@@ -4,30 +4,27 @@ description: Deep-dive investigation on a thread, company, or topic
 
 Research `$ARGUMENTS` (thread ID, company ID/name, or topic keyword) across all available sources.
 
-## Steps by Target Type
+## Phase 1 — Identify target (sub-agent)
 
-### Thread (numeric ID)
-1. `get_thread_detail` → identify company
-2. `get_company_detail` for relationship context
-3. `search_threads` with `company_id` (limit 10) — related threads
-4. `search_bookings` with `company_id` — booking context
-5. `list_company_rentals` with `include_channels: true` — property context
-6. `search_docs` (no repo) — broad search
-7. `search_docs` repo=`ninja-docs` — help center
-8. `search_docs` repo=`ninja|ninja_app|ninja_app_client|rentals-united-docs` — if technical issue. Think hard and search for a solution, the docs most of the time have the answer.
+- **Agent A**: Resolve the target and extract IDs needed to fan out.
+  - Thread (numeric ID): `get_thread_detail` → return company_id, thread subject, key topics.
+  - Company (ID or name): `search_companies` (if name) or `get_company_detail` (if ID) → return company_id, name, state.
+  - Topic/keyword: skip to Phase 2 with keyword-only searches.
 
-### Company (ID or name)
-1. `search_companies` (if name) or `get_company_detail` (if ID)
-2. Same chain as thread steps 3-8
+## Phase 2 — Fan-out (parallel sub-agents)
 
-### Topic/keyword
-1. `search_docs` across all repos
-2. `search_threads` by keyword
-3. Identify relevant companies → expand with company chain
+Using company_id and topic from Agent A:
 
-## Output
+- **Agent B** (threads): `search_threads` with `company_id` (limit 10). Return: thread IDs + subjects + dates + one-line summary each.
+- **Agent C** (bookings/rentals): `search_bookings` with `company_id` + `list_company_rentals` with `include_channels: true`. Return: booking refs, statuses, key dates, rental names + channels.
+- **Agent D** (docs): `search_docs` across repos — broad search first, then targeted (`ninja-docs`, `ninja`, `ninja_app`, `rentals-united-docs` if technical). Return: relevant article titles + key excerpts.
 
-Structured brief:
+For topic/keyword searches, Agent B uses keyword-only `search_threads`, Agent D searches all repos.
+
+## Phase 3 — Synthesize (main context)
+
+Assemble structured brief from sub-agent summaries:
+
 - **Subject**: what was researched
 - **Company**: name, ID, state, manager
 - **Thread history**: relevant threads summary

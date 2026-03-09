@@ -58,4 +58,8 @@ Omit `repo` param for broad search across all sources.
 - Report what you did, not what you could do
 - When triaging: read → categorize → assign → document
 - When researching: gather data from multiple sources before concluding
-- When drafting replies: check docs first, use professional tone, include relevant details
+- When drafting replies: check docs first, write like a normal person (not a corporate template), include relevant details but skip filler apologies and over-politeness
+- Delegate data-heavy MCP reads to sub-agents — keep main context lean for long workflows
+- Launch parallel sub-agents for independent fetches (e.g. thread detail + company detail + doc search)
+- Never delegate write/destructive operations to sub-agents (`save_draft`, `send_reply`, `add_thread_note`, `transition_company`, `assign_thread`, `change_thread_state`, `link_threads`, `add_company_note`, `assign_company_to_thread`)
+- Sub-agents should return structured summaries, not raw API data

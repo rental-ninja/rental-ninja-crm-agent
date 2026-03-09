@@ -4,14 +4,22 @@ description: Create an escalation brief for a thread
 
 Escalate thread `$ARGUMENTS`.
 
-## Steps
+## Phase 1 — Thread context (sub-agent)
 
-1. `get_thread_detail` — full conversation
-2. Identify company → `get_company_detail`
-3. `search_threads` with `company_id` — related threads (limit 10)
-4. `search_bookings` if booking-related
-5. `search_docs` for known issues
-6. Compose HTML escalation brief as thread note:
+- **Agent A**: `get_thread_detail`. Return: company_id, subject, participants (names + emails), timeline (created, last message), issue summary, what's been tried so far, whether booking-related.
+
+## Phase 2 — Context fan-out (parallel sub-agents)
+
+Using company_id and context from Agent A:
+
+- **Agent B** (company + related): `get_company_detail` + `search_threads` with `company_id` (limit 10). Return: company name/ID/state/manager + related thread summaries (ID, subject, one-line context).
+- **Agent C** (bookings + docs): `search_bookings` with `company_id` if booking-related + `search_docs` for known issues. Return: booking context (refs, statuses, dates) + known issue articles.
+
+## Phase 3 — Act (main context)
+
+From sub-agent summaries:
+
+1. Compose HTML escalation brief as thread note:
    - Thread # + subject
    - Company name / ID / state
    - Reporter name / email
@@ -22,6 +30,6 @@ Escalate thread `$ARGUMENTS`.
    - What was already tried
    - Related thread IDs
    - Recommended action
-7. `add_thread_note` with the brief
-8. `link_threads` for any related threads found
-9. Show team members list → ask user who to assign → `assign_thread`
+2. `add_thread_note` with the brief
+3. `link_threads` for any related threads found
+4. Show team members list → ask user who to assign → `assign_thread`

@@ -91,3 +91,28 @@ Omit `repo` param for broad search across all sources.
 - Report what was done, not what could be done
 - When presenting options, use numbered lists
 - Include IDs when referencing threads/companies
+
+## Internal and Customer-Facing Tone (drafts, replies & notes)
+
+Write like a real person, not a corporate bot. The goal is natural, competent, and brief.
+
+**Do:**
+- Get to the point — lead with the solution or answer
+- Match the customer's language (French, Catalan, Spanish, English, etc.)
+- Be direct: say what happened, what to do next, done
+- One brief acknowledgment if something was slow — then move on
+- Short paragraphs, simple sign-off (Cordialement / Salutations / Best)
+
+**Don't:**
+- Over-apologize ("nous sommes conscients du délai et nous nous en excusons sincèrement")
+- Use filler empathy ("je comprends votre frustration", "nous sommes désolés pour la gêne occasionnée")
+- Hedge or be passive-aggressive ("pourriez-vous éventuellement...", "n'hésitez pas à...")
+- Write walls of text — if it can be 3 sentences, don't make it 8
+- Add unnecessary pleasantries or corporate fluff
+
+## Sub-Agent Usage
+
+- Delegate data-heavy MCP reads to sub-agents to keep main context lean
+- Launch multiple sub-agents in parallel when fetches are independent
+- Sub-agents absorb raw API responses; main orchestrator sees only summaries
+- Write actions (`save_draft`, `add_thread_note`, `send_reply`, `transition_company`, `assign_thread`, `change_thread_state`, `link_threads`, `add_company_note`, `assign_company_to_thread`) stay in main context — never delegate destructive/write ops to sub-agents
