@@ -6,46 +6,37 @@ No Docker. No codebase. Just an API token.
 
 ## Prerequisites
 
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
-- Node.js 18+ (for `npx mcp-remote`)
+- macOS
+- Node.js 18+ — check with `node --version`, install from https://nodejs.org if missing
 
 ## Setup
 
-### 1. Clone
+### For team members
+
+1. **Get the setup script** from Pol (he'll send you the file or a download link)
+2. **Open Terminal** and run:
 
 ```bash
-git clone https://github.com/nicobatllo/rental-ninja-crm-agent.git
-cd rental-ninja-crm-agent
+bash /path/to/setup.sh
 ```
 
-### 2. Get your API token
-
-Go to your Hub account settings and generate a new API token.
-
-### 3. Set the token
-
-Add to your shell profile (`~/.zshrc` or `~/.bashrc`):
+3. It will ask for your **Hub API token** (Pol will give you one)
+4. Once done, open a **new terminal** and type:
 
 ```bash
-export HUB_MCP_TOKEN="your-api-token-here"
+ninja
 ```
 
-Then reload: `source ~/.zshrc`
+That's it. The agent auto-updates every hour.
 
-Alternatively, create a `.env` file (gitignored):
+### For Pol (admin)
 
-```bash
-cp .env.example .env
-# Edit .env with your token
-```
-
-### 4. Start Claude Code
-
-```bash
-claude
-```
-
-Claude will connect to the Hub MCP server automatically.
+1. Create a fine-grained PAT at GitHub → Settings → Developer settings → Fine-grained PATs
+   - Scope: `rental-ninja/rental-ninja-crm-agent` only
+   - Permission: Contents → Read-only
+2. Paste the PAT into `setup.sh` (replace `__PASTE_YOUR_PAT_HERE__`)
+3. Send `setup.sh` to team members (Slack, email, etc.) — the PAT is read-only, safe to share
+4. Generate a `HUB_MCP_TOKEN` for each team member in Hub
 
 ## What You Can Do
 

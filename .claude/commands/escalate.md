@@ -30,6 +30,6 @@ From sub-agent summaries:
    - What was already tried
    - Related thread IDs
    - Recommended action
-2. `add_thread_note` with the brief
+2. `add_thread_note` with the brief. If user specifies an assignee, include their ID in `mention_user_ids` so they're notified.
 3. `link_threads` for any related threads found
 4. Show team members list → ask user who to assign → `assign_thread`

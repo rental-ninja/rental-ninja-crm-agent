@@ -16,6 +16,7 @@ All operations go through the `hub` MCP server — 23 tools and 6 resources.
 4. **Company first** — booking/rental/guest lookups require `company_id`; find the company via `search_companies` first
 5. **Notes are internal** — thread notes and company notes are team-only; customers never see them
 6. **Never retry destructive ops** — investigate errors instead of retrying
+7. **Tag AI notes** — every `add_thread_note` and `add_company_note` must end with `<p style="color:#888;font-size:11px;">🤖 CRM-AI-Agent</p>`
 
 ### send_reply (DESTRUCTIVE)
 
@@ -54,11 +55,11 @@ All operations go through the `hub` MCP server — 23 tools and 6 resources.
 | `get_guest_detail` | read-only | Guests | Full contact, passport, booking history |
 | `assign_thread` | idempotent | Threads | Get valid IDs from `hub://team/members` resource |
 | `change_thread_state` | idempotent | Threads | Snooze requires `snooze_until` + `snooze_reason` |
-| `add_thread_note` | idempotent | Threads | HTML body; team-only, customers never see |
+| `add_thread_note` | idempotent | Threads | HTML body; optional `mention_user_ids` to @mention and notify team members |
 | `link_threads` | idempotent | Threads | Cannot link a thread to itself |
 | `assign_company_to_thread` | idempotent | Threads | Associates company with thread |
 | `save_draft` | idempotent | Threads | Draft appears in composer for human review |
-| `add_company_note` | idempotent | Companies | Optional `next_action_due` sets follow-up date |
+| `add_company_note` | idempotent | Companies | Optional `next_action_due` + `mention_user_ids` for @mentions |
 | `send_reply` | **DESTRUCTIVE** | Threads | Irreversible — see send_reply rules above |
 | `transition_company` | **DESTRUCTIVE** | Companies | May trigger automations — see rules above |
 
@@ -67,7 +68,7 @@ All operations go through the `hub` MCP server — 23 tools and 6 resources.
 | URI | Returns | When to Use |
 |-----|---------|-------------|
 | `hub://inbox/overview` | Dashboard counters | Morning standup, workload check |
-| `hub://team/members` | Team member list (id, name) | Before `assign_thread` to find valid IDs |
+| `hub://team/members` | Team member list (id, name) | Before `assign_thread` or `mention_user_ids` to find valid IDs |
 | `hub://threads/{threadId}` | Full thread detail | When you have a thread ID and want full context |
 | `hub://companies/{companyId}` | Company detail | Quick company overview without notes |
 | `hub://companies/{companyId}/threads` | Company threads (max 50) | See all communication history for a company |
@@ -116,3 +117,15 @@ Write like a real person, not a corporate bot. The goal is natural, competent, a
 - Launch multiple sub-agents in parallel when fetches are independent
 - Sub-agents absorb raw API responses; main orchestrator sees only summaries
 - Write actions (`save_draft`, `add_thread_note`, `send_reply`, `transition_company`, `assign_thread`, `change_thread_state`, `link_threads`, `add_company_note`, `assign_company_to_thread`) stay in main context — never delegate destructive/write ops to sub-agents
+
+## Browser Automation
+
+Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
+
+If not installed, you can install it with `npx skills add vercel-labs/agent-browser`
+
+Core workflow:
+1. `agent-browser open <url>` - Navigate to page
+2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
+3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
+4. Re-snapshot after page changes

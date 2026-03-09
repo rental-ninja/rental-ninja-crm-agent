@@ -20,12 +20,12 @@ Using company_id and ticket type from Agent A:
 From sub-agent summaries:
 
 1. Present related threads for user confirmation → `link_threads`
-2. `add_thread_note` — follow-up note:
+2. `add_thread_note` — follow-up note (if thread has an assignee, include their ID in `mention_user_ids`):
    - Type (RU ticket / customer support / mixed)
    - Follow-up date
    - What to check / what we're waiting for
    - Linked thread IDs
    - Additional notes from user
 3. `change_thread_state` action=`snooze`, `snooze_until`=follow-up date, `snooze_reason`=summary
-4. `add_company_note` with `next_action_due`=follow-up date, content="Follow-up: [issue summary] — see thread #ID"
+4. `add_company_note` with `next_action_due`=follow-up date, content="Follow-up: [issue summary] — see thread #ID" (include company manager in `mention_user_ids` if one is set)
 5. Report: note added, thread snoozed until [date], company follow-up set, threads linked
