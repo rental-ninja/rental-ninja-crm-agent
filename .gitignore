@@ -1,0 +1,16 @@
+# Claude Code local settings
+.claude/settings.local.json
+.claude/plans/
+
+# Environment
+.env
+
+# Node
+node_modules/
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

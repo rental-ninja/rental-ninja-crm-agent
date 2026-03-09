@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "hub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://rental-ninja.com/hub/mcp",
+        "--header",
+        "Authorization: Bearer ${HUB_MCP_TOKEN}"
+      ]
+    }
+  }
+}

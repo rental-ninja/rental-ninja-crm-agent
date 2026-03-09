@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__hub__search_docs",
+      "mcp__hub__search_companies",
+      "mcp__hub__search_threads",
+      "mcp__hub__get_thread_detail",
+      "mcp__hub__get_company_detail",
+      "mcp__hub__get_company_states",
+      "mcp__hub__get_transition_paths",
+      "mcp__hub__get_dashboard_data",
+      "mcp__hub__search_bookings",
+      "mcp__hub__get_booking_detail",
+      "mcp__hub__list_company_rentals",
+      "mcp__hub__get_rental_detail",
+      "mcp__hub__search_guests",
+      "mcp__hub__get_guest_detail",
+      "mcp__hub__assign_thread",
+      "mcp__hub__change_thread_state",
+      "mcp__hub__add_thread_note",
+      "mcp__hub__link_threads",
+      "mcp__hub__assign_company_to_thread",
+      "mcp__hub__save_draft",
+      "mcp__hub__add_company_note"
+    ]
+  }
+}
