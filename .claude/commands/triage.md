@@ -1,18 +1,27 @@
 ---
-description: Triage inbox — prioritize and process unhandled threads
+description: Triage inbox — prioritize and process unhandled threads, snoozed threads, and RU tickets
 ---
 
-Triage the team inbox with priority and category classification.
+Triage the full team inbox: unhandled emails, snoozed threads, and Rentals United tickets.
 
 ## Phase 1 — Dashboard (sub-agent)
 
-- **Agent A**: Call `get_dashboard_data` (team-wide, no params). Return: inbox counts by state, total unhandled, list of unhandled thread IDs.
+- **Agent A**: Call `get_dashboard_data` (team-wide, no params). Return all counters:
+  - Emails: mine, unassigned, snoozed
+  - Tickets (RU): mine, unassigned, snoozed
+  - Actions: overdue, dueToday, thisWeek
 
 ## Phase 2 — Thread summaries (parallel sub-agents)
 
-Based on Agent A's thread count, batch `get_thread_detail` calls across sub-agents (up to 15 oldest unhandled). Each agent returns per thread: thread ID, subject, sender name/email, company name/ID, age (days since created), one-line preview of latest message.
+Launch sub-agents in parallel to fetch details for each category:
 
-Note remaining count if more than 15 unhandled threads exist.
+- **Agent B — Unhandled emails**: Batch `get_thread_detail` for unassigned email threads (up to 15 oldest). Return per thread: thread ID, subject, sender name/email, company name/ID, age (days since created), one-line preview of latest message.
+
+- **Agent C — Snoozed threads**: Batch `get_thread_detail` for snoozed email threads (up to 10). Return per thread: thread ID, subject, company, snooze_until, snooze_reason, last message preview. Flag any that are overdue (snooze_until < now) or snoozing without a reason.
+
+- **Agent D — RU tickets**: Batch `get_thread_detail` for open RU tickets — both assigned and unassigned (up to 10). Return per ticket: thread ID, subject, company, assignee, age, last message preview.
+
+Note remaining counts if more threads exist than fetched.
 
 ## Phase 3 — Classify + prioritize (main context)
 
@@ -20,21 +29,33 @@ From sub-agent summaries (no raw messages needed):
 
 1. Categorize each thread: `billing` | `onboarding` | `technical` | `churn-risk` | `general`
 2. Prioritize each: `P1 Critical` | `P2 High` | `P3 Medium` | `P4 Low`
-3. Present sorted table:
+3. Present three sorted tables:
 
+**Unhandled Emails**
 ```
 | # | Thread ID | Subject | Category | Priority | Company | Age |
 ```
 
-4. Summary: counts by priority + category, recommended first action
+**Snoozed Threads**
+```
+| # | Thread ID | Subject | Category | Priority | Company | Snooze Until | Reason |
+```
+
+**RU Tickets**
+```
+| # | Thread ID | Subject | Category | Priority | Company | Assignee | Age |
+```
+
+4. Summary: counts by priority + category across all three groups, recommended first action
 
 ## Processing
 
-Process P1-first, one thread at a time. For each, offer to:
+Process P1-first across all groups, one thread at a time. For each, offer to:
 - Read full detail
 - Assign to a team member
 - Draft a reply
 - Add triage note (include category + priority tag)
 - Snooze with reason and date
+- Wake a snoozed thread (for snoozed items)
 
 Wait for user input between each thread.
