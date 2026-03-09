@@ -100,7 +100,8 @@ Write like a real person, not a corporate bot. The goal is natural, competent, a
 
 **Do:**
 - Get to the point — lead with the solution or answer
-- Match the customer's language (French, Catalan, Spanish, English, etc.)
+- **Customer-facing** (drafts, replies): match the customer's language (French, Catalan, Spanish, English, etc.)
+- **Internal** (thread notes, company notes): always write in English, regardless of customer language
 - Be direct: say what happened, what to do next, done
 - One brief acknowledgment if something was slow — then move on
 - Short paragraphs, simple sign-off (Cordialement / Salutations / Best)
