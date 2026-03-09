@@ -51,11 +51,14 @@ Claude will connect to the Hub MCP server automatically.
 
 | Task | Example prompt |
 |------|----------------|
-| Check inbox | "What needs attention today?" or `/triage` |
+| Check inbox | `/triage` |
+| Research | `/research 1234` or `/research "Company Name"` |
+| Draft reply | `/draft-response 1234` |
+| Escalate | `/escalate 1234` |
+| KB article | `/kb-article 1234` |
+| Follow-up | `/follow-up-ticket 1234 2026-03-16 waiting for RU sync fix` |
 | Triage email | "Read thread #1234 and assign it" |
-| Reply to customer | "Draft a reply to thread #1234" |
-| Research company | "Give me a full overview of company #56" |
-| Move pipeline | "What are the transition options for company #56?" |
+| Move pipeline | "Transition options for company #56?" |
 | Debug booking | "Look up booking REF-12345 for company #56" |
 | Snooze thread | "Snooze thread #1234 until next Monday" |
 
@@ -63,22 +66,20 @@ Claude will connect to the Hub MCP server automatically.
 
 ```
 rental-ninja-crm-agent/
-├── CLAUDE.md                          # CRM operator persona
+├── CLAUDE.md                          # CRM operator persona + safety rules + tool reference
 ├── .mcp.json                          # Hub MCP server connection
 ├── README.md                          # This file
 ├── .claude/
 │   ├── settings.json                  # Auto-approve safe tools
-│   ├── skills/hub-mcp/
-│   │   ├── SKILL.md                   # Tool quick-ref + decision tree
-│   │   └── references/
-│   │       ├── tool-catalog.md        # All 23 tools: params, returns, tips
-│   │       ├── resource-catalog.md    # All 6 resources: URIs, shapes
-│   │       ├── workflows.md           # 10 step-by-step CRM recipes
-│   │       └── safety.md             # Destructive tool guardrails
 │   ├── agents/
 │   │   └── hub-crm-operator.md        # Autonomous triage agent
 │   └── commands/
-│       └── triage.md                  # /triage inbox command
+│       ├── triage.md                  # /triage — prioritized inbox processing
+│       ├── research.md                # /research — deep-dive investigation
+│       ├── draft-response.md          # /draft-response — context-aware reply drafting
+│       ├── escalate.md                # /escalate — escalation brief
+│       ├── kb-article.md              # /kb-article — KB article from resolved thread
+│       └── follow-up-ticket.md        # /follow-up-ticket — follow-up tracking with snooze
 ├── .gitignore
 └── .env.example
 ```

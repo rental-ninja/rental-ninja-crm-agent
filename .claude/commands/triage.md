@@ -1,18 +1,30 @@
 ---
-description: Triage inbox — fetch dashboard and process unhandled threads
+description: Triage inbox — prioritize and process unhandled threads
 ---
 
-Fetch the team's inbox dashboard using `get_dashboard_data` (team-wide view).
+Triage the team inbox with priority and category classification.
 
-Then report:
-1. Total unhandled emails and tickets
-2. Any overdue actions or follow-ups
-3. Top items that need immediate attention
+## Steps
 
-For each item needing attention, offer to:
-- Read the thread detail
-- Assign it to a team member
+1. Call `get_dashboard_data` (team-wide, no params) for inbox overview
+2. Call `get_thread_detail` for up to 15 oldest unhandled items; note remaining count if more exist
+3. Categorize each thread: `billing` | `onboarding` | `technical` | `churn-risk` | `general`
+4. Prioritize each: `P1 Critical` | `P2 High` | `P3 Medium` | `P4 Low`
+5. Present sorted table:
+
+```
+| # | Thread ID | Subject | Category | Priority | Company | Age |
+```
+
+6. Summary: counts by priority + category, recommended first action
+
+## Processing
+
+Process P1-first, one thread at a time. For each, offer to:
+- Read full detail
+- Assign to a team member
 - Draft a reply
-- Add a triage note
+- Add triage note (include category + priority tag)
+- Snooze with reason and date
 
-Process items one at a time, waiting for my input between each.
+Wait for user input between each thread.
