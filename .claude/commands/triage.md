@@ -13,13 +13,13 @@ Triage the full team inbox: unhandled emails, snoozed threads, and Rentals Unite
 
 ## Phase 2 — Thread summaries (parallel sub-agents)
 
-Launch sub-agents in parallel to fetch details for each category:
+Launch sub-agents in parallel to fetch thread lists, then selectively get details for threads that need more context:
 
-- **Agent B — Unhandled emails**: Batch `get_thread_detail` for unassigned email threads (up to 15 oldest). Return per thread: thread ID, subject, sender name/email, company name/ID, age (days since created), one-line preview of latest message.
+- **Agent B — Unhandled emails**: Call `list_threads` with `state: "active", type: "customer_email", assigned_to: 0, limit: 15`. For P1/P2 candidates, call `get_thread_detail` to get message previews. Return per thread: thread ID, subject, sender name/email, company name/ID, age (days since created), one-line preview if fetched.
 
-- **Agent C — Snoozed threads**: Batch `get_thread_detail` for snoozed email threads (up to 10). Return per thread: thread ID, subject, company, snooze_until, snooze_reason, last message preview. Flag any that are overdue (snooze_until < now) or snoozing without a reason.
+- **Agent C — Snoozed threads**: Call `list_threads` with `state: "snoozed", limit: 10`. For overdue or reason-less snoozes, call `get_thread_detail` for context. Return per thread: thread ID, subject, company, snooze_until, snooze_reason, last message preview if fetched. Flag any that are overdue (snooze_until < now) or snoozing without a reason.
 
-- **Agent D — RU tickets**: Batch `get_thread_detail` for open RU tickets — both assigned and unassigned (up to 10). Return per ticket: thread ID, subject, company, assignee, age, last message preview.
+- **Agent D — RU tickets**: Call `list_threads` with `state: "active", type: "ru_ticket", limit: 10`. For P1/P2 candidates, call `get_thread_detail` for message previews. Return per ticket: thread ID, subject, company, assignee, age, last message preview if fetched.
 
 Note remaining counts if more threads exist than fetched.
 
