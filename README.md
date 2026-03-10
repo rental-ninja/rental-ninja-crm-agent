@@ -101,10 +101,11 @@ rental-ninja-crm-agent/
 │   └── plugin.json               # Plugin manifest (name, version)
 ├── .mcp.json                     # Hub MCP server connection
 ├── settings.json                 # Auto-approved tool permissions
-├── skills/
-│   └── hub/SKILL.md              # CRM operator skill (persona, safety, workflows)
-└── agents/
-    └── hub-crm-operator.md       # Sub-agent for autonomous CRM tasks
+└── skills/
+    └── hub/
+        ├── SKILL.md              # CRM operator skill (persona, safety, workflows)
+        └── agents/
+            └── hub-crm-operator.md   # Sub-agent for autonomous CRM tasks
 ```
 
 ## Troubleshooting
