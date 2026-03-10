@@ -27,7 +27,7 @@ You only need to do this once.
 ### Step 2: Install the plugin
 
 ```
-/plugin install rental-ninja-crm
+/plugin install ninja-hub
 ```
 
 ### Step 3: Set up your token
@@ -38,7 +38,7 @@ Close and reopen Claude Code one last time so the CRM connection activates.
 
 ### You're done
 
-Type `/rental-ninja-crm:help` to see what you can do. The plugin keeps itself up to date.
+Type `/ninja-hub:help` to see what you can do. The plugin keeps itself up to date.
 
 If something isn't working, check the [Troubleshooting](#troubleshooting) section below or ask Pol.
 
@@ -46,10 +46,10 @@ If something isn't working, check the [Troubleshooting](#troubleshooting) sectio
 
 | Command | What it does |
 |---------|-------------|
-| `/rental-ninja-crm:triage` | Shows your inbox sorted by priority — emails, snoozed threads, RU tickets |
-| `/rental-ninja-crm:thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
-| `/rental-ninja-crm:research 1234` | Deep investigation on a thread, company, or topic |
-| `/rental-ninja-crm:help` | Quick reference card |
+| `/ninja-hub:triage` | Shows your inbox sorted by priority — emails, snoozed threads, RU tickets |
+| `/ninja-hub:thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
+| `/ninja-hub:research 1234` | Deep investigation on a thread, company, or topic |
+| `/ninja-hub:help` | Quick reference card |
 
 You can also just ask in plain language:
 
@@ -76,7 +76,7 @@ Everything below is for Pol / whoever manages the plugin.
 
 Already set up:
 - **Marketplace repo**: `rental-ninja/claude-plugins-marketplace` (public)
-- **Plugin repo**: `rental-ninja/rental-ninja-crm-agent` (private)
+- **Plugin repo**: `rental-ninja/ninja-hub-agent` (private)
 - **PAT**: fine-grained, read-only Contents on the plugin repo, owned by `rental-ninja` org
 
 The marketplace repo has a plain URL in `marketplace.json` (no secrets). The PAT is only in the URL you send to team members:
@@ -104,17 +104,17 @@ Team members get the update on their next session.
 ### Plugin structure
 
 ```
-rental-ninja-crm-agent/
+ninja-hub-agent/
 ├── .claude-plugin/
 │   └── plugin.json               # Plugin manifest (name, version)
 ├── CLAUDE.md                     # CRM operator persona + safety rules
 ├── .mcp.json                     # Hub MCP server connection
 ├── settings.json                 # Auto-approved tool permissions
 ├── skills/
-│   ├── triage/SKILL.md           # /rental-ninja-crm:triage
-│   ├── thread/SKILL.md           # /rental-ninja-crm:thread
-│   ├── research/SKILL.md         # /rental-ninja-crm:research
-│   └── help/SKILL.md             # /rental-ninja-crm:help
+│   ├── triage/SKILL.md           # /ninja-hub:triage
+│   ├── thread/SKILL.md           # /ninja-hub:thread
+│   ├── research/SKILL.md         # /ninja-hub:research
+│   └── help/SKILL.md             # /ninja-hub:help
 ├── agents/
 │   └── hub-crm-operator.md       # Sub-agent for autonomous CRM tasks
 └── hooks/
@@ -134,4 +134,4 @@ rental-ninja-crm-agent/
 
 **Commands not showing up**
 - Make sure the plugin is installed: type `/plugin` and check the list
-- Try updating: `/plugin update rental-ninja-crm`
+- Try updating: `/plugin update ninja-hub`
