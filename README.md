@@ -115,11 +115,8 @@ ninja-hub-agent/
 │   ├── thread/SKILL.md           # /ninja-hub:thread
 │   ├── research/SKILL.md         # /ninja-hub:research
 │   └── help/SKILL.md             # /ninja-hub:help
-├── agents/
-│   └── hub-crm-operator.md       # Sub-agent for autonomous CRM tasks
-└── hooks/
-    ├── hooks.json                # Hook definitions
-    └── check-token.sh            # First-run token setup
+└── agents/
+    └── hub-crm-operator.md       # Sub-agent for autonomous CRM tasks
 ```
 
 ## Troubleshooting
