@@ -72,25 +72,20 @@ You can also just ask in plain language:
 
 Everything below is for Pol / whoever manages the plugin.
 
-### First-time marketplace setup
+### Marketplace & PAT
 
-1. Create a **fine-grained GitHub PAT** scoped to `rental-ninja/rental-ninja-crm-agent` (read-only, contents only):
-   GitHub → Settings → Developer settings → Fine-grained PATs
+Already set up:
+- **Marketplace repo**: `rental-ninja/claude-plugins-marketplace` (public)
+- **Plugin repo**: `rental-ninja/rental-ninja-crm-agent` (private)
+- **PAT**: fine-grained, read-only Contents on the plugin repo, owned by `rental-ninja` org
 
-2. Create a new repo `rental-ninja/claude-plugins-marketplace` with one file, `marketplace.json`:
+The marketplace repo has a plain URL in `marketplace.json` (no secrets). The PAT is only in the URL you send to team members:
 
-```json
-{
-  "plugins": [
-    {
-      "name": "rental-ninja-crm",
-      "url": "https://x-access-token:<PAT>@github.com/rental-ninja/rental-ninja-crm-agent.git"
-    }
-  ]
-}
+```
+https://x-access-token:<PAT>@github.com/rental-ninja/claude-plugins-marketplace.git
 ```
 
-The PAT is embedded in the marketplace URL — team members never see it or need GitHub accounts.
+Team members paste this URL when they run `/plugin marketplace add`. The PAT gives them read access to the private plugin repo. It never gets stored in any repo.
 
 ### Releasing a new version
 
@@ -108,10 +103,10 @@ Team members get the update on their next session.
 
 ### Rotating the GitHub PAT
 
-When the PAT expires:
-1. Generate a new one (same scope as before)
-2. Update the URL in `marketplace.json` in the marketplace repo
-3. Tell team members to re-run: `/plugin marketplace add <new URL>`
+Current PAT expires Mar 11, 2027. When it expires:
+1. Generate a new fine-grained PAT (same scope: rental-ninja org, rental-ninja-crm-agent repo, Contents read-only)
+2. Send team members the new marketplace URL
+3. They re-run: `/plugin marketplace add <new URL>`
 
 ### Plugin structure
 
