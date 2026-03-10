@@ -36,6 +36,26 @@ Close Claude Code (Ctrl+C) and open it again. Claude will notice your token is m
 
 Close and reopen Claude Code one last time so the CRM connection activates.
 
+### Step 4: Set up your project
+
+Create a file called `CLAUDE.md` in the folder where you use Claude Code (or ask Pol to do it for you). Paste this inside:
+
+```markdown
+# Rental Ninja CRM
+
+Always use the `/ninja-hub:hub` skill for any CRM task — inbox triage, thread management, customer replies, booking/rental research, company pipeline transitions, and Rentals United tickets.
+
+Available workflows:
+- `/ninja-hub:hub triage` — prioritize and process inbox
+- `/ninja-hub:hub thread <id>` — analyze a thread with full context and actions
+- `/ninja-hub:hub research <topic>` — deep-dive investigation
+- `/ninja-hub:hub help` — quick reference
+
+You can also just describe what you need in plain language.
+```
+
+This tells Claude to always use the CRM tools when you ask about work stuff.
+
 ### You're done
 
 Type `/ninja-hub:hub help` to see what you can do. The plugin keeps itself up to date.
