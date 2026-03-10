@@ -6,11 +6,11 @@ Triage the full team inbox.
 
 ## Gather
 
-Use sub-agents in parallel to fetch:
+Spawn parallel sub-agents to fetch:
 - Dashboard counters (team-wide)
-- Unhandled emails (unassigned, active) — get details for anything that looks urgent
+- Unhandled emails (unassigned, active) — get details for the most urgent ones
 - Snoozed threads — flag overdue or missing-reason snoozes
-- Active RU tickets — get details for anything that looks urgent
+- Active RU tickets — get details for the most urgent ones
 
 ## Classify & Present
 

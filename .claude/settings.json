@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Agent",
       "mcp__hub__search_docs",
       "mcp__hub__search_companies",
       "mcp__hub__search_threads",

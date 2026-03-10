@@ -6,8 +6,7 @@ Analyze thread `$ARGUMENTS` (thread ID or ticket number).
 
 ## Gather Context
 
-Use sub-agents to gather in parallel:
-- Full thread messages — read carefully for issue, status, sentiment, key details
+Spawn a sub-agent to fetch the full thread detail for `$ARGUMENTS` (thread ID or ticket number). Once you have the thread and its company ID, spawn parallel sub-agents for:
 - Company info — state, manager, notes, follow-up dates
 - Related threads for the same company
 - Any referenced bookings, rentals, or guests (if mentioned in messages)

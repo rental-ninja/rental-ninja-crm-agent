@@ -6,7 +6,7 @@ Research `$ARGUMENTS` (thread ID, company ID/name, or topic keyword).
 
 ## Gather
 
-Identify the target (thread, company, or keyword), then fan out with parallel sub-agents across all relevant sources: thread history, company info, bookings, rentals, documentation, and related threads. Cast a wide net.
+Identify the target (thread, company, or keyword). Resolve the primary entity first (e.g. fetch thread to get company ID), then fan out with parallel sub-agents across all relevant sources: company info, bookings, rentals, documentation, and related threads. Cast a wide net.
 
 ## Synthesize
 

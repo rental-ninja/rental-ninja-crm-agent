@@ -49,10 +49,14 @@ Write like a real person, not a corporate bot. Natural, competent, brief.
 
 ## Sub-Agent Usage
 
-- Delegate data-heavy reads to sub-agents; keep main context lean
-- Launch parallel sub-agents for independent fetches
-- Write/destructive operations stay in main context — never delegate to sub-agents
-- Sub-agents return structured summaries, not raw API data
+You MUST use the Agent tool to delegate data-heavy reads to sub-agents. Calling read operations directly in the main context wastes context window and prevents parallelism.
+
+- **Delegate reads** — fetching thread details, company info, bookings, rentals, guests, doc searches, thread lists
+- **Keep writes in main context** — replies, drafts, notes, assignments, transitions
+- Spawn multiple Agent calls in a SINGLE message for parallel execution
+- Tell each sub-agent *what data you need*, not which tool to call — it will figure out the right hub MCP tools
+- Sub-agents return structured summaries, not raw API dumps
+- Quick single lookups before a write operation can stay in main context
 
 ## Browser Automation
 
