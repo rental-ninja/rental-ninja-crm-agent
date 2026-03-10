@@ -110,7 +110,7 @@ rental-ninja-crm-agent/
 ├── CLAUDE.md                     # CRM operator persona + safety rules
 ├── .mcp.json                     # Hub MCP server connection
 ├── settings.json                 # Auto-approved tool permissions
-├── skills/
+├── commands/
 │   ├── triage.md                 # /rental-ninja-crm:triage
 │   ├── thread.md                 # /rental-ninja-crm:thread
 │   ├── research.md               # /rental-ninja-crm:research
