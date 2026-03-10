@@ -11,6 +11,9 @@ node_modules/
 # IDE
 .idea/
 
+# Dify runtime state
+dify/.app-map.json
+
 # OS
 .DS_Store
 Thumbs.db

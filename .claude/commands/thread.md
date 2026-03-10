@@ -6,7 +6,8 @@ Analyze thread `$ARGUMENTS` (thread ID or ticket number).
 
 ## Phase 1 — Thread analysis (sub-agent)
 
-- **Agent A**: `get_thread_detail` — read every message carefully. Return: company_id, issue summary, current status (waiting on us/them/blocked/resolved), who spoke last and when, sentiment (frustrated/neutral/positive/urgent), key details (booking refs, rental names, error messages, dates), missing info needed to act.
+- **Agent A**: `get_thread_detail` — read every message carefully. Return: company_id, issue summary, current status (waiting on us/them/blocked/resolved), who spoke last and when, sentiment (frustrated/neutral/positive/urgent), key details (booking refs,
+  rental names, error messages, dates), missing info needed to act.
 
 ## Phase 2 — Context fan-out (parallel sub-agents)
 
@@ -30,4 +31,13 @@ Assemble structured brief from sub-agent summaries:
 - **Missing info**: what we'd need to resolve this
 - **Recommended action**: what to do next (draft reply, escalate, snooze, research more, etc.)
 
-Then ask: want me to draft a reply, escalate, research deeper, or something else?
+Then offer numbered actions:
+
+1. **Draft reply** — compose context-aware reply (`save_draft`), matching customer's language, leading with the solution
+2. **Escalate** — write HTML escalation brief as thread note, link related threads, offer to assign and optionally create RU ticket
+3. **Follow-up** — snooze thread to a date, add company note with `next_action_due`, link related threads, @mention assignee/manager
+4. **Assign / reassign** — assign thread to a team member
+5. **Close / snooze / reopen** — change thread state
+6. **Research deeper** — fan out to bookings, rentals, docs, and related threads across all sources
+
+Ask: which action (or something else)?

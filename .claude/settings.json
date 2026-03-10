@@ -21,7 +21,10 @@
       "mcp__hub__link_threads",
       "mcp__hub__assign_company_to_thread",
       "mcp__hub__save_draft",
-      "mcp__hub__add_company_note"
+      "mcp__hub__add_company_note",
+      "mcp__hub__suggest_linked_threads",
+      "mcp__hub__get_rental_rate_calendar",
+      "mcp__hub__generate_ru_ticket_body"
     ]
   }
 }

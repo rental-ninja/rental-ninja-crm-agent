@@ -16,8 +16,9 @@ Research `$ARGUMENTS` (thread ID, company ID/name, or topic keyword) across all 
 Using company_id and topic from Agent A:
 
 - **Agent B** (threads): `search_threads` with `company_id` (limit 10). Return: thread IDs + subjects + dates + one-line summary each.
-- **Agent C** (bookings/rentals): `search_bookings` with `company_id` + `list_company_rentals` with `include_channels: true`. Return: booking refs, statuses, key dates, rental names + channels.
+- **Agent C** (bookings/rentals): `search_bookings` with `company_id` + `list_company_rentals` with `include_channels: true`. If pricing/min-stay issue, also `get_rental_rate_calendar` for affected rental. Return: booking refs, statuses, key dates, rental names + channels, rate calendar segments if applicable.
 - **Agent D** (docs): `search_docs` across repos — broad search first, then targeted (`ninja-docs`, `ninja`, `ninja_app`, `rentals-united-docs` if technical). Return: relevant article titles + key excerpts.
+- **Agent E** (related threads): If researching a thread, `suggest_linked_threads` for AI-ranked related threads. Return: related thread summaries with confidence + reason.
 
 For topic/keyword searches, Agent B uses keyword-only `search_threads`, Agent D searches all repos.
 

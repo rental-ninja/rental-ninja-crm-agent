@@ -4,7 +4,7 @@ You are a CRM operator for Rental Ninja Hub. You manage inbox threads, reply to 
 
 ## MCP Server
 
-All operations go through the `hub` MCP server — 24 tools and 6 resources.
+All operations go through the `hub` MCP server — 29 tools and 6 resources.
 
 ## Safety Rules
 
@@ -35,6 +35,33 @@ All operations go through the `hub` MCP server — 24 tools and 6 resources.
 - Transitions may trigger automations (emails, tasks)
 - Rollback transitions marked [ROLLBACK] — use with caution
 
+### create_ru_ticket (DESTRUCTIVE)
+
+- Always use `generate_ru_ticket_body` first to AI-draft the ticket content
+- Review the generated subject + body before sending
+- Requires `company_id` — company must have a linked RU account
+- `source_thread_id` links the new RU ticket to the originating conversation thread
+- Subject is auto-prefixed with "WL - {account_id} - " — don't include prefix yourself
+- Response includes `warnings[]` if thread linking or note addition failed post-send
+
+## Workflows
+
+### Debug pricing/min-stay issues
+
+1. `get_rental_detail` → check base config + `license_type_explanation` (e.g. Andalucia 61-night min stay is a legal requirement, not a bug)
+2. `get_rental_rate_calendar` → daily min_stay, seasonal rules, pricing over date range
+3. `suggest_linked_threads` → find related threads for same company
+4. If escalation to RU needed:
+   - `generate_ru_ticket_body` → AI-draft an RU support ticket
+   - `create_ru_ticket` → send the ticket (requires confirmation)
+
+### Create RU support ticket
+
+1. `get_thread_detail` → understand the customer issue
+2. `generate_ru_ticket_body` → AI-draft with concrete references (property IDs, booking refs, channel listing IDs)
+3. Review the draft — edit subject/body if needed
+4. `create_ru_ticket` with `source_thread_id` → sends email, links threads, adds note
+
 ## Tool Reference
 
 | Tool | Safety | Domain | Key Tip |
@@ -51,7 +78,8 @@ All operations go through the `hub` MCP server — 24 tools and 6 resources.
 | `search_bookings` | read-only | Bookings | Requires `company_id`; filter by status/date |
 | `get_booking_detail` | read-only | Bookings | Full pricing, payments, check-in, notes |
 | `list_company_rentals` | read-only | Rentals | Set `include_channels: true` for distribution data |
-| `get_rental_detail` | read-only | Rentals | Includes door codes, Wi-Fi, amenities, legal |
+| `get_rental_detail` | read-only | Rentals | Includes door codes, Wi-Fi, amenities, legal + `license_type_explanation` |
+| `get_rental_rate_calendar` | read-only | Rentals | Pricing, min_stay rules, seasonal prices, availability over date range |
 | `search_guests` | read-only | Guests | Requires `company_id`; search by name |
 | `get_guest_detail` | read-only | Guests | Full contact, passport, booking history |
 | `assign_thread` | idempotent | Threads | Get valid IDs from `hub://team/members` resource |
@@ -61,8 +89,11 @@ All operations go through the `hub` MCP server — 24 tools and 6 resources.
 | `assign_company_to_thread` | idempotent | Threads | Associates company with thread |
 | `save_draft` | idempotent | Threads | Draft appears in composer for human review |
 | `add_company_note` | idempotent | Companies | Optional `next_action_due` + `mention_user_ids` for @mentions |
+| `suggest_linked_threads` | read-only | Threads | AI-ranked related threads (cross-type: RU ticket ↔ conversation) |
+| `generate_ru_ticket_body` | read-only | Threads | AI-draft RU support ticket from thread (up to 45s) |
 | `send_reply` | **DESTRUCTIVE** | Threads | Irreversible — see send_reply rules above |
 | `transition_company` | **DESTRUCTIVE** | Companies | May trigger automations — see rules above |
+| `create_ru_ticket` | **DESTRUCTIVE** | Threads | Sends email to RU support — use `generate_ru_ticket_body` first |
 
 ## Resources
 
@@ -118,7 +149,7 @@ Write like a real person, not a corporate bot. The goal is natural, competent, a
 - Delegate data-heavy MCP reads to sub-agents to keep main context lean
 - Launch multiple sub-agents in parallel when fetches are independent
 - Sub-agents absorb raw API responses; main orchestrator sees only summaries
-- Write actions (`save_draft`, `add_thread_note`, `send_reply`, `transition_company`, `assign_thread`, `change_thread_state`, `link_threads`, `add_company_note`, `assign_company_to_thread`) stay in main context — never delegate destructive/write ops to sub-agents
+- Write actions (`save_draft`, `add_thread_note`, `send_reply`, `transition_company`, `assign_thread`, `change_thread_state`, `link_threads`, `add_company_note`, `assign_company_to_thread`, `create_ru_ticket`) stay in main context — never delegate destructive/write ops to sub-agents
 
 ## Browser Automation
 

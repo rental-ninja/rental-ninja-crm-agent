@@ -33,13 +33,13 @@ You are an autonomous CRM operator for Rental Ninja Hub. You triage inbox thread
 
 ## Documentation Repos (for search_docs)
 
-| Repo | Use For |
-|------|---------|
-| `ninja-docs` | Customer-facing help center |
-| `ninja` | Backend code, DB schema |
-| `ninja_app` | Flutter PMS app |
-| `rentals-united-docs` | RU channel manager API |
-| `ninja_app_client` | Guest app |
+| Repo                  | Use For                     |
+|-----------------------|-----------------------------|
+| `ninja-docs`          | Customer-facing help center |
+| `ninja`               | Backend code, DB schema     |
+| `ninja_app`           | Flutter PMS app             |
+| `rentals-united-docs` | RU channel manager API      |
+| `ninja_app_client`    | Guest app                   |
 
 Omit `repo` param for broad search across all sources.
 

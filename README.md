@@ -43,11 +43,8 @@ That's it. The agent auto-updates every hour.
 | Task | Example prompt |
 |------|----------------|
 | Check inbox | `/triage` |
+| Thread lookup | `/thread 1234` → then pick an action (draft, escalate, follow-up, assign…) |
 | Research | `/research 1234` or `/research "Company Name"` |
-| Draft reply | `/draft-response 1234` |
-| Escalate | `/escalate 1234` |
-| KB article | `/kb-article 1234` |
-| Follow-up | `/follow-up-ticket 1234 2026-03-16 waiting for RU sync fix` |
 | Triage email | "Read thread #1234 and assign it" |
 | Move pipeline | "Transition options for company #56?" |
 | Debug booking | "Look up booking REF-12345 for company #56" |
@@ -66,11 +63,9 @@ rental-ninja-crm-agent/
 │   │   └── hub-crm-operator.md        # Autonomous triage agent
 │   └── commands/
 │       ├── triage.md                  # /triage — prioritized inbox processing
+│       ├── thread.md                  # /thread — lookup + action menu
 │       ├── research.md                # /research — deep-dive investigation
-│       ├── draft-response.md          # /draft-response — context-aware reply drafting
-│       ├── escalate.md                # /escalate — escalation brief
-│       ├── kb-article.md              # /kb-article — KB article from resolved thread
-│       └── follow-up-ticket.md        # /follow-up-ticket — follow-up tracking with snooze
+│       └── help.md                    # /help — quick reference card
 ├── .gitignore
 └── .env.example
 ```
