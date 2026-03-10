@@ -73,7 +73,7 @@ rental-ninja-crm-agent/
 ## Safety
 
 - **21 tools auto-approved**: All read-only and idempotent operations run without prompting
-- **2 tools require confirmation**: `send_reply` (sends email) and `transition_company` (changes CRM state) always ask first
+- **3 tools require confirmation**: `send_reply` (sends email), `transition_company` (changes CRM state), and `create_ru_ticket` (sends RU support ticket) always ask first
 - Claude defaults to saving drafts instead of sending emails directly
 
 ## Troubleshooting

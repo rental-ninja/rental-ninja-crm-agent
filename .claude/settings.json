@@ -4,6 +4,7 @@
       "mcp__hub__search_docs",
       "mcp__hub__search_companies",
       "mcp__hub__search_threads",
+      "mcp__hub__list_threads",
       "mcp__hub__get_thread_detail",
       "mcp__hub__get_company_detail",
       "mcp__hub__get_company_states",
