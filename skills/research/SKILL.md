@@ -1,5 +1,7 @@
 ---
+name: research
 description: Deep-dive investigation on a thread, company, or topic
+argument-hint: Thread ID, company ID/name, or topic keyword
 ---
 
 Research `$ARGUMENTS` (thread ID, company ID/name, or topic keyword).

@@ -1,5 +1,7 @@
 ---
+name: thread
 description: Thread lookup with full context and actions
+argument-hint: Thread ID or ticket number
 ---
 
 Analyze thread `$ARGUMENTS` (thread ID or ticket number).

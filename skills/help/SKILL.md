@@ -1,4 +1,5 @@
 ---
+name: help
 description: Show available commands, capabilities, and safety rules
 ---
 

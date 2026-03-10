@@ -1,4 +1,5 @@
 ---
+name: triage
 description: Triage inbox — prioritize and process unhandled threads, snoozed threads, and RU tickets
 ---
 
