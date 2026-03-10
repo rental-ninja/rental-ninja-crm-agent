@@ -101,13 +101,6 @@ Team members get the update on their next session.
 2. Send them: the marketplace URL (with PAT embedded) + their token
 3. Point them to the [Install](#install) section above
 
-### Rotating the GitHub PAT
-
-Current PAT expires Mar 11, 2027. When it expires:
-1. Generate a new fine-grained PAT (same scope: rental-ninja org, rental-ninja-crm-agent repo, Contents read-only)
-2. Send team members the new marketplace URL
-3. They re-run: `/plugin marketplace add <new URL>`
-
 ### Plugin structure
 
 ```
