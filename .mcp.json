@@ -1,11 +1,9 @@
 {
-  "mcpServers": {
-    "hub": {
-      "command": "sh",
-      "args": [
-        "-c",
-        "[ -f .env ] && set -a && . .env && set +a; npx -y mcp-remote https://rental-ninja.com/hub/mcp --header \"Authorization: Bearer $HUB_MCP_TOKEN\""
-      ]
-    }
+  "hub": {
+    "command": "sh",
+    "args": [
+      "-c",
+      "[ -f .env ] && set -a && . .env && set +a; npx -y mcp-remote https://rental-ninja.com/hub/mcp --header \"Authorization: Bearer $HUB_MCP_TOKEN\""
+    ]
   }
 }
