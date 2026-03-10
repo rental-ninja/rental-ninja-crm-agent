@@ -4,7 +4,7 @@
       "command": "sh",
       "args": [
         "-c",
-        "set -a && [ -f .env ] && . .env; set +a && npx -y mcp-remote https://rental-ninja.com/hub/mcp --header \"Authorization: Bearer $HUB_MCP_TOKEN\""
+        "[ -f .env ] && set -a && . .env && set +a; npx -y mcp-remote https://rental-ninja.com/hub/mcp --header \"Authorization: Bearer $HUB_MCP_TOKEN\""
       ]
     }
   }

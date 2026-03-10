@@ -27,7 +27,8 @@
       "mcp__hub__add_company_note",
       "mcp__hub__suggest_linked_threads",
       "mcp__hub__get_rental_rate_calendar",
-      "mcp__hub__generate_ru_ticket_body"
+      "mcp__hub__generate_ru_ticket_body",
+      "mcp__hub__search_closure_summaries"
     ]
   }
 }

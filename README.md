@@ -1,92 +1,149 @@
 # Rental Ninja CRM Agent
 
-A Claude Code project for operating the Rental Ninja CRM. Clone this repo, add your API token, and use Claude Code to manage inbox threads, reply to customers, and advance companies through the sales pipeline.
+A Claude Code plugin for operating the Rental Ninja CRM. Manage inbox threads, reply to customers, research bookings, and advance companies through the sales pipeline — all from Claude.
 
-No Docker. No codebase. Just an API token.
+## Install
 
-## Prerequisites
+You need two things from Pol:
+- **Marketplace URL** — a long link he'll send you (just copy-paste it, no GitHub account needed)
+- **Hub API token** — your personal CRM access token
 
-- macOS
-- Node.js 18+ — check with `node --version`, install from https://nodejs.org if missing
-
-## Setup
-
-### For team members
-
-1. **Get the setup script** from Pol (he'll send you the file or a download link)
-2. **Open Terminal** and run:
-
-```bash
-bash /path/to/setup.sh
-```
-
-3. It will ask for your **Hub API token** (Pol will give you one)
-4. Once done, open a **new terminal** and type:
-
-```bash
-ninja
-```
-
-That's it. The agent auto-updates every hour.
-
-### For Pol (admin)
-
-1. Create a fine-grained PAT at GitHub → Settings → Developer settings → Fine-grained PATs
-   - Scope: `rental-ninja/rental-ninja-crm-agent` only
-   - Permission: Contents → Read-only
-2. Paste the PAT into `setup.sh` (replace `__PASTE_YOUR_PAT_HERE__`)
-3. Send `setup.sh` to team members (Slack, email, etc.) — the PAT is read-only, safe to share
-4. Generate a `HUB_MCP_TOKEN` for each team member in Hub
-
-## What You Can Do
-
-| Task | Example prompt |
-|------|----------------|
-| Check inbox | `/triage` |
-| Thread lookup | `/thread 1234` → then pick an action (draft, escalate, follow-up, assign…) |
-| Research | `/research 1234` or `/research "Company Name"` |
-| Triage email | "Read thread #1234 and assign it" |
-| Move pipeline | "Transition options for company #56?" |
-| Debug booking | "Look up booking REF-12345 for company #56" |
-| Snooze thread | "Snooze thread #1234 until next Monday" |
-
-## What's Inside
+You also need Claude Code. If you have the Claude desktop app, you already have it — just open Terminal and type `claude` to check. If not, install it with:
 
 ```
-rental-ninja-crm-agent/
-├── CLAUDE.md                          # CRM operator persona + safety rules + tool reference
-├── .mcp.json                          # Hub MCP server connection
-├── README.md                          # This file
-├── .claude/
-│   ├── settings.json                  # Auto-approve safe tools
-│   ├── agents/
-│   │   └── hub-crm-operator.md        # Autonomous triage agent
-│   └── commands/
-│       ├── triage.md                  # /triage — prioritized inbox processing
-│       ├── thread.md                  # /thread — lookup + action menu
-│       ├── research.md                # /research — deep-dive investigation
-│       └── help.md                    # /help — quick reference card
-├── .gitignore
-└── .env.example
+brew install --cask claude-code
 ```
+
+### Step 1: Open Claude Code and add the marketplace
+
+Open Terminal, type `claude`, and press Enter. Once Claude Code opens, type:
+
+```
+/plugin marketplace add <paste the marketplace URL Pol sent you>
+```
+
+You only need to do this once.
+
+### Step 2: Install the plugin
+
+```
+/plugin install rental-ninja-crm
+```
+
+### Step 3: Set up your token
+
+Close Claude Code (Ctrl+C) and open it again. Claude will notice your token is missing and ask you to paste it in the chat. Just paste the token Pol gave you and press Enter — Claude saves it for you.
+
+Close and reopen Claude Code one last time so the CRM connection activates.
+
+### You're done
+
+Type `/rental-ninja-crm:help` to see what you can do. The plugin keeps itself up to date.
+
+If something isn't working, check the [Troubleshooting](#troubleshooting) section below or ask Pol.
+
+## Commands
+
+| Command | What it does |
+|---------|-------------|
+| `/rental-ninja-crm:triage` | Shows your inbox sorted by priority — emails, snoozed threads, RU tickets |
+| `/rental-ninja-crm:thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
+| `/rental-ninja-crm:research 1234` | Deep investigation on a thread, company, or topic |
+| `/rental-ninja-crm:help` | Quick reference card |
+
+You can also just ask in plain language:
+
+- "What's going on with thread 1057?"
+- "Assign thread 1234 to Sarah"
+- "Look up booking REF-12345 for company 56"
+- "Snooze thread 1234 until next Monday"
 
 ## Safety
 
-- **21 tools auto-approved**: All read-only and idempotent operations run without prompting
-- **3 tools require confirmation**: `send_reply` (sends email), `transition_company` (changes CRM state), and `create_ru_ticket` (sends RU support ticket) always ask first
-- Claude defaults to saving drafts instead of sending emails directly
+- Most CRM tools (reading threads, searching, adding notes, etc.) run automatically
+- Three actions always ask for your confirmation first:
+  - **Sending an email** to a customer — Claude drafts first, you review before sending
+  - **Changing a company's pipeline stage** — may trigger automated emails
+  - **Creating a Rentals United ticket** — sends to RU support
+
+---
+
+## Admin Guide
+
+Everything below is for Pol / whoever manages the plugin.
+
+### First-time marketplace setup
+
+1. Create a **fine-grained GitHub PAT** scoped to `rental-ninja/rental-ninja-crm-agent` (read-only, contents only):
+   GitHub → Settings → Developer settings → Fine-grained PATs
+
+2. Create a new repo `rental-ninja/claude-plugins-marketplace` with one file, `marketplace.json`:
+
+```json
+{
+  "plugins": [
+    {
+      "name": "rental-ninja-crm",
+      "url": "https://x-access-token:<PAT>@github.com/rental-ninja/rental-ninja-crm-agent.git"
+    }
+  ]
+}
+```
+
+The PAT is embedded in the marketplace URL — team members never see it or need GitHub accounts.
+
+### Releasing a new version
+
+1. Make your changes (skills, agents, CLAUDE.md, settings, etc.)
+2. Bump `version` in `.claude-plugin/plugin.json`
+3. Commit and push to `main`
+
+Team members get the update on their next session.
+
+### Adding a new team member
+
+1. Generate a `HUB_MCP_TOKEN` for them in Hub
+2. Send them: the marketplace URL (with PAT embedded) + their token
+3. Point them to the [Install](#install) section above
+
+### Rotating the GitHub PAT
+
+When the PAT expires:
+1. Generate a new one (same scope as before)
+2. Update the URL in `marketplace.json` in the marketplace repo
+3. Tell team members to re-run: `/plugin marketplace add <new URL>`
+
+### Plugin structure
+
+```
+rental-ninja-crm-agent/
+├── .claude-plugin/
+│   └── plugin.json               # Plugin manifest (name, version)
+├── CLAUDE.md                     # CRM operator persona + safety rules
+├── .mcp.json                     # Hub MCP server connection
+├── settings.json                 # Auto-approved tool permissions
+├── skills/
+│   ├── triage.md                 # /rental-ninja-crm:triage
+│   ├── thread.md                 # /rental-ninja-crm:thread
+│   ├── research.md               # /rental-ninja-crm:research
+│   └── help.md                   # /rental-ninja-crm:help
+├── agents/
+│   └── hub-crm-operator.md       # Sub-agent for autonomous CRM tasks
+└── hooks/
+    ├── hooks.json                # Hook definitions
+    └── check-token.sh            # First-run token setup
+```
 
 ## Troubleshooting
 
-**"MCP server not connecting"**
-- Verify `HUB_MCP_TOKEN` is set: `echo $HUB_MCP_TOKEN`
-- Verify Node.js is installed: `node --version` (need 18+)
-- Try running the MCP command directly: `npx -y mcp-remote https://rental-ninja.com/hub/mcp --header "Authorization: Bearer $HUB_MCP_TOKEN"`
+**CRM tools not working / "MCP server not connecting"**
+1. Make sure you completed the token setup (Step 3 above)
+2. Try closing and reopening Claude Code
+3. If it still doesn't work, ask Pol to check your token is valid
 
 **"Permission denied" or "Unauthorized"**
-- Your API token may be expired or revoked
-- Generate a new token from Hub account settings
+- Your token may have expired — ask Pol for a new one
 
-**"Tool not found"**
-- The MCP server may be unreachable — check your internet connection
-- Verify the Hub instance is running
+**Commands not showing up**
+- Make sure the plugin is installed: type `/plugin` and check the list
+- Try updating: `/plugin update rental-ninja-crm`

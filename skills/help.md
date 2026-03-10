@@ -14,10 +14,10 @@ AI-powered CRM operator for managing inbox, customers, bookings, and sales pipel
 
 | Command | Description |
 |---------|-------------|
-| `/triage` | Prioritize & process inbox (emails, snoozed, RU tickets) |
-| `/thread <id>` | Thread lookup with full context — then offers actions (draft, escalate, follow-up, assign, etc.) |
-| `/research <id\|name\|topic>` | Deep-dive investigation on a thread, company, or topic |
-| `/help` | This reference card |
+| `/rental-ninja-crm:triage` | Prioritize & process inbox (emails, snoozed, RU tickets) |
+| `/rental-ninja-crm:thread <id>` | Thread lookup with full context — then offers actions (draft, escalate, follow-up, assign, etc.) |
+| `/rental-ninja-crm:research <id\|name\|topic>` | Deep-dive investigation on a thread, company, or topic |
+| `/rental-ninja-crm:help` | This reference card |
 
 ### Direct Capabilities
 
