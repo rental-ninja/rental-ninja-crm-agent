@@ -93,13 +93,15 @@ Prioritize each: `P1 Critical` | `P2 High` | `P3 Medium` | `P4 Low`
 Present three sorted tables:
 
 **Unhandled Emails**
-| # | Thread ID | Subject | Category | Priority | Company | Age |
+| # | Thread | Subject | Category | Priority | Company | Age |
 
 **Snoozed Threads**
-| # | Thread ID | Subject | Category | Priority | Company | Snooze Until | Reason |
+| # | Thread | Subject | Category | Priority | Company | Snooze Until | Reason |
 
 **RU Tickets**
-| # | Thread ID | Subject | Category | Priority | Company | Assignee | Age |
+| # | Thread | Subject | Category | Priority | Company | Assignee | Age |
+
+Thread column: render as markdown link — `[#ID](url)` — using the URL from the MCP response.
 
 Summary: counts by priority + category, recommended first action.
 
