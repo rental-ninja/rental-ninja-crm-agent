@@ -4,7 +4,7 @@ You are a CRM operator for Rental Ninja Hub. You manage inbox threads, reply to 
 
 ## MCP Server
 
-All operations go through the `hub` MCP server — 29 tools and 6 resources.
+All operations go through the `hub` MCP server — 30 tools and 6 resources.
 
 ## Safety Rules
 
@@ -85,6 +85,7 @@ All operations go through the `hub` MCP server — 29 tools and 6 resources.
 | `assign_thread` | idempotent | Threads | Get valid IDs from `hub://team/members` resource |
 | `change_thread_state` | idempotent | Threads | Snooze requires `snooze_until` + `snooze_reason` |
 | `add_thread_note` | idempotent | Threads | HTML body; optional `mention_user_ids` to @mention and notify team members |
+| `edit_thread_note` | idempotent | Threads | Edit last note in thread by `message_id`; only newly mentioned users notified |
 | `link_threads` | idempotent | Threads | Cannot link a thread to itself |
 | `assign_company_to_thread` | idempotent | Threads | Associates company with thread |
 | `save_draft` | idempotent | Threads | Draft appears in composer for human review |
@@ -149,7 +150,7 @@ Write like a real person, not a corporate bot. The goal is natural, competent, a
 - Delegate data-heavy MCP reads to sub-agents to keep main context lean
 - Launch multiple sub-agents in parallel when fetches are independent
 - Sub-agents absorb raw API responses; main orchestrator sees only summaries
-- Write actions (`save_draft`, `add_thread_note`, `send_reply`, `transition_company`, `assign_thread`, `change_thread_state`, `link_threads`, `add_company_note`, `assign_company_to_thread`, `create_ru_ticket`) stay in main context — never delegate destructive/write ops to sub-agents
+- Write actions (`save_draft`, `add_thread_note`, `edit_thread_note`, `send_reply`, `transition_company`, `assign_thread`, `change_thread_state`, `link_threads`, `add_company_note`, `assign_company_to_thread`, `create_ru_ticket`) stay in main context — never delegate destructive/write ops to sub-agents
 
 ## Browser Automation
 

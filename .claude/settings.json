@@ -18,6 +18,7 @@
       "mcp__hub__assign_thread",
       "mcp__hub__change_thread_state",
       "mcp__hub__add_thread_note",
+      "mcp__hub__edit_thread_note",
       "mcp__hub__link_threads",
       "mcp__hub__assign_company_to_thread",
       "mcp__hub__save_draft",
