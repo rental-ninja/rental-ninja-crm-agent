@@ -5,7 +5,7 @@ A Claude Code plugin for operating the Rental Ninja CRM. Manage inbox threads, r
 ## Install
 
 You need two things from Pol:
-- **Marketplace URL** — a long link he'll send you (just copy-paste it, no GitHub account needed)
+- **Marketplace URL** — a link he'll send you (just copy-paste it, no GitHub account needed)
 - **Hub API token** — your personal CRM access token
 
 You also need Claude Code. If you have the Claude desktop app, you already have it — just open Terminal and type `claude` to check. If not, install it with:
@@ -38,7 +38,7 @@ Close and reopen Claude Code one last time so the CRM connection activates.
 
 ### You're done
 
-Type `/ninja-hub:help` to see what you can do. The plugin keeps itself up to date.
+Type `/ninja-hub:hub help` to see what you can do. The plugin keeps itself up to date.
 
 If something isn't working, check the [Troubleshooting](#troubleshooting) section below or ask Pol.
 
@@ -46,10 +46,10 @@ If something isn't working, check the [Troubleshooting](#troubleshooting) sectio
 
 | Command | What it does |
 |---------|-------------|
-| `/ninja-hub:triage` | Shows your inbox sorted by priority — emails, snoozed threads, RU tickets |
-| `/ninja-hub:thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
-| `/ninja-hub:research 1234` | Deep investigation on a thread, company, or topic |
-| `/ninja-hub:help` | Quick reference card |
+| `/ninja-hub:hub triage` | Shows your inbox sorted by priority — emails, snoozed threads, RU tickets |
+| `/ninja-hub:hub thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
+| `/ninja-hub:hub research 1234` | Deep investigation on a thread, company, or topic |
+| `/ninja-hub:hub help` | Quick reference card |
 
 You can also just ask in plain language:
 
@@ -72,24 +72,16 @@ You can also just ask in plain language:
 
 Everything below is for Pol / whoever manages the plugin.
 
-### Marketplace & PAT
+### Marketplace
 
-Already set up:
-- **Marketplace repo**: `rental-ninja/claude-plugins-marketplace` (public)
-- **Plugin repo**: `rental-ninja/ninja-hub-agent` (private)
-- **PAT**: fine-grained, read-only Contents on the plugin repo, owned by `rental-ninja` org
+- **Marketplace repo**: `rental-ninja/claude-plugins-marketplace` (private)
+- **Plugin repo**: `rental-ninja/rental-ninja-crm-agent` (public)
 
-The marketplace repo has a plain URL in `marketplace.json` (no secrets). The PAT is only in the URL you send to team members:
-
-```
-https://x-access-token:<PAT>@github.com/rental-ninja/claude-plugins-marketplace.git
-```
-
-Team members paste this URL when they run `/plugin marketplace add`. The PAT gives them read access to the private plugin repo. It never gets stored in any repo.
+Team members add the marketplace once with the URL Pol sends them. The plugin repo is public — no PAT needed for cloning.
 
 ### Releasing a new version
 
-1. Make your changes (skills, agents, CLAUDE.md, settings, etc.)
+1. Make your changes (skills, agents, settings, etc.)
 2. Bump `version` in `.claude-plugin/plugin.json`
 3. Commit and push to `main`
 
@@ -98,23 +90,19 @@ Team members get the update on their next session.
 ### Adding a new team member
 
 1. Generate a `HUB_MCP_TOKEN` for them in Hub
-2. Send them: the marketplace URL (with PAT embedded) + their token
+2. Send them: the marketplace URL + their token
 3. Point them to the [Install](#install) section above
 
 ### Plugin structure
 
 ```
-ninja-hub-agent/
+rental-ninja-crm-agent/
 ├── .claude-plugin/
 │   └── plugin.json               # Plugin manifest (name, version)
-├── CLAUDE.md                     # CRM operator persona + safety rules
 ├── .mcp.json                     # Hub MCP server connection
 ├── settings.json                 # Auto-approved tool permissions
 ├── skills/
-│   ├── triage/SKILL.md           # /ninja-hub:triage
-│   ├── thread/SKILL.md           # /ninja-hub:thread
-│   ├── research/SKILL.md         # /ninja-hub:research
-│   └── help/SKILL.md             # /ninja-hub:help
+│   └── hub/SKILL.md              # CRM operator skill (persona, safety, workflows)
 └── agents/
     └── hub-crm-operator.md       # Sub-agent for autonomous CRM tasks
 ```
