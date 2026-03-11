@@ -72,6 +72,7 @@ If something isn't working, check the [Troubleshooting](#troubleshooting) sectio
 | `/ninja-hub:hub thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
 | `/ninja-hub:hub research 1234` | Deep investigation on a thread, company, or topic |
 | `/ninja-hub:hub help` | Quick reference card |
+| `/ninja-hub:accounting <query>` | Investigate payouts, settlements, payee strategies, and discrepancies |
 
 You can also just ask in plain language:
 
@@ -124,6 +125,8 @@ rental-ninja-crm-agent/
 ├── .mcp.json                     # Hub MCP server connection
 ├── settings.json                 # Auto-approved tool permissions
 └── skills/
+    ├── accounting/
+    │   └── SKILL.md              # Payout & settlement investigation skill
     └── hub/
         ├── SKILL.md              # CRM operator skill (persona, safety, workflows)
         └── agents/

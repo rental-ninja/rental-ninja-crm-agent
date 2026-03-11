@@ -21,6 +21,7 @@ Parse `$ARGUMENTS` to determine what the user needs:
 - **A thread ID or ticket number** (e.g., `1234`, `thread 1234`) → run the Thread workflow
 - **`research <topic>`**, a company name, or investigative question → run the Research workflow
 - **`help`** → print the Quick Reference card
+- **Accounting / payout / settlement question** → hand off to the `accounting` skill (`/ninja-hub:accounting`)
 - **Ambiguous or plain language** → use judgment based on the user's intent, or ask
 
 ## Safety
@@ -159,7 +160,7 @@ Deep-dive investigation on a thread, company, or topic.
 ### Gather
 
 Identify the target (thread, company, or keyword). Resolve the primary entity first (e.g. fetch thread to get company ID), then fan out with parallel sub-agents across all relevant sources: company info, bookings, rentals, documentation, and related threads.
-Cast a wide net.
+Cast a wide net. For accounting/payout questions, hand off to `/ninja-hub:accounting` instead — it has the domain knowledge to investigate strategies and discrepancies.
 
 ### Synthesize
 
@@ -184,6 +185,7 @@ Present a structured brief:
 | `/ninja-hub:hub thread <id>`      | Thread lookup with full context + actions |
 | `/ninja-hub:hub research <topic>` | Deep-dive investigation                   |
 | `/ninja-hub:hub help`             | This reference card                       |
+| `/ninja-hub:accounting <query>`   | Payout/settlement investigation           |
 
 **Direct capabilities** (no slash command needed): search companies/threads/bookings/rentals/guests, assign/close/snooze threads, add notes with @mentions, look up documentation, debug pricing/min-stay, transition company state, send replies, create RU
 tickets.
