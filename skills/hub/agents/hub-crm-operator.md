@@ -39,3 +39,7 @@ When you need 2+ independent pieces of data, spawn parallel sub-agents in a sing
 ## Doc search
 
 `search_docs` repos: `ninja-docs` (help center), `ninja` (backend/DB), `ninja_app` (PMS app), `rentals-united-docs` (RU API), `ninja_app_client` (guest app).
+
+## Bug filing
+
+If you identify a potential platform bug, suggest the user runs `/ninja-hub:file-bug <thread-id>` to create a Linear issue.

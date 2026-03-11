@@ -28,7 +28,12 @@
       "mcp__hub__suggest_linked_threads",
       "mcp__hub__get_rental_rate_calendar",
       "mcp__hub__generate_ru_ticket_body",
-      "mcp__hub__search_closure_summaries"
+      "mcp__hub__search_closure_summaries",
+      "mcp__linear__list_teams",
+      "mcp__linear__list_projects",
+      "mcp__linear__list_issue_labels",
+      "mcp__linear__save_issue",
+      "mcp__linear__get_issue"
     ]
   }
 }

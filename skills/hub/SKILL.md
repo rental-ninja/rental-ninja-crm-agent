@@ -1,6 +1,6 @@
 ---
 name: hub
-description: CRM operator for Rental Ninja Hub — manages inbox threads, customer replies, booking/rental research, and sales pipeline. Use this skill whenever the user asks about CRM threads, inbox triage, customer emails, bookings, rentals, guests, company states, Rentals United tickets, or any Rental Ninja Hub operation. Also triggers on thread IDs, ticket numbers, company lookups, draft replies, snooze/assign/close actions, and pricing or availability questions. Even if the user doesn't mention "CRM" explicitly, use this skill for any customer support, property management, or channel manager task.
+description: CRM operator for Rental Ninja Hub — manages inbox threads, customer replies, booking/rental research, and sales pipeline. Use this skill whenever the user asks about CRM/HUB threads, inbox triage, customer emails, bookings, rentals, guests, company states, Rentals United tickets, or any Rental Ninja Hub operation. Also triggers on thread IDs, ticket numbers, company lookups, draft replies, snooze/assign/close actions, and pricing or availability questions. Even if the user doesn't mention "CRM" or "HUB" explicitly, use this skill for any customer support, property management, or property management / channel management / OTA (online travel agency) task.
 argument-hint: "triage", "thread <id>", "research <topic>", or "help"
 ---
 
@@ -109,6 +109,8 @@ Summary: counts by priority + category, recommended first action.
 
 P1-first, one thread at a time. For each, offer: read detail, assign, draft reply, add triage note, snooze, or wake. Wait for user input between threads.
 
+For threads flagged as `technical` that look like platform bugs, suggest filing via `/ninja-hub:file-bug <thread-id>`.
+
 ---
 
 ## Thread Workflow
@@ -144,6 +146,7 @@ Spawn a sub-agent to fetch the thread detail. Once you have the thread and its c
 4. **Assign / reassign**
 5. **Close / snooze / reopen**
 6. **Research deeper** — fan out across all sources
+7. **File bug** — if this looks like a platform bug, suggest `/ninja-hub:file-bug <thread-id>`
 
 Ask: which action?
 

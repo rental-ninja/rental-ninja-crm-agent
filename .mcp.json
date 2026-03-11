@@ -5,5 +5,9 @@
       "-c",
       "[ -f .env ] && set -a && . .env && set +a; npx -y mcp-remote https://rental-ninja.com/hub/mcp --header \"Authorization: Bearer $HUB_MCP_TOKEN\""
     ]
+  },
+  "linear": {
+    "type": "http",
+    "url": "https://mcp.linear.app/mcp"
   }
 }
