@@ -12,7 +12,33 @@ Argument: $ARGUMENTS (patch, minor, or major — default: patch)
 6. Update `.claude-plugin/plugin.json` with the new version.
 7. Stage all changes and commit with message: `v{new_version}: {short description of changes}` (include Co-Authored-By trailer).
 8. Push to main.
-9. Confirm the release is done and print the new version.
+9. Clone `https://github.com/rental-ninja/claude-plugins-marketplace.git` into a temp dir.
+10. Update `.claude-plugin/marketplace.json` — ONLY change the `version` field of the plugin named `rental-ninja-crm` in the `plugins` array. The file has this exact schema:
+
+    ```json
+    {
+      "name": "rental-ninja",
+      "owner": { "name": "Rental Ninja" },
+      "metadata": { "description": "Claude Code plugins for Rental Ninja" },
+      "plugins": [
+        {
+          "name": "rental-ninja-crm",
+          "description": "CRM operator for Rental Ninja Hub — inbox triage, customer replies, booking research, sales pipeline",
+          "version": "<UPDATE THIS TO NEW VERSION>",
+          "source": {
+            "source": "url",
+            "url": "https://github.com/rental-ninja/rental-ninja-crm-agent.git"
+          }
+        }
+      ]
+    }
+    ```
+
+    Only modify the `version` value. Do not change any other field.
+
+11. Commit: `Bump rental-ninja-crm to v{new_version}` and push to main.
+12. Remove the temp dir.
+13. Confirm the release is done and print the new version.
 
 ## Rules
 
