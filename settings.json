@@ -37,6 +37,7 @@
       "mcp__hub__get_payee_strategy",
       "mcp__hub__get_settlement_bookings",
       "mcp__hub__recalculate_payout_preview",
+      "mcp__hub__get_setup_instructions",
       "mcp__linear__list_teams",
       "mcp__linear__list_projects",
       "mcp__linear__list_issue_labels",

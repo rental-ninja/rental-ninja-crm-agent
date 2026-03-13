@@ -38,25 +38,13 @@ Close and reopen Claude Code one last time so the CRM connection activates.
 
 ### Step 4: Set up your project
 
-Claude code user should run /init with:
-
-```markdown
-/init -> focus only in the current folder.
-# Rental Ninja CRM
-
-Always use the `/ninja-hub:hub` skill for any CRM task — inbox triage, thread management, customer replies, booking/rental research, company pipeline transitions, Rentals United tickets, OTA research, etc.
-
-Available workflows:
-- `/ninja-hub:hub triage` — prioritize and process inbox
-- `/ninja-hub:hub thread <id>` — analyze a thread with full context and actions
-- `/ninja-hub:hub research <topic>` — deep-dive investigation
-- `/ninja-hub:hub help` — quick reference
-
-You can also just describe what you need in plain language.
+Navigate to the folder where you'll use the CRM (e.g. your work directory), open Claude Code there, and run:
 
 ```
+/ninja-hub:setup-hub
+```
 
-This tells Claude to always use the CRM tools when you ask about work stuff.
+This creates a `CLAUDE.md` file that tells Claude to use the CRM tools when you ask about work stuff. Run it again anytime to check for updates.
 
 ### You're done
 
@@ -127,6 +115,8 @@ rental-ninja-crm-agent/
 └── skills/
     ├── accounting/
     │   └── SKILL.md              # Payout & settlement investigation skill
+    ├── setup-hub/
+    │   └── SKILL.md              # CLAUDE.md installer/updater
     └── hub/
         ├── SKILL.md              # CRM operator skill (persona, safety, workflows)
         └── agents/
