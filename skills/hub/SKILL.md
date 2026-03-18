@@ -162,6 +162,8 @@ Deep-dive investigation on a thread, company, or topic.
 Identify the target (thread, company, or keyword). Resolve the primary entity first (e.g. fetch thread to get company ID), then fan out with parallel sub-agents across all relevant sources: company info, bookings, rentals, documentation, and related threads.
 Cast a wide net. For accounting/payout questions, hand off to `/ninja-hub:accounting` instead — it has the domain knowledge to investigate strategies and discrepancies.
 
+For channel manager sync issues (wrong prices, missing availability, failed pushes), use `search_provider_logs` to list S3 log files by team + date + log type, then `get_provider_log` to read the XML request/response. Credentials are auto-redacted. Start broad (no action_type filter) to see available action types, then narrow down by action and rental_id.
+
 ### Synthesize
 
 Present a structured brief:
@@ -187,7 +189,6 @@ Present a structured brief:
 | `/ninja-hub:hub help`             | This reference card                       |
 | `/ninja-hub:accounting <query>`   | Payout/settlement investigation           |
 
-**Direct capabilities** (no slash command needed): search companies/threads/bookings/rentals/guests, assign/close/snooze threads, add notes with @mentions, look up documentation, debug pricing/min-stay, transition company state, send replies, create RU
-tickets.
+**Direct capabilities** (no slash command needed): search companies/threads/bookings/rentals/guests, assign/close/snooze threads, add notes with @mentions, look up documentation, debug pricing/min-stay, inspect channel manager S3 logs, transition company state, send replies, create RU tickets.
 
 **Three operations require confirmation**: `send_reply` (email to customer), `transition_company` (may trigger automations), `create_ru_ticket` (sends to RU support). Everything else runs automatically.
