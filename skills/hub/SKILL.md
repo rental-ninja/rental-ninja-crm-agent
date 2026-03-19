@@ -22,6 +22,7 @@ Parse `$ARGUMENTS` to determine what the user needs:
 - **`research <topic>`**, a company name, or investigative question → run the Research workflow
 - **`help`** → print the Quick Reference card
 - **Accounting / payout / settlement question** → run the Research workflow using `references/accounting/` for domain knowledge
+- **Channel sync / OTA / distribution / provider log question** → run the Research workflow using `references/channel-sync/` for domain knowledge
 - **Ambiguous or plain language** → use judgment based on the user's intent, or ask
 
 ## Safety
@@ -71,6 +72,7 @@ Delegate data-heavy reads to sub-agents — this keeps context lean and enables 
 
 Domain knowledge and investigation guides live in `references/`. See `references/overview.md` for a full index.
 
+- `references/channel-sync/` — Channel sync pipeline, provider log analysis, per-OTA patterns (Airbnb, BDC, VRBO, Expedia)
 - `references/accounting/` — Payout/settlement domain model, strategy hierarchy, recalculation previews
 - `references/booking-rental/` — Booking, rental, guest, and channel entity lookups
 - `references/docs-resolutions/` — Documentation search and past resolution research
@@ -168,9 +170,7 @@ Deep-dive investigation on a thread, company, or topic.
 ### Gather
 
 Identify the target (thread, company, or keyword). Resolve the primary entity first (e.g. fetch thread to get company ID), then fan out with parallel sub-agents across all relevant sources: company info, bookings, rentals, documentation, and related threads.
-Cast a wide net. For accounting/payout questions, consult `references/accounting/accounting.md` for the domain model, strategy hierarchy, and investigation protocol.
-
-For channel manager sync issues (wrong prices, missing availability, failed pushes), use `search_provider_logs` to list S3 log files by team + date + log type, then `get_provider_log` to read the XML request/response. Credentials are auto-redacted. Start broad (no action_type filter) to see available action types, then narrow down by action and rental_id.
+Cast a wide net. For accounting/payout questions, consult `references/accounting/accounting.md` for the domain model, strategy hierarchy, and investigation protocol. For channel sync/OTA/distribution questions, consult `references/channel-sync/` for the sync pipeline, provider log analysis, and per-OTA patterns.
 
 ### Synthesize
 

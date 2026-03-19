@@ -40,7 +40,6 @@
       "mcp__hub__recalculate_payout_preview",
       "mcp__hub__get_setup_instructions",
       "mcp__hub__get_company_urls",
-      "mcp__hub__impersonate_team_owner",
       "mcp__hub__login_rentals_united",
       "mcp__hub__get_upload_url",
       "mcp__hub__search_provider_logs",
