@@ -1,14 +1,10 @@
+# Accounting
+
+Domain knowledge for investigating payouts, settlements, and earning strategies in Rental Ninja.
+
+All accounting data lives in the `hub` MCP server. All accounting tools are **read-only** — they cannot modify payouts, settlements, or strategies.
+
 ---
-name: accounting
-description: Investigate payout and settlement discrepancies for property management companies. Use when the user asks about payouts, settlements, payees, owner statements, commission calculations, payout mismatches, or any accounting/financial question related to a company's earnings.
-argument-hint: "thread <id>", "company <name>", "payee <name>", or plain question about payouts/settlements
----
-
-# Accounting Investigation
-
-You investigate payout and settlement questions for property management companies. Your job is to find the truth in the numbers, explain it clearly, and help the team resolve discrepancies.
-
-All accounting data lives in the `hub` MCP server. Explore its tools proactively — there are tools for listing payees, browsing settlements, drilling into payouts, inspecting strategies, viewing settlement bookings, aggregating across periods, and dry-run recalculation.
 
 ## Domain Model
 
@@ -32,7 +28,7 @@ All accounting data lives in the `hub` MCP server. Explore its tools proactively
 
 **Key insight**: Custom rules win over defaults for matching items. If a custom rule targets a specific rental, the default percentage is ignored for that rental's bookings. Recurring items stack on top of everything.
 
-## Investigation Mindset
+## Common Root Causes
 
 When a payout looks wrong, the root cause is almost always one of these:
 
@@ -48,28 +44,18 @@ When a payout looks wrong, the root cause is almost always one of these:
 
 - **Recurring item scope** — A recurring item scoped to specific rentals may not apply to the rental in question. Check whether the item's rental list matches.
 
-### General approach
+## Investigation Approach
 
-Start broad, narrow down. Get the big picture first (settlement list, payout summary), then drill into the specific payout and payee strategy. Use the recalculation preview early — it's the fastest way to spot whether something changed.
+Start broad, narrow down. Get the big picture first (settlement list, payout summary), then drill into the specific payout and payee strategy.
 
-## Routing
+Recommended sequence:
 
-Parse `$ARGUMENTS` to determine what the user needs:
-
-- **A thread ID** (e.g. `thread 1234`, `1234`) — Fetch the thread, identify the accounting question, find the company, then investigate.
-- **A company name** (e.g. `company Sunset Villas`) — Find the company, list their payees and recent settlements, ask what to investigate.
-- **A payee name** (e.g. `payee John Smith`) — Need the company context first. Ask for company if not obvious from conversation, then look up the payee and their strategy.
-- **A plain question** (e.g. "why is the March payout different from February?") — Identify the company from context, then investigate.
-- **No arguments / `help`** — Print a brief summary of what you can investigate.
-
-Always find the **company** first — all accounting tools require `company_id`.
-
-## Sub-agents
-
-Delegate data-heavy reads to sub-agents for parallelism. Same rules as the hub skill:
-
-- **Delegate**: settlement lists, booking details, payout breakdowns, strategy lookups, recalculation previews
-- **Keep in main context**: synthesis, explanations, thread notes, drafts
+1. Find the relevant payee with `list_payees`. If multiple and unclear which, report all.
+2. Find the settlement period with `list_settlements`. If no date range given, check the last 3 months.
+3. Review the earning rules with `get_payee_strategy` to understand the configuration.
+4. Run `recalculate_payout_preview` to compare stored vs. recalculated amounts — this is the fastest way to spot whether something changed.
+5. If mismatches found, verify input booking data with `get_settlement_bookings`.
+6. For a specific payout, use `get_payout_detail` for the line-item breakdown.
 
 ## Communication
 
@@ -78,12 +64,23 @@ Property managers are not accountants. When explaining findings:
 - Lead with the answer: "The March payout is lower because..."
 - Use concrete numbers: "Villa Rosa earned 2,400 (80% of 3,000) instead of 2,700 (90% of 3,000)"
 - Name the root cause plainly: "The percentage was changed from 90% to 80% on March 5th"
-- If you recommend action, be specific: "Re-generate the payout to apply the current strategy" or "The booking price needs to be corrected from X to Y"
+- If recommending action, be specific: "Re-generate the payout to apply the current strategy" or "The booking price needs to be corrected from X to Y"
 - For thread notes and drafts, follow hub skill conventions (AI footer tag, match customer language for replies, English for notes)
 
 ## Safety
 
-- All accounting tools are **read-only** — you cannot modify payouts, settlements, or strategies
 - The recalculation tool is a **dry-run preview** — it does not change any stored data
-- For thread replies and notes, follow the hub skill's safety rules (draft before send, confirm destructive ops)
 - When findings contradict a customer's claim, present the evidence factually — don't hedge or apologize for the math
+- Report exact numbers from tools — don't round or estimate (€1,234.56, not "about €1,200")
+- Financial communication with customers needs human review — produce research notes rather than customer-facing drafts for accounting topics
+
+## Available Tools
+
+- `list_payees(company_id, name)` — find payees (owners/managers receiving payouts)
+- `get_payee_strategy(company_id, payee_id)` — earning rules, custom overrides, recurring items
+- `list_settlements(company_id, date_from, date_to, rental_id)` — browse settlement periods
+- `get_settlement_detail(company_id, settlement_id)` — full settlement with payouts, invoices, attachments
+- `get_payout_detail(company_id, payout_id)` — single payout with line items and payment history
+- `query_payout_summary(company_id, ...)` — aggregate payout amounts, group by settlement/rental/payee
+- `recalculate_payout_preview(company_id, settlement_id, payout_id)` — compare stored vs. fresh calculation
+- `get_settlement_bookings(company_id, settlement_id)` — bookings feeding into a settlement

@@ -1,6 +1,6 @@
 ---
 name: hub
-description: CRM operator for Rental Ninja Hub — manages inbox threads, customer replies, booking/rental research, and sales pipeline. Use this skill whenever the user asks about CRM/HUB threads, inbox triage, customer emails, bookings, rentals, guests, company states, Rentals United tickets, or any Rental Ninja Hub operation. Also triggers on thread IDs, ticket numbers, company lookups, draft replies, snooze/assign/close actions, and pricing or availability questions. Even if the user doesn't mention "CRM" or "HUB" explicitly, use this skill for any customer support, property management, or property management / channel management / OTA (online travel agency) task.
+description: CRM operator for Rental Ninja Hub — manages inbox threads, customer replies, booking/rental research, sales pipeline, and accounting investigations. Use this skill whenever the user asks about CRM/HUB threads, inbox triage, customer emails, bookings, rentals, guests, company states, Rentals United tickets, payouts, settlements, payees, owner statements, commission calculations, payout mismatches, or any Rental Ninja Hub operation. Also triggers on thread IDs, ticket numbers, company lookups, draft replies, snooze/assign/close actions, pricing or availability questions, and any accounting/financial question related to a company's earnings. Even if the user doesn't mention "CRM" or "HUB" explicitly, use this skill for any customer support, property management, channel management, OTA (online travel agency), or accounting task.
 argument-hint: "triage", "thread <id>", "research <topic>", or "help"
 ---
 
@@ -21,7 +21,7 @@ Parse `$ARGUMENTS` to determine what the user needs:
 - **A thread ID or ticket number** (e.g., `1234`, `thread 1234`) → run the Thread workflow
 - **`research <topic>`**, a company name, or investigative question → run the Research workflow
 - **`help`** → print the Quick Reference card
-- **Accounting / payout / settlement question** → hand off to the `accounting` skill (`/ninja-hub:accounting`)
+- **Accounting / payout / settlement question** → run the Research workflow using `references/accounting/` for domain knowledge
 - **Ambiguous or plain language** → use judgment based on the user's intent, or ask
 
 ## Safety
@@ -62,10 +62,18 @@ Write like a real person, not a corporate bot. Natural, competent, brief.
 
 Delegate data-heavy reads to sub-agents — this keeps context lean and enables parallelism. Spawn multiple Agent calls in a SINGLE message when you need independent data.
 
-- **Delegate**: thread details, company info, bookings, rentals, guests, doc searches, thread lists
+- **Delegate**: thread details, company info, bookings, rentals, guests, doc searches, thread lists, automations, tasks, team members, stats, smart devices, door codes, police registrations, rental pictures/guides/upsells/precheckin settings
 - **Keep in main context**: replies, drafts, notes, assignments, transitions
 - Tell sub-agents *what data you need*, not which tool to call
 - Quick single lookups before a write can stay in main context
+
+## Investigation References
+
+Domain knowledge and investigation guides live in `references/`. See `references/overview.md` for a full index.
+
+- `references/accounting/` — Payout/settlement domain model, strategy hierarchy, recalculation previews
+- `references/booking-rental/` — Booking, rental, guest, and channel entity lookups
+- `references/docs-resolutions/` — Documentation search and past resolution research
 
 ## Doc search
 
@@ -160,7 +168,7 @@ Deep-dive investigation on a thread, company, or topic.
 ### Gather
 
 Identify the target (thread, company, or keyword). Resolve the primary entity first (e.g. fetch thread to get company ID), then fan out with parallel sub-agents across all relevant sources: company info, bookings, rentals, documentation, and related threads.
-Cast a wide net. For accounting/payout questions, hand off to `/ninja-hub:accounting` instead — it has the domain knowledge to investigate strategies and discrepancies.
+Cast a wide net. For accounting/payout questions, consult `references/accounting/accounting.md` for the domain model, strategy hierarchy, and investigation protocol.
 
 For channel manager sync issues (wrong prices, missing availability, failed pushes), use `search_provider_logs` to list S3 log files by team + date + log type, then `get_provider_log` to read the XML request/response. Credentials are auto-redacted. Start broad (no action_type filter) to see available action types, then narrow down by action and rental_id.
 
@@ -187,7 +195,6 @@ Present a structured brief:
 | `/ninja-hub:hub thread <id>`      | Thread lookup with full context + actions |
 | `/ninja-hub:hub research <topic>` | Deep-dive investigation                   |
 | `/ninja-hub:hub help`             | This reference card                       |
-| `/ninja-hub:accounting <query>`   | Payout/settlement investigation           |
 
 **Direct capabilities** (no slash command needed): search companies/threads/bookings/rentals/guests, assign/close/snooze threads, add notes with @mentions, look up documentation, debug pricing/min-stay, inspect channel manager S3 logs, transition company state, send replies, create RU tickets.
 
