@@ -61,6 +61,8 @@
       "mcp__hub__list_smart_devices",
       "mcp__hub__get_booking_door_codes",
       "mcp__hub__list_police_registrations",
+      "mcp__hub__get_booking_conversation",
+      "mcp__hub__get_booking_timeline",
       "mcp__linear__list_teams",
       "mcp__linear__list_projects",
       "mcp__linear__list_issue_labels",
