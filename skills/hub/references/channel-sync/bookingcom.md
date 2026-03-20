@@ -38,7 +38,7 @@ Never syncs: descriptions, discounts, floor number, down payment, T&C, check-in 
 
 ## Quirks
 
-LOS pricing model must be selected in the BDC extranet before mapping. Multiple fees of the same type get summed; if both a percentage and a fixed amount exist for the same type, BDC only uses the percentage. Credit card fees are not processed. All fees and taxes are always "not included in price." Cancellation policy changes can trigger rate restrictions — requires contacting BDC via Extranet Inbox. Bedding composition must exactly match max occupancy. If the property's country isn't in the partner agreement, the customer must contact the Booking.com "Home" team to extend it.
+Occupancy-Based Pricing (OBP) pricing model must be selected in the BDC extranet before mapping. Multiple fees of the same type get summed; if both a percentage and a fixed amount exist for the same type, BDC only uses the percentage. Credit card fees are not processed. All fees and taxes are always "not included in price." Cancellation policy changes can trigger rate restrictions — requires contacting BDC via Extranet Inbox. Bedding composition must exactly match max occupancy. If the property's country isn't in the partner agreement, the customer must contact the Booking.com "Home" team to extend it.
 
 ## Escalation
 
