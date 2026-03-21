@@ -45,6 +45,7 @@
       "mcp__hub__search_provider_logs",
       "mcp__hub__get_provider_log",
       "mcp__hub__set_thread_presence",
+      "mcp__hub__set_thread_urgency",
       "mcp__hub__get_booking_contract",
       "mcp__hub__list_booking_tags",
       "mcp__hub__list_booking_sources",
