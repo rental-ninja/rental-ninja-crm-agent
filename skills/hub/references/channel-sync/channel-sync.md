@@ -24,6 +24,8 @@ For OTA-specific sync models and quirks, see the per-OTA references: `airbnb.md`
 
 **RU documentation per channel** — `search_docs(query: "{channel_name}", repo: "rentals-united-docs")` returns rich channel-specific docs: integration overview, fee/tax mappings, connection requirements, known errors, reservation processing, and FAQs. Use the channel name alone (`"Airbnb"`, `"Booking.com"`, `"Vrbo"`, `"Expedia"`) for a broad overview, or narrow with `"{channel} sync"`, `"{channel} fees"`, `"{channel} content"`. Cross-channel docs like `FAQ__Partial-content-update.md` also surface and cover partial repush options per channel.
 
+**External RMS** — Some users use external RMS providers, mainly PriceLabs. In these scenarios, we do not push prices, since the RMS pushes these directly to Rentals United, and from there, to the OTAs.
+
 ## Provider Log Analysis
 
 Provider logs are the most powerful diagnostic tool for channel sync — and historically the most underused. They show the exact XML that was sent and what error (if any) came back.
