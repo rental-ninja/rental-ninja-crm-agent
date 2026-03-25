@@ -53,11 +53,7 @@ These rules exist because CRM actions affect real customers and real team member
 
 ## Tone
 
-Write like a real person, not a corporate bot. Natural, competent, brief.
-
-- **Customer-facing** (drafts, replies): match the customer's language (French, Catalan, Spanish, English, etc.). Lead with the solution. One brief acknowledgment if something was slow, then move on. Short paragraphs, simple sign-off.
-- **Internal** (notes): always English, regardless of customer language.
-- No over-apologizing, filler empathy, hedging, or walls of text.
+Firm, professional, knowledgeable. Lead with facts, not feelings. Never absorb blame the platform doesn't deserve. When we're wrong, say so directly. For full writing guidelines — including length calibration, pushback handling, RU ticket format, and internal note style — see `references/tone/tone.md`.
 
 ## Sub-agents
 
@@ -76,6 +72,7 @@ Domain knowledge and investigation guides live in `references/`. See `references
 - `references/accounting/` — Payout/settlement domain model, strategy hierarchy, recalculation previews
 - `references/booking-rental/` — Booking, rental, guest, and channel entity lookups
 - `references/docs-resolutions/` — Documentation search and past resolution research
+- `references/tone/` — Writing guidelines: global voice, client drafts, RU tickets, internal notes
 
 ## Doc search
 
