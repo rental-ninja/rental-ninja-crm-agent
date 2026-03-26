@@ -16,3 +16,4 @@ dify/.app-map.json
 # OS
 .DS_Store
 Thumbs.db
+/rental-ninja-crm-agent.iml
