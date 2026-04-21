@@ -18,7 +18,9 @@ Run these in parallel:
 
 **Thread context** (if thread ID provided): spawn a sub-agent to fetch thread detail + company via hub MCP tools. Extract the bug summary, repro steps, affected company/rental/booking, and any error messages.
 
-**Linear discovery** (always): call `list_teams`, `list_projects`, and `list_issue_labels` in parallel to find the appropriate team, best-matching project, and `Bug` label.
+**Linear discovery** (always): call `list_teams`, `list_projects`, and `list_issue_labels` in parallel to find the appropriate team, `Bug` label, and the current quarter's project.
+
+The project must be the current quarter's **General Development** project, named `QX-YY General Development` (X = quarter 1–4, YY = 2-digit year, e.g. `Q2-26 General Development` for Q2 2026). Search `list_projects` results for a match. If it doesn't exist, create a new project with that name before proceeding.
 
 If freeform description with no thread ID: skip the thread fetch, use what the user provided directly.
 
@@ -39,7 +41,7 @@ Build the issue with:
   - P3 → `3` (Normal)
   - P4 → `4` (Low)
 - **Label**: `Bug`
-- **Team + Project**: from discovery step
+- **Team + Project**: team from discovery step; project is always the current quarter's `QX-YY General Development`
 
 ### 3. Confirm with user
 
