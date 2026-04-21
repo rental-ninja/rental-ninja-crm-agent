@@ -22,6 +22,7 @@ To investigate an entity question, resolve the entities mentioned (booking refer
 
 - **Booking lookup**: Use `search_bookings` to find by reference or guest name, then `get_booking_detail` for full details (pricing, payments, pre-check-in, notes).
 - **Rental lookup**: Use `list_company_rentals` for an overview, then `get_rental_detail` for specifics (amenities, legal, Wi-Fi, door codes, channels).
+- **Booking authorisations / door codes**: Use `get_booking_door_codes` to retrieve smartlock authorisations (door key codes) for a specific booking. "Booking authorisations" and "smartlock authorisations" both refer to door codes.
 - **Pricing / availability**: Use `get_rental_rate_calendar` for daily pricing, min-stay, and availability over a date range.
 - **Channel distribution**: Use `list_company_rentals(include_channels=true)` to see all channel connections and sync status.
 - **Guest lookup**: Use `search_guests` by name, then `get_guest_detail` for contact info and booking history.
@@ -39,5 +40,6 @@ Cross-reference findings with what the customer claims in the thread — discrep
 - `get_rental_rate_calendar(company_id, rental_id, date_from, date_to)` — daily pricing, min_stay, availability
 - `search_guests(company_id, query)` — search guests by name
 - `get_guest_detail(company_id, guest_id)` — guest with contact info, booking history
+- `get_booking_door_codes(company_id, booking_id)` — smartlock authorisations (door key codes) for a booking. Also known as "booking authorisations"
 - `get_company_urls(company_id)` — all navigation URLs (Nova admin, setup wizard, white label/distribution center, Airbnb hosts)
 - `login_rentals_united(company_id)` — direct login URL for the RU distribution center dashboard (slow, ~30s)
