@@ -44,7 +44,9 @@ From real investigations, these are the root cause categories ordered by frequen
 
 - **OTA content policy rejection** — The OTA rejects the listing for content reasons (missing photos, insufficient amenities, licence requirements, accessibility policy). This looks like a sync bug but isn't — the push went through but the OTA won't accept the content. Often only visible on the Distribution Center's Publishing page, not via API.
 
-- **Configuration misunderstanding** — Customer reports "dates blocked" but it's actually min-stay filtering, bookable-months limit, or seasonal pricing rules. Cross-referencing the rate calendar against what the customer expects usually reveals the gap.
+- **Configuration misunderstanding** — Customer reports "dates blocked" but it's actually min-stay filtering, bookable-months limit, seasonal pricing rules, or `preparation_day` blocking check-in/out. Pull `get_rental_rate_calendar` and read `pricing_model_explainer`, `seasonal_rules`, and `daily_segments`; for "can't check in/out" complaints, look at `effective_changeover` rather than raw `changeover`.
+
+- **External pricing model wipes overrides** — When `pricing_model_explainer.pricing_model` is `external` (RU pushes ARI), every RU sync wipes `manual_*` columns. If a customer says "I set a manual price and it disappeared," this is almost always why. Confirm via `pricing_model_explainer.manual_overrides`.
 
 - **Manual Options override** — Someone edited Manual Options in the RU Distribution Center, creating a persistent override that prevents data from syncing correctly. Since the team never teaches this feature, nobody thinks to check it.
 
@@ -54,7 +56,7 @@ From real investigations, these are the root cause categories ordered by frequen
 
 Start broad, narrow down. Get the big picture first, then drill into the specific channel and rental.
 
-Identify the channel and rental — check channel connections and status for the company. Verify the data on our side — is the rental detail and rate calendar correct for the date range in question? Check provider logs — did we push the data, and did RU accept it? If logs show a successful push but the OTA still shows wrong data, the issue is OTA-side — consult the per-OTA reference for known patterns.
+Identify the channel and rental — check channel connections and status for the company. Verify the data on our side — pull `get_rental_detail` and `get_rental_rate_calendar`, confirm `pricing_model_explainer` matches the customer's expectation, then scan `daily_segments` across the date range in question. Check provider logs — did we push the data, and did RU accept it? If logs show a successful push but the OTA still shows wrong data, the issue is OTA-side — consult the per-OTA reference for known patterns.
 
 When API data looks correct but the customer disagrees, visual verification via the Distribution Center adds value. Two paths: `login_rentals_united` for a direct RU dashboard login, or `get_company_urls` for navigation links including the white label URL (a tokenized URL that opens the Distribution Center directly — no auth needed, expires after 5 minutes). For a detailed browser-based verification workflow, see `distribution-center.md`. Look for: channel status badges, "last synced" timestamps, error messages on the Publishing page, Manual Options state.
 
@@ -68,7 +70,7 @@ Self-service: customer corrects data in RN and retries the push. CRM support: ag
 
 - `list_company_rentals(company_id, include_channels)` — rentals with channel distribution and sync status
 - `get_rental_detail(company_id, rental_id)` — full rental config, amenities, legal, channels
-- `get_rental_rate_calendar(company_id, rental_id, date_from, date_to)` — daily pricing, min-stay, availability
+- `get_rental_rate_calendar(company_id, rental_id, from_date?, to_date?, include_seasonal_rules?, include_daily_details?)` — daily pricing, min_stay, extra-guest fee, changeover, availability. Returns `pricing_model_explainer`, `rental_defaults`, `seasonal_rules` (when applicable), `daily_segments`, and optional `daily_details[]` with `strategy`/`manual` breakdown.
 - `search_provider_logs(company_id, date, log_type, action_type, rental_id)` — list S3 log files by team, date, provider type, and action
 - `get_provider_log(path, offset, limit)` — read XML request/response (credentials auto-redacted)
 - `login_rentals_united(company_id)` — direct RU dashboard login URL (~30s)
