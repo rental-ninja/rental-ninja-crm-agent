@@ -1,7 +1,7 @@
 {
   "name": "rental-ninja-crm",
   "description": "CRM operator for Rental Ninja Hub — inbox triage, customer replies, booking research, sales pipeline",
-  "version": "4.5.7",
+  "version": "5.0.0",
   "author": {
     "name": "Rental Ninja"
   }
