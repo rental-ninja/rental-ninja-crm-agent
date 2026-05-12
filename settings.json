@@ -30,6 +30,7 @@
       "mcp__hub__get_rental_rate_calendar",
       "mcp__hub__generate_ru_ticket_body",
       "mcp__hub__search_closure_summaries",
+      "mcp__hub__get_closure_summary",
       "mcp__hub__list_payees",
       "mcp__hub__list_settlements",
       "mcp__hub__query_payout_summary",
