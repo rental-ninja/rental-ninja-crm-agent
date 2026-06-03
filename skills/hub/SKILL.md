@@ -1,7 +1,7 @@
 ---
 name: hub
 description: CRM operator for Rental Ninja Hub — manages inbox threads, customer replies, booking/rental research, sales pipeline, and accounting investigations. Use this skill whenever the user asks about CRM/HUB threads, inbox triage, customer emails, bookings, rentals, guests, company states, Rentals United tickets, payouts, settlements, payees, owner statements, commission calculations, payout mismatches, or any Rental Ninja Hub operation. Also triggers on thread IDs, ticket numbers, company lookups, draft replies, snooze/assign/close actions, pricing or availability questions, and any accounting/financial question related to a company's earnings. Even if the user doesn't mention "CRM" or "HUB" explicitly, use this skill for any customer support, property management, channel management, OTA (online travel agency), or accounting task.
-argument-hint: "triage", "thread <id>", "research <topic>", or "help"
+argument-hint: "triage | thread <id> | research <topic> | help"
 ---
 
 # Rental Ninja CRM Operator
