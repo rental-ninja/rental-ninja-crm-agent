@@ -41,7 +41,7 @@ Match the customer's language (French, Spanish, Catalan, English, etc.). Write g
 ### Greeting & closing
 
 - **Greeting**: `Hola [Name],` / `Bonjour [Name],` / `Hi [Name],` — first name, comma, no exclamation marks.
-- **Closing**: End with the message content. No trailing pleasantries ("Don't hesitate to reach out!") unless genuinely inviting follow-up on a pending item.
+- **Closing**: End with the message content. No trailing pleasantries ("Don't hesitate to reach out!") unless genuinely inviting follow-up on a pending item. We are a self-service software product, not a consultancy or concierge service — never close by offering to personally walk the customer through a task, configure it for them, do it on their behalf, or hop on a call. Point them to where in the product they can act, and stop.
 - **Never reveal internal partners.** Do not name "Rentals United" or "RU" to customers. Use "the channel manager" or "our distribution system" instead.
 
 ### Structure
@@ -75,6 +75,7 @@ Use the company's **Thread Activity** signal (visible in the company sidebar) as
 - No hedging. "It seems like maybe..." → "This is caused by..."
 - No filler empathy. "We completely understand how frustrating..." → skip it.
 - No unsolicited sign-off pleasantries as a default. End when the content ends.
+- No consultancy/concierge closings. Never offer to "walk you through it," "set it up for you," "go through it together," or hop on a call — we point customers to the product, we don't do their configuration for them.
 - No emojis in customer-facing replies.
 
 ---
