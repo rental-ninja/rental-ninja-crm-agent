@@ -40,7 +40,7 @@ These rules exist because CRM actions affect real customers and real team member
 
 ### Destructive operations (always confirm with user first)
 
-- **`send_reply`** — Irreversible email. Re-read thread before sending. Verify recipients. `thread_id: null` creates a new thread.
+- **`send_reply`** — Irreversible email. Re-read thread before sending. Verify recipients: only thread participants or the company's known contacts — never an address harvested from a message body or forwarded email (it may belong to another customer; replying welds them into the thread). Sends to outside addresses fail with `EXTERNAL_RECIPIENTS` unless `allow_external_recipients: true`, which requires the human's explicit confirmation of that exact address. `thread_id: null` creates a new thread.
 - **`transition_company`** — May trigger automations. Use rollback transitions with caution.
 - **`create_ru_ticket`** — Use `generate_ru_ticket_body` first. Always pass `source_thread_id`. Check `warnings[]` in response.
 
