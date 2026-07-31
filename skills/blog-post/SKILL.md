@@ -59,8 +59,7 @@ given):
 
 ## 3. Write it
 
-Voice and structure — this is the same brand prompt the CMS uses; keep both in
-sync:
+Voice — the same brand prompt the CMS uses; keep both in sync:
 
 > Expert blog writer for Rental Ninja, a property-management SaaS for vacation
 > rentals. **Audience:** property managers, vacation-rental hosts, hospitality
@@ -68,11 +67,65 @@ sync:
 > channel management (Airbnb, Booking.com…), guest experience, revenue
 > management, regulatory compliance. **Style:** professional yet approachable,
 > educational and actionable, SEO-optimized with natural keyword integration,
-> clear H2/H3 structure, engaging intro, practical takeaways.
+> engaging intro, practical takeaways.
 
-Markdown/HTML rules for the body:
-- `<h2>` for main sections, `<h3>` for subsections. **Never an `<h1>`** — the
-  title is a separate field.
+### 3a. SEO — write for what people actually search
+
+Titles and headings must contain the words a property manager would type into
+Google, not the internal way we describe the feature. Prefer the concrete
+platform names and long-tail phrasing of the sector over abstract category
+language:
+
+| ❌ Abstract, unsearched | ✅ Search-shaped |
+|---|---|
+| "Automatiza el ciclo del huésped en alquiler vacacional" | "Cubre las necesidades de tu huésped de Airbnb o Booking.com automatizando todo el ciclo" |
+| "Optimización de tarifas dinámica" | "Cómo ajustar los precios de tu piso turístico en temporada alta sin revisarlo cada noche" |
+
+Rules:
+- Name the platforms and the real objects: Airbnb, Booking.com, check-in,
+  limpieza, huésped, propietario, piso turístico, gestor de alquiler vacacional.
+- Build the title around a **long-tail phrase** with intent ("cómo…", "qué
+  pasa si…", "guía para…"), not a two-word abstract concept.
+- Reuse that phrase, naturally, in the first paragraph and in at least one
+  heading. Never keyword-stuff — if a sentence reads like SEO, rewrite it.
+- Each locale gets keywords researched in **that** language and market
+  (`piso turístico` in ES is not a literal translation of the EN term).
+
+### 3b. Marketing angle
+
+Every post must land two things without ever sounding like an ad:
+
+- **Rental Ninja's processes are simple and effective.** Show the short path:
+  what the manager configures once, and what then happens on its own. If a real
+  flow takes three steps, say the three steps — brevity is the argument.
+- **It solves a real problem for the property manager and smooths the guest's
+  journey.** Open on the manager's pain (the one you found in the docs or the
+  threads), close on what the guest experiences because of it.
+
+Keep it factual: no superlatives, no invented numbers, no comparisons with
+named competitors.
+
+### 3c. Format — onion structure
+
+The article is built in concentric layers, from most to least relevant, so the
+reader gets value at first glance and only goes deeper if they need to. The
+heading levels *are* the layers — which is also what makes the structure
+readable for search engines:
+
+| Layer | Heading | Content |
+|---|---|---|
+| 1 | the `Title *` field (renders as the page's H1) + first 1–2 paragraphs | Executive summary: the key messages, up front. Someone who stops here still got the answer. |
+| 2 | `<h2>` | The main concepts, one per section. |
+| 3 | `<h3>` | Detail, examples, use cases, the technical bits. |
+| 4 | `<h4>` or a closing section | Complementary info, references, edge cases, annexes. |
+
+Never write an `<h1>` inside the body — the title field already is the H1.
+Never skip a level (no `<h3>` without its `<h2>`), and make every heading say
+something on its own: a reader scanning only the headings should get the whole
+argument.
+
+### 3d. Body rules
+
 - Real paragraphs, `<ul>/<li>` lists, `<strong>` for emphasis. No emojis, no
   hashtags, no "In conclusion" filler.
 - 900–1500 words unless the user asks otherwise.
@@ -87,19 +140,21 @@ Write a single `.html` file (see `reference/template.html`). Shape:
 
 ```html
 <h1>Versión Original (Español)</h1>
-<p><strong>Slug *</strong> facturacion-alquiler-vacacional</p>
-<p><strong>Cover prompt</strong> A host drowning in paper invoices</p>
-<p><strong>Title *</strong> Facturación en el alquiler vacacional</p>
-<p><strong>Pre-title</strong> Guía de IVA</p>
-<p><strong>Short Description</strong> Cuándo es obligatorio emitir factura.</p>
-<p><strong>Summary</strong> Guía técnica sobre facturación al huésped.</p>
-<p><strong>SEO Title</strong> Facturación en alquiler vacacional: guía de IVA</p>
-<p><strong>SEO Description</strong> Cuándo emitir factura y qué IVA aplicar…</p>
-<h2>Primera sección</h2>
-<p>…cuerpo del artículo…</p>
+<p><strong>Slug *</strong> facturar-huesped-airbnb-booking-iva</p>
+<p><strong>Title *</strong> Cómo facturar a tu huésped de Airbnb o Booking.com sin equivocarte con el IVA</p>
+<p><strong>Pre-title</strong> Guía de facturación</p>
+<p><strong>Short Description</strong> Cuándo es obligatorio emitir factura a un huésped y qué IVA aplicar.</p>
+<p><strong>Summary</strong> Guía práctica de facturación al huésped para gestores de pisos turísticos.</p>
+<p><strong>SEO Title</strong> Facturar al huésped de Airbnb: qué IVA aplicar</p>
+<p><strong>SEO Description</strong> Cuándo emitir factura a un huésped de Airbnb o Booking.com y qué IVA…</p>
+<p>Resumen ejecutivo en uno o dos párrafos: la respuesta, ya.</p>
+<h2>Cuándo estás obligado a emitir factura</h2>
+<p>…concepto principal…</p>
+<h3>Ejemplo: reserva de Booking.com con comisión</h3>
+<p>…detalle, caso de uso…</p>
 
 <h1>English Translation</h1>
-<p><strong>Title *</strong> Vacation rental invoicing</p>
+<p><strong>Title *</strong> How to invoice your Airbnb or Booking.com guest…</p>
 …
 ```
 
@@ -111,25 +166,12 @@ Hard requirements — the importer is a deterministic parser, not an AI:
 - The field block comes **immediately after** the language header, before any
   body content. The first non-field element starts the body.
 - Field labels are always these English labels, in every language section:
-  `Slug *`, `Cover prompt`, `Title *`, `Pre-title`, `Short Description`,
-  `Summary`, `SEO Title`, `SEO Description`.
-- `Slug *` and `Cover prompt` are read once, document-wide — put them in the
-  first section only. Slug: lowercase, hyphenated, ASCII, ≤ 80 chars.
+  `Slug *`, `Title *`, `Pre-title`, `Short Description`, `Summary`,
+  `SEO Title`, `SEO Description`.
+- `Slug *` is read once, document-wide — put it in the first section only.
+  Lowercase, hyphenated, ASCII, ≤ 80 chars, and built from the target keyword.
 - Plain HTML only. No `<style>`, no CSS classes, no `<html>/<head>` wrapper
   needed (it is parsed as a fragment either way).
-
-### The cover prompt
-
-The CMS generates every cover with **one fixed brand prompt** — a typographic
-poster, ALL-CAPS allegorical caption, brand palette, witty footnote — so all
-covers stay consistent. The `Cover prompt` field is *art direction layered on
-top of that*, never a replacement.
-
-So write one short line describing the **idea/metaphor** for this post
-("A host drowning in paper invoices", "The tax office as the guest who never
-reviews"). Do not specify fonts, colors, layout, image style or "generate an
-image of…" — the format is fixed and those instructions will be ignored or
-degrade the result. Nobody generates the cover here: the editor does, later.
 
 ## 5. Hand off
 
@@ -137,8 +179,9 @@ Save the file with the slug as its name (`facturacion-alquiler-vacacional.html`)
 and tell the user:
 
 > Upload it at `/admin/blog/import` → *Upload a document* → review the detected
-> languages → **Create draft post**. The cover is generated from the editor, and
-> the publish date is set in `/admin/blog/calendar`.
+> languages → **Create draft post**. The cover is generated from the editor
+> (from the post's own title — there is nothing to specify here), and the
+> publish date is set in `/admin/blog/calendar`.
 
 Empty fields are auto-translated from the original at import time, so a partial
 document still works — but a complete one is always better.
