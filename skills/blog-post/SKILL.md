@@ -124,7 +124,35 @@ Never skip a level (no `<h3>` without its `<h2>`), and make every heading say
 something on its own: a reader scanning only the headings should get the whole
 argument.
 
-### 3d. Body rules
+### 3d. Write like a native speaker, not a translator
+
+This applies to the original locale and every translation, and to the body and
+the titles alike. A section that parses grammatically but that no native
+speaker would actually write is a failure, even if every word is technically
+correct.
+
+- **Reach for the product's real terminology first.** `reference/product-knowledge.md`
+  and the Hub docs give you the actual names of modules and features (Channel
+  Manager / Gestión de Canales, Módulo de Huéspedes, Contabilidad, Control de
+  Accesos…). Use those as proper terms instead of improvising generic
+  descriptive words to fit a metaphor.
+- **Keep metaphors internally consistent.** If a metaphor forces you to relabel
+  real features as mismatched concrete objects, the metaphor is wrong — fix or
+  drop it, don't distort the terminology to make it fit.
+- **Bad (calqued, mismatched metaphor):**
+  *"Un anfitrión con una sola llave que abre a la vez todas las puertas de su
+  negocio -canal, contabilidad, huéspedes, cerradura-"* — "llave" doesn't fit a
+  software product, and the door-labels are generic translated nouns instead
+  of the product's real module names.
+  **Good (natural, real terminology):**
+  *"Un anfitrión con una sola herramienta que abre a la vez todas las puertas
+  de su negocio: Channel Management, Contabilidad, Gestión de Huéspedes,
+  Control de Accesos inteligente, y mucho, muchísimo más."*
+- **Before moving to the next locale, reread the section once purely for
+  naturalness** — not grammar, not facts. Would a native copywriter in that
+  language actually write this sentence, or does it just parse?
+
+### 3e. Body rules
 
 - Real paragraphs, `<ul>/<li>` lists, `<strong>` for emphasis. No emojis, no
   hashtags, no "In conclusion" filler.
