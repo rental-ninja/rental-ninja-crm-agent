@@ -61,6 +61,7 @@ If something isn't working, check the [Troubleshooting](#troubleshooting) sectio
 | `/ninja-hub:hub research 1234` | Deep investigation on a thread, company, or topic |
 | `/ninja-hub:hub help` | Quick reference card |
 | `/ninja-hub:accounting <query>` | Investigate payouts, settlements, payee strategies, and discrepancies |
+| `/ninja-hub:blog-post <topic>` | Writes a multilingual blog article grounded in the Hub (changelog, docs, real threads) and saves an `.html` file to upload at `/admin/blog/import` in the CMS |
 
 You can also just ask in plain language:
 
@@ -115,6 +116,9 @@ rental-ninja-crm-agent/
 └── skills/
     ├── accounting/
     │   └── SKILL.md              # Payout & settlement investigation skill
+    ├── blog-post/
+    │   ├── SKILL.md              # Hub-grounded multilingual blog writer
+    │   └── reference/            # CMS import template + product-knowledge snapshot
     ├── setup-hub/
     │   └── SKILL.md              # CLAUDE.md installer/updater
     └── hub/
