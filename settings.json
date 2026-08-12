@@ -15,6 +15,8 @@
       "mcp__hub__query_state_transitions",
       "mcp__hub__get_sales_funnel",
       "mcp__hub__get_dashboard_data",
+      "mcp__hub__list_features",
+      "mcp__hub__list_company_feedback",
       "mcp__hub__search_bookings",
       "mcp__hub__get_booking_detail",
       "mcp__hub__list_company_rentals",
