@@ -40,13 +40,16 @@ These rules exist because CRM actions affect real customers and real team member
 
 ### Destructive operations (always confirm with user first)
 
-- **`send_reply`** — Irreversible email. Re-read thread before sending. Verify recipients: only thread participants or the company's known contacts — never an address harvested from a message body or forwarded email (it may belong to another customer; replying welds them into the thread). Sends to outside addresses fail with `EXTERNAL_RECIPIENTS` unless `allow_external_recipients: true`, which requires the human's explicit confirmation of that exact address. `thread_id: null` creates a new thread.
+- **`send_reply`** — Irreversible email. Re-read thread before sending. Verify recipients: only thread participants or the company's known contacts — never an address harvested from a message body or forwarded email (it may belong to another customer; replying welds them into the thread). Sends to outside addresses fail with `EXTERNAL_RECIPIENTS` unless `allow_external_recipients: true`, which requires the human's explicit confirmation of that exact address; the gate also applies when opening a new thread or sending a draft thread. Sending converts the thread's pending draft (and sends its attachments) instead of leaving it in the composer. Omitting `thread_id` opens a new thread and needs `company_id`; prefer `save_draft` with `company_id` + `subject` first so the team can review.
 - **`transition_company`** — May trigger automations. Use rollback transitions with caution.
 - **`create_ru_ticket`** — Use `generate_ru_ticket_body` first. Always pass `source_thread_id`. Check `warnings[]` in response.
+- **`create_changelog_entry`** / **`create_changelog_item`** — Publish-facing changelog content; `create_changelog_entry` fails when a draft already exists. Confirm the text with the user before creating.
 
 ### Team-visible operations (use with care)
 
 - `add_thread_note`, `edit_thread_note`, `add_company_note`, `save_draft` — visible to all team members immediately
+- **New threads**: `save_draft` with `company_id` + `subject` (no `thread_id`) opens a draft thread the team reviews in the inbox; one new-thread draft per company, saving again overwrites it
+- **Attachments**: `get_upload_url` → HTTP PUT the bytes to `upload_url` within 10 minutes → pass the returned `inline_image` (embedding its `temp_url` as an `<img src>` in `body_html`) or `attachment_file` object to the write tool. Only your own uploads are accepted; no `size` needed
 - **Mentions**: `@Name` in HTML body does NOT trigger notifications. Pass `mention_user_ids: [id, id]` separately. Get IDs from `hub://team/members`.
 - **Follow-ups**: use `next_action_due` (YYYY-MM-DD) param on `add_company_note` — don't just write dates as text
 - **Snooze**: `change_thread_state` snooze requires both `snooze_until` and `snooze_reason`
