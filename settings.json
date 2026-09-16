@@ -70,6 +70,7 @@
       "mcp__hub__get_task_detail",
       "mcp__hub__list_team_members",
       "mcp__hub__get_company_stats",
+      "mcp__hub__get_company_feature_usage",
       "mcp__hub__list_smart_devices",
       "mcp__hub__get_booking_door_codes",
       "mcp__hub__list_police_registrations",
