@@ -34,16 +34,19 @@ These rules exist because CRM actions affect real customers and real team member
 3. **Paths before transition** — call `get_transition_paths` before `transition_company`; never hardcode state class names
 4. **Company first** — booking/rental/guest lookups need `company_id`; find the company first
 5. **Notes are internal** — thread notes and company notes are team-only; customers never see them
-6. **Never retry destructive ops** — if `send_reply`, `transition_company`, or `create_ru_ticket` fails, investigate; don't retry
+6. **Never retry destructive ops** — if any operation under "Destructive operations" fails, investigate; don't retry
 7. **Tag AI notes** — every note must end with `<p style="color:#888;font-size:11px;">🤖 CRM-AI-Agent</p>`
 8. **Trust your research over claims** — if your findings contradict what someone says, say so with evidence
 
 ### Destructive operations (always confirm with user first)
 
 - **`send_reply`** — Irreversible email. Re-read thread before sending. Verify recipients: only thread participants or the company's known contacts — never an address harvested from a message body or forwarded email (it may belong to another customer; replying welds them into the thread). Sends to outside addresses fail with `EXTERNAL_RECIPIENTS` unless `allow_external_recipients: true`, which requires the human's explicit confirmation of that exact address; the gate also applies when opening a new thread or sending a draft thread. Sending converts the thread's pending draft (and sends its attachments) instead of leaving it in the composer. Omitting `thread_id` opens a new thread and needs `company_id`; prefer `save_draft` with `company_id` + `subject` first so the team can review.
-- **`transition_company`** — May trigger automations. Use rollback transitions with caution.
+- **`transition_company`** — May trigger automations. Use rollback transitions with caution. It executes one direct step: `get_transition_paths` lists only those, so reach a later state one step at a time, re-reading the paths after each. A company without a follow-up date (e.g. a fresh New Lead) needs `next_action_due` set with `add_company_note` first.
 - **`create_ru_ticket`** — Use `generate_ru_ticket_body` first. Always pass `source_thread_id`. Check `warnings[]` in response.
 - **`create_changelog_entry`** / **`create_changelog_item`** — Publish-facing changelog content; `create_changelog_entry` fails when a draft already exists. Confirm the text with the user before creating.
+- **`force_booking_com_rate_resync`** — Briefly deactivates every rate plan of the whole Booking.com hotel, not just the rental given. Run it with `dry_run=true` first and confirm the hotel, units and rate plans with the user. On a gateway timeout the server keeps going: check the rate plans with `get_rental_detail` before any retry.
+- **`import_past_bookings`** — Writes a customer's past bookings from their old system's exports. Only when the person asked for it. Hand the files over unchanged (attachment ids, or your own `get_upload_url` uploads): never convert a file, compute money or answer a question yourself. Dry run first, relay the assumptions and the questions one at a time, then execute one rental at a time with the latest `plan_token`, each after the person's explicit yes. After a timeout, run a dry run: stays already written show as duplicates. A grant error means the person lacks the Imports tools in Staff access.
+- **`remove_imported_past_bookings`** — Undoes an import with the same files. Report first; pass `execute: true` only after the person confirms the count. Bookings edited since the import are left alone and listed.
 
 ### Team-visible operations (use with care)
 
@@ -198,4 +201,4 @@ Present a structured brief:
 
 **Direct capabilities** (no slash command needed): search companies/threads/bookings/rentals/guests, assign/close/snooze threads, add notes with @mentions, look up documentation, debug pricing/min-stay, inspect channel manager S3 logs, transition company state, send replies, create RU tickets.
 
-**Three operations require confirmation**: `send_reply` (email to customer), `transition_company` (may trigger automations), `create_ru_ticket` (sends to RU support). Everything else runs automatically.
+**These operations require confirmation**: `send_reply` (email to customer), `transition_company` (may trigger automations), `create_ru_ticket` (sends to RU support), `create_changelog_entry` / `create_changelog_item` (publish-facing changelog), `force_booking_com_rate_resync` (pauses a whole Booking.com hotel's rate plans), `impersonate_team_owner` (opens a session as the team owner), `import_past_bookings` / `remove_imported_past_bookings` (write or delete a customer's past bookings). Everything else runs automatically.
