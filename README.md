@@ -73,10 +73,14 @@ You can also just ask in plain language:
 ## Safety
 
 - Most CRM tools (reading threads, searching, adding notes, etc.) run automatically
-- Three actions always ask for your confirmation first:
+- These actions always ask for your confirmation first:
   - **Sending an email** to a customer — Claude drafts first, you review before sending
   - **Changing a company's pipeline stage** — may trigger automated emails
   - **Creating a Rentals United ticket** — sends to RU support
+  - **Creating changelog content** — publish-facing text
+  - **Forcing a Booking.com rate re-sync** — briefly pauses the whole hotel's rate plans
+  - **Opening a session as a team owner** — impersonation
+  - **Importing or removing a customer's past bookings** — writes into their account; needs the Imports tools in Staff access
 
 ---
 
