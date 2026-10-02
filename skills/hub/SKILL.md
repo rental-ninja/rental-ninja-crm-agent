@@ -59,7 +59,7 @@ These rules exist because CRM actions affect real customers and real team member
 
 ## Tone
 
-Firm, professional, knowledgeable. Lead with facts, not feelings. Never absorb blame the platform doesn't deserve. When we're wrong, say so directly. For full writing guidelines — including length calibration, pushback handling, RU ticket format, and internal note style — see `references/tone/tone.md`.
+Firm, professional, knowledgeable. Lead with facts, not feelings. Never absorb blame the platform doesn't deserve. When we're wrong, say so directly. Emails (drafts, replies, RU tickets) never end with a sign-off, a name or "Rental Ninja": Hub appends the sender's signature on send. For full writing guidelines — including length calibration, pushback handling, RU ticket format, and internal note style — see `references/tone/tone.md`.
 
 ## Sub-agents
 
