@@ -41,7 +41,8 @@ Match the customer's language (French, Spanish, Catalan, English, etc.). Write g
 ### Greeting & closing
 
 - **Greeting**: `Hola [Name],` / `Bonjour [Name],` / `Hi [Name],` — first name, comma, no exclamation marks.
-- **Closing**: End with the message content. No trailing pleasantries ("Don't hesitate to reach out!") unless genuinely inviting follow-up on a pending item. We are a self-service software product, not a consultancy or concierge service — never close by offering to personally walk the customer through a task, configure it for them, do it on their behalf, or hop on a call. Point them to where in the product they can act, and stop.
+- **Closing**: None. No closing formula (`Best regards,` / `Cordialement,` / `Saludos,`), no name, no `Rental Ninja` — the body ends with the content. Hub appends the sender's configured signature (localized closing + name + brand) when the email is sent, so a hand-written sign-off shows up twice.
+- **Last line**: No trailing pleasantries ("Don't hesitate to reach out!") unless genuinely inviting follow-up on a pending item. We are a self-service software product, not a consultancy or concierge service — never close by offering to personally walk the customer through a task, configure it for them, do it on their behalf, or hop on a call. Point them to where in the product they can act, and stop.
 - **Never reveal internal partners.** Do not name "Rentals United" or "RU" to customers. Use "the channel manager" or "our distribution system" instead.
 
 ### Structure
@@ -74,7 +75,7 @@ Use the company's **Thread Activity** signal (visible in the company sidebar) as
 - No over-apologizing. One acknowledgment is enough.
 - No hedging. "It seems like maybe..." → "This is caused by..."
 - No filler empathy. "We completely understand how frustrating..." → skip it.
-- No unsolicited sign-off pleasantries as a default. End when the content ends.
+- No sign-off and no trailing pleasantries. End when the content ends — the signature is appended on send.
 - No consultancy/concierge closings. Never offer to "walk you through it," "set it up for you," "go through it together," or hop on a call — we point customers to the product, we don't do their configuration for them.
 - No emojis in customer-facing replies.
 
@@ -115,7 +116,7 @@ For simple tickets (data queries, single questions): skip the sections, use a sh
 
 ### Sign-off
 
-`Best regards,` or `Kind regards,` + name + `Rental Ninja`. Opening tickets that are AI-generated sign as `Rental Ninja Support Team`.
+None. End on the last content line (typically the **Request** list or the closing question) — no `Best regards,` / `Kind regards,`, no name, no `Rental Ninja` or `Rental Ninja Support Team`, including on AI-generated opening tickets. Hub appends the sender's configured signature (closing + name + brand, in English for RU) when the ticket or reply is sent, so a hand-written sign-off shows up twice.
 
 ---
 
