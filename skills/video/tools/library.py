@@ -210,7 +210,7 @@ def build(infos, lib, name=None, description=None, force=False):
           f'     (one curl POST per file, storage answers 204; then it writes library/publish_request.json)\n'
           f'  4. Call publish_marketing_asset with the JSON in library/publish_request.json, exactly as written, and save its result\n'
           f'     to library/published.json. The asset is a DRAFT: give the user its hub_url and paid_ads verdict; once they say so,\n'
-          f'     approve it (approve_marketing_asset when available, else Hub -> Marketing -> Library).')
+          f'     approve it (manage_marketing_asset action approve, or Hub -> Marketing -> Media library).')
 
 
 # ---------- upload ----------
@@ -270,7 +270,7 @@ def upload(lib, dry=False):
     out = os.path.join(lib, 'publish_request.json'); write_json(out, req)
     print(f'{len(tickets)} files on storage. Now call publish_marketing_asset with the JSON in {out}, exactly as written,\n'
           'save its result to library/published.json and give the user the hub_url and the paid_ads verdict: the asset is a draft\n'
-          'until it is approved (approve_marketing_asset when available, else Hub -> Marketing -> Library), once the user says so.')
+          'until it is approved (manage_marketing_asset action approve, or Hub -> Marketing -> Media library), once the user says so.')
 
 
 def library_dir(root):

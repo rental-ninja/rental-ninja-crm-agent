@@ -30,30 +30,33 @@ check their Hub token.
    internal Rental Ninja team, never a customer.
 5. **Spanish and English are yours, the rest is the translator's.** Write `es` and `en` yourself. Fill `ca`, `fr`,
    `de`, `it`, `nl`, `pt` only with `translate_campaign_messages`, which marks them machine-translated. Never
-   hand-write those languages, and mark translations reviewed (`mark_translations_reviewed`, when available) only
+   hand-write those languages, and mark translations reviewed (`manage_campaign` `mark_translations_reviewed`) only
    after a person who reads that language checked them and says so.
 6. **Live campaigns change only while paused.** `update_campaign_draft` refuses an active campaign: pause it first
-   (`pause_campaign` when available, with the user's OK; else a person pauses it in the Hub), then a person resumes
-   it. Once activated, a campaign's audience and holdout are fixed and hand-picked teams can only be added.
+   (`manage_campaign` `pause`, with the user's OK), then a person resumes it in the Hub. Once activated, a campaign's
+   audience and holdout are fixed and hand-picked teams can only be added.
 7. **No invented facts.** Every number, price, offer or promise traces to the context's proof points,
    `list_campaign_options` (offers, plans) or the changelog/docs. No made-up statistics or testimonials.
 
 ## Tools
 
-Available now: `get_marketing_context`, `update_marketing_context`, `list_campaign_options`, `list_campaigns`,
-`create_campaign_draft`, `update_campaign_draft`, `translate_campaign_messages`, `preview_campaign`,
-`send_campaign_test`, `add_teams_to_campaign`, `get_campaign_results`, `add_campaign_note`, `list_campaign_notes`,
-`list_marketing_assets`, `get_marketing_asset`, `list_marketing_voices`; the audience tools
-(`list_marketing_audiences`, `preview_marketing_audience`, `save_marketing_audience`) are arriving now.
+- **Context:** `get_marketing_context` (`version`, `include_history`), `update_marketing_context` (new version, or
+  `restore_version`).
+- **Campaigns:** `list_campaign_options`, `list_campaigns`, `create_campaign_draft`, `update_campaign_draft`,
+  `translate_campaign_messages`, `add_teams_to_campaign`, `preview_campaign`, `send_campaign_test`,
+  `get_campaign_results`, `list_campaign_notes`, `add_campaign_note`, and `manage_campaign` with an `action`: `pause`,
+  `end`, `duplicate`, `delete_draft`, `remove_teams`, `mark_translations_reviewed`.
+- **Audiences:** `list_marketing_audiences`, `preview_marketing_audience`, `save_marketing_audience`,
+  `manage_marketing_audience` (`archive`, `restore`, `delete`).
+- **Media library:** `list_marketing_assets`, `get_marketing_asset`, `get_marketing_asset_upload_urls`,
+  `publish_marketing_asset`, `manage_marketing_asset` (`update`, `approve`, `back_to_draft`, `archive`, `add_usage`,
+  `remove_usage`, `delete_file`), `get_campaign_media_upload_url` (one-off popup files).
+- **Voice & settings:** `list_marketing_voices`, `get_voiceover_usage`, `generate_voiceover`, `generate_music`,
+  `marketing_settings` (`get`, `set_voice`, `update_contact_rules`, `update_guardrails`, `pause_all_sending`),
+  `marketing_suppressions` (`list`, `add`).
 
-Coming with the next Hub release; use them when they appear in your tool list and otherwise send the user to the
-same action in the Hub: `pause_campaign`, `end_campaign`, `duplicate_campaign`, `delete_campaign_draft`,
-`remove_teams_from_campaign`, `mark_translations_reviewed`, `approve_marketing_asset`, `archive_marketing_asset`,
-`update_marketing_asset`, `add_marketing_asset_usage` / `remove_marketing_asset_usage`,
-`list_marketing_context_versions` / `restore_marketing_context_version`, `set_marketing_voice`,
-`get_marketing_contact_rules` / `update_marketing_contact_rules`, `pause_all_marketing_sending`,
-`list_marketing_suppressions` / `add_marketing_suppression`, `archive_marketing_audience`. Exact names may differ
-slightly: go by the tool descriptions.
+Nothing activates or resumes a campaign, turns sending back on or lifts a suppression: those stay with a person in
+the Hub.
 
 ## Routing
 
@@ -181,8 +184,8 @@ text for these, then fix every `copy_warnings` entry the tools return.
 
 ### 6. Contact rules
 
-The Hub enforces these (defaults; live values in `list_campaign_options` or `get_marketing_contact_rules` when
-available; changed with `update_marketing_contact_rules` only when the user asks, or in Marketing → Settings). Plan
+The Hub enforces these (defaults; live values in `list_campaign_options` or `marketing_settings` `get`; changed with
+`marketing_settings` `update_contact_rules` only when the user asks, or in Marketing → Marketing settings). Plan
 around them so the sequence lands as intended. Customers are businesses, reached at work:
 
 - **Send window:** push and email go out on weekdays, 09:00–19:00 in each team's timezone; outside it they wait.
@@ -193,9 +196,9 @@ around them so the sequence lands as intended. Customers are businesses, reached
   of 300 campaign emails a day overall, one-click unsubscribe; nothing goes out while email sending is off.
 - **In-app:** at most 1 campaign popup per user per day across campaigns; it shows until clicked or dismissed.
 - **Priority:** when several campaigns match a user, the highest `priority` shows first.
-- **Kill switch:** "Pause all sending" (Hub → Marketing → Settings) stops every campaign push, email and popup. When
-  the user asks, turn it on (`pause_all_marketing_sending`, when available; else they flip it in the Hub). Turning it
-  back off restarts sending, so only a person does that, in the Hub.
+- **Kill switch:** "Pause all sending" (Hub → Marketing → Marketing settings) stops every campaign push, email and
+  popup. When the user asks, pause it with `marketing_settings` `pause_all_sending` {reason}. Turning it back on
+  restarts sending, so only a person does that, in the Hub.
 
 ### 7. Create the draft
 
@@ -208,8 +211,8 @@ per channel: `in_app` {`placement`, `title`, `body`, `cta_label`, `cta_type`, `c
 
 - `in_app.asset_id` (the popup's video) and `email.asset_id` (a thumbnail of the video) take **approved** media
   library assets only. A draft asset (for example one the `video` skill just published) is approved first: after
-  the user has watched it and says so, `approve_marketing_asset` (when available), else they approve it in Hub →
-  Marketing → Library. Pass its paid-ads verdict on when it says "check first".
+  the user has watched it and says so, `manage_marketing_asset` `approve`, or they approve it in Hub → Marketing →
+  Media library. Pass its paid-ads verdict on when it says "check first".
 - Fix every `copy_warnings` entry with `update_campaign_draft` (send only the fields to change).
 
 ### 8. Translate, preview, test
@@ -218,7 +221,7 @@ per channel: `in_app` {`placement`, `title`, `body`, `cta_label`, `cta_type`, `c
    placeholders, limits and product names. It lists what it rejected: leave those languages to fall back to English,
    or ask the user. Every language it wrote is machine-translated and needs a human review before activation: list
    them for the user. When a person who reads the language has checked one and says so, mark it reviewed
-   (`mark_translations_reviewed`, when available; else in the Hub editor).
+   (`manage_campaign` `mark_translations_reviewed`, or in the Hub editor).
 2. `preview_campaign` in `es` and `en` (and `role: member` when the button is admin-only): check the `sequence`,
    `push_reach`, `email_reach`, `content_locale` (a language missing a text falls back as a whole) and
    `copy_warnings`.
@@ -239,19 +242,19 @@ Give the user:
 
 ## Managing campaigns
 
-Each of these needs the user's explicit OK for the named campaign, team or contact. Use the tool when it is in your
-tool list; otherwise tell the user where the same action is in the Hub.
+Each of these needs the user's explicit OK for the named campaign, team or contact. A grant error means the person
+asks an admin for it (see Grants); the same action is always in the Hub too.
 
 | Ask | Tool | Notes |
 |---|---|---|
-| Pause a campaign | `pause_campaign` | stops its sends and popups; resuming is human-only (Hub) |
-| End a campaign | `end_campaign` | final; its results and notes stay; a `marketing-review` postmortem follows |
-| Start from an earlier campaign | `duplicate_campaign` | the copy is a new draft: re-check hypothesis, audience and copy |
-| Delete a draft | `delete_campaign_draft` | drafts only, never one that reached people |
-| Add / remove hand-picked teams | `add_teams_to_campaign` / `remove_teams_from_campaign` | after activation teams can only be added |
-| A customer asks not to get marketing | `add_marketing_suppression` (`list_marketing_suppressions` to check) | also tell the person handling that customer's thread |
-| Brand voice per language | `list_marketing_voices` / `set_marketing_voice` | the voice the `video` skill uses by default |
-| Retire an audience | `archive_marketing_audience` | campaigns already using it keep their snapshot |
+| Pause a campaign | `manage_campaign` `pause` | stops its sends and popups; resuming is human-only (Hub) |
+| End a campaign | `manage_campaign` `end` | final; its results and notes stay; a `marketing-review` postmortem follows |
+| Start from an earlier campaign | `manage_campaign` `duplicate` | the copy is a new draft: re-check hypothesis, audience and copy |
+| Delete a draft | `manage_campaign` `delete_draft` | drafts only, never one that reached people |
+| Add / remove hand-picked teams | `add_teams_to_campaign` / `manage_campaign` `remove_teams` | after activation teams can only be added |
+| A customer asks not to get marketing | `marketing_suppressions` `add` (`list` to check) | also tell the person handling that customer's thread |
+| Brand voice per language | `list_marketing_voices` / `marketing_settings` `set_voice` | the voice the `video` skill uses by default |
+| Retire an audience | `manage_marketing_audience` `archive` | campaigns already using it keep working; new ones can't pick it |
 
 ## Notes and learnings
 
@@ -266,8 +269,8 @@ Target audience & roles, Problems & pain points, Competitive landscape, Differen
 language, Words to use/avoid, Brand voice, Proof points, Goals, Changelog), quote customers verbatim with where it
 comes from, mark guesses, add a Changelog line and pass the same summary as `change_note`. Customer language comes
 from real threads (`search_threads`, `search_closure_summaries`): phrasing only, never a customer's name. Earlier
-versions: `list_marketing_context_versions` / `restore_marketing_context_version` when available (the Hub keeps the
-history either way).
+versions: `get_marketing_context` with `include_history` or `version`, and `update_marketing_context`
+`restore_version` to bring one back as a new version.
 
 ## Grants
 

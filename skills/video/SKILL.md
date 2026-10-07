@@ -119,7 +119,7 @@ characters, words: [{text, start, end}]}`.
 1. **Voice.** `voice.engine: hub` (the template default). Call `list_marketing_voices` (free) and find `film.lang`:
    - a `voice_id` → leave `voice.voice` empty (the Hub uses that brand voice) and write its `name` into `voice.name`;
    - `voice_id` null (no brand voice for that language yet) → ask the user for an ElevenLabs voice id, or to have one
-     picked in Hub → Marketing → Settings (`settings_url`), and set `voice.voice` (+ `voice.name`);
+     picked in Hub → Marketing → Voice & audio (`settings_url`), and set `voice.voice` (+ `voice.name`);
    - the user wants another voice for this film → `voice.voice` overrides the brand voice; keep it in `film.yml`.
    Set `voice.from_voice_library` when you know it (true = a public ElevenLabs Voice Library voice, e.g. Cristina
    `1CeqBeXMOqCleeQjfYfO`; false = premade or the company's own); `publish` records the rights from these fields.
@@ -330,7 +330,7 @@ this and shows a personal key's credits when there is one.
 
 ## Media library (`publish`)
 
-The Hub media library (Hub → Marketing → Library) holds the videos campaigns use: an in-app popup plays the 16x9
+The Hub media library (Hub → Marketing → Media library) holds the videos campaigns use: an in-app popup plays the 16x9
 video, poster and WebVTT subtitles of the user's language (`update_campaign_draft` `in_app.asset_id`), an email shows
 the 16x9 poster as a thumbnail (`email.asset_id`). Python cannot call the Hub, so `FILM publish` prepares everything
 and you make the tool calls, in this order:
@@ -356,11 +356,11 @@ and you make the tool calls, in this order:
    library" in Hub → Staff access, group "Campaigns & media".
 
 The asset always lands as a **draft**, and only approved assets can be linked to campaigns. Approve it once the user
-has watched the delivered film and says so: `approve_marketing_asset` when that tool is in your list (the next Hub
-release), else the user approves it in Hub → Marketing → Library. Publish only films the user approved.
+has watched the delivered film and says so: `manage_marketing_asset` `approve` (gated: "Manage library assets"), or
+the user approves it in Hub → Marketing → Media library. Publish only films the user approved.
 `list_marketing_assets` / `get_marketing_asset` show what is already in the library: check for an earlier version
-before adding a duplicate. Rights, usages and archiving: `update_marketing_asset`, `add_marketing_asset_usage`,
-`archive_marketing_asset` when available, else the asset's page in the Hub.
+before adding a duplicate. Rights, usages and archiving: `manage_marketing_asset` (`update`, `add_usage`,
+`archive`), or the video's page in the Hub.
 
 ## Review
 
