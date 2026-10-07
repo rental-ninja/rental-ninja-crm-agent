@@ -271,18 +271,23 @@ history either way).
 
 ## Grants
 
-Read tools need no grant. These need the person's grant in Hub → Staff access, group **"Campaigns & media"**: a grant
-error means asking an admin, not working around it.
+Read tools and the upload-URL tools need no grant. Every write tool needs the person's grant in Hub → Staff access,
+group **"Campaigns & media"**: a grant error means asking an admin, not working around it.
 
 | Tool | Grant |
 |---|---|
+| `create_campaign_draft`, `update_campaign_draft` | Create campaign drafts, Edit campaign drafts |
+| `add_teams_to_campaign` | Add teams to campaigns |
+| `translate_campaign_messages` | Translate campaigns |
 | `send_campaign_test` | Send campaign test |
 | `add_campaign_note` | Add campaign notes |
+| `manage_campaign` | Manage campaigns |
+| `save_marketing_audience`, `manage_marketing_audience` | Save marketing audiences, Manage marketing audiences |
 | `update_marketing_context` | Update marketing context |
-| `publish_marketing_asset` | Publish to the media library |
+| `publish_marketing_asset`, `manage_marketing_asset` | Publish to the media library, Manage library assets |
+| `marketing_settings`, `marketing_suppressions` | Marketing settings, Marketing suppressions |
 | `generate_voiceover`, `generate_music` | Generate voiceover, Generate music |
 
-The tools of the next Hub release may come with grants of their own in the same group. Drafting and managing tools
-(`create_campaign_draft`, `update_campaign_draft`, `translate_campaign_messages`, `add_teams_to_campaign`,
-`save_marketing_audience`, and the pause/end/delete/approve ones) are not auto-approved by this plugin: Claude Code
-asks before each call, because the whole team sees the result.
+This plugin auto-approves the drafting tools. Claude Code still asks before every call that stops, deletes, approves
+or changes shared settings (`manage_campaign`, `manage_marketing_asset`, `manage_marketing_audience`,
+`marketing_settings`), because the whole team sees the result.
