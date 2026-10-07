@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Hands delivered films to the Hub media library (Hub -> Marketing -> Library). Standard library only, Python 3.9+,
-system curl; ffprobe (already needed by the pipeline) only to read sizes and lengths.
+"""Hands delivered films to the Hub media library (Hub -> Marketing -> Media library). Standard library only,
+Python 3.9+, system curl; ffprobe (already needed by the pipeline) only to read sizes and lengths.
 
 Python cannot call the Hub MCP tools, so the hand-off is split between this file and Claude:
 
@@ -20,7 +20,7 @@ LOCALES = ('es', 'en', 'ca', 'fr', 'de', 'it', 'nl', 'pt')
 CONTENT_TYPES = {'.mp4': 'video/mp4', '.webm': 'video/webm', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
                  '.webp': 'image/webp', '.vtt': 'text/vtt', '.srt': 'application/x-subrip'}
 MAX_BYTES = {'video': 500 * 1024 * 1024, 'poster': 10 * 1024 * 1024, 'subtitles': 1024 * 1024}
-MAX_FILES, NAME_MAX, DESCRIPTION_MAX = 40, 160, 2000
+MAX_FILES, NAME_MAX, DESCRIPTION_MAX, MUSIC_NOTE_MAX = 40, 160, 2000, 500
 TEMPLATE_IMAGES = {'logo_color.svg', 'logo_neg.png', 'iso.svg'}
 # Voices known to come from the public ElevenLabs Voice Library: their owner's terms decide paid-ads use.
 VOICE_LIBRARY = {'1CeqBeXMOqCleeQjfYfO': 'Cristina'}
@@ -62,6 +62,15 @@ def read_json(path):
     with open(path) as f: return json.load(f)
 
 
+def mcp_result(res, what='the saved tool result'):
+    """A saved Hub tool result, unwrapped when it was saved as the MCP envelope {content: [{type: text, text: JSON}]}."""
+    if not (isinstance(res, dict) and isinstance(res.get('content'), list)): return res
+    if isinstance(res.get('structuredContent'), dict): return res['structuredContent']
+    text = next((c.get('text') for c in res['content'] if isinstance(c, dict) and c.get('type') == 'text'), None)
+    try: return json.loads(text)
+    except (TypeError, ValueError): sys.exit(f'{what} is not the JSON a Hub tool returns: {str(text)[:300]}')
+
+
 # ---------- publish: manifest ----------
 def collect(info, problems, checks):
     """The delivered files of one film: per format its 1080p MP4, its poster and (formats without burned-in captions)
@@ -101,7 +110,7 @@ def voice_of(info, checks):
     for n, pick in info['picks']:
         p = os.path.join(info['root'], f'vo/lines/l{n}_{pick}.hub.json')
         if os.path.exists(p):
-            vid = read_json(p).get('voice_id')
+            vid = mcp_result(read_json(p), p).get('voice_id')
             if vid and vid not in ids: ids.append(vid)
     if V.get('voice') and V['voice'] not in ids: ids.append(V['voice'])
     if len(ids) > 1: checks.append(f"{info['slug']}: the picked takes use {len(ids)} voices ({', '.join(ids)}): the rights record the first")
@@ -118,17 +127,25 @@ def voice_of(info, checks):
 
 
 def music_of(info, checks):
-    M = info['music']
+    """rights.music of one film: ElevenLabs only when its composed score exists; None when it has no music at all."""
+    M, slug, R = info['music'], info['slug'], info['root']
+    note = lambda parts: '; '.join(p for p in parts if p)[:MUSIC_NOTE_MAX] or None
     if M['engine'] == 'library':
-        if not M.get('licence'): checks.append(f"{info['slug']}: music.engine library: write the music's licence in film.yml music.licence")
-        return {'provider': M.get('provider') or 'library', 'model': None, 'note': M.get('licence')}
-    meta = os.path.join(info['root'], 'music/composed.json'); model = (read_json(meta).get('model') if os.path.exists(meta) else None) or M['model']
-    note = []
+        if not M.get('licence'): checks.append(f"{slug}: music.engine library: write the music's licence in film.yml music.licence")
+        return {'provider': M.get('provider') or 'library', 'model': None, 'note': note([M.get('licence')])}
+    extra = []
     if M.get('clips'):
-        note.append('plus clips: ' + ', '.join(os.path.basename(c['file']) for c in M['clips']))
-        checks.append(f"{info['slug']}: music.clips on top of the score: name their licence in film.yml rights.other")
-    if M.get('synth'): note.append('plus in-house synthesised cues')
-    return {'provider': 'elevenlabs', 'model': model, 'note': '; '.join(note) or None}
+        extra.append('clips: ' + ', '.join(os.path.basename(c['file']) for c in M['clips']))
+        checks.append(f"{slug}: music.clips in the mix: name their licence in film.yml rights.other")
+    if M.get('synth'): extra.append('in-house synthesised cues')
+    if os.path.exists(os.path.join(R, 'music/composed.wav')):
+        meta = os.path.join(R, 'music/composed.json'); model = (read_json(meta).get('model') if os.path.exists(meta) else None) or M['model']
+        return {'provider': 'elevenlabs', 'model': model, 'note': note(['plus ' + x for x in extra])}
+    if not extra:
+        checks.append(f"{slug}: no composed score (music/composed.wav) and no clips or synth: recorded as a film without music")
+        return None
+    checks.append(f"{slug}: no composed score (music/composed.wav): the music is recorded as {' and '.join(extra)}, not ElevenLabs")
+    return {'provider': 'in-house' if not M.get('clips') else 'film clips', 'model': None, 'note': note(extra)}
 
 
 def rights_of(infos, checks):
@@ -142,7 +159,9 @@ def rights_of(infos, checks):
              'from_voice_library': any(v[3] for v in voices)}
     other = [x for x in (i['rights'].get('other') for i in infos) if x]
     if len(voices) > 1: other.insert(0, 'Voices per language: ' + '; '.join(f"{v[0]} {v[2] or '?'} {v[1] or '?'}{' (Voice Library)' if v[3] else ''}" for v in voices))
-    if any(m != musics[0] for m in musics): other.append('Music per film: ' + '; '.join(f"{i['lang']} {m['provider']} {m['model'] or ''}".strip() for i, m in zip(infos, musics)))
+    if any(m != musics[0] for m in musics):
+        other.append('Music per film: ' + '; '.join(f"{i['lang']} {m['provider']} {m['model'] or ''}".strip() if m else f"{i['lang']} none"
+                                                     for i, m in zip(infos, musics)))
     visuals = ' '.join(dict.fromkeys([VISUALS.get(i['style'], VISUALS['flat']) for i in infos] + [i['rights']['visuals'] for i in infos if i['rights'].get('visuals')]))
     return {'voice': voice, 'music': musics[0], 'visuals': visuals[:1000], 'other': '; '.join(other)[:1000] or None}
 
@@ -196,8 +215,9 @@ def build(infos, lib, name=None, description=None, force=False):
         print(f"  {f['role']:<9} {f['format']:<4} {f['locale']}  {f['filename']:<44} {human(f['size_bytes']):>9}  {dims:<9} "
               f"{str(f['duration_s']) + ' s' if 'duration_s' in f else '':<8} <- {os.path.relpath(f['path'], os.path.dirname(os.path.dirname(os.path.dirname(f['path']))))}")
     v, m = rights['voice'], rights['music']
+    music = f"music {m['provider']} {m.get('model') or ''}{'; ' + m['note'] if m.get('note') else ''}" if m else 'music none'
     print(f"rights: voice {v['provider']} {v['voice_name'] or '?'} ({v['voice_id'] or '?'}){', public Voice Library' if v['from_voice_library'] else ''}; "
-          f"music {m['provider']} {m.get('model') or ''}{'; ' + m['note'] if m.get('note') else ''}\n        visuals: {rights['visuals']}"
+          f"{music}\n        visuals: {rights['visuals']}"
           + (f"\n        other: {rights['other']}" if rights['other'] else ''))
     print(f'description: {man["description"]}')
     for c in checks: print(f'CHECK  {c}')
@@ -216,8 +236,7 @@ def build(infos, lib, name=None, description=None, force=False):
 # ---------- upload ----------
 def tickets_of(res):
     """The `files` of a saved get_marketing_asset_upload_urls result (also when saved inside an MCP content wrapper)."""
-    if isinstance(res, dict) and 'files' not in res and isinstance(res.get('content'), list):
-        res = json.loads(next(c['text'] for c in res['content'] if c.get('type') == 'text'))
+    res = mcp_result(res, 'upload_urls.json')
     if not isinstance(res, dict) or not isinstance(res.get('files'), list): sys.exit('upload_urls.json: expected the tool result {files: [...], expires_at}')
     return res['files'], res.get('expires_at')
 

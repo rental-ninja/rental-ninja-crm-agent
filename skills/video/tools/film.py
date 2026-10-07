@@ -172,10 +172,13 @@ def cmd_takes(root, lines=None, takes=None, force=False):
 def cmd_import_take(root, line, take, audio, words=None):
     s = spec.load(root); R = s['root']; n = int(line); ln = s['lines'][n - 1]; d = os.path.join(R, 'vo/lines'); os.makedirs(d, exist_ok=True)
     base = f'{d}/l{n}_{take}'; loc = lambda p: p if os.path.exists(p) else os.path.join(R, p)
+    import library
     if audio.endswith('.json') and os.path.exists(loc(audio)):
-        res = json.load(open(loc(audio))); audio = res['audio_url']; words = words or res
+        res = library.mcp_result(json.load(open(loc(audio))), audio)
         for k in ('notice', 'warning'):
             if res.get(k): print(f'Hub {k} (show it to the user verbatim): {res[k]}')
+        if not res.get('audio_url'): sys.exit(f'{audio}: no audio_url in this generate_voiceover result')
+        audio = res['audio_url']; words = words or res
     src = loc(audio)
     if re.match(r'https?://', audio): src = base + '.download'; sh('curl', '-fsSL', '--retry', '2', '--max-time', '300', '-o', src, audio)
     sh('ffmpeg', '-loglevel', 'error', '-y', '-i', src, '-ar', '48000', '-ac', '1', base + '.wav')
@@ -186,6 +189,7 @@ def cmd_import_take(root, line, take, audio, words=None):
         note = 'no word timings: vo will transcribe it'
     else:
         if isinstance(words, str): words = json.load(open(loc(words))) if os.path.exists(loc(words)) else json.loads(words)
+        words = library.mcp_result(words, 'the words JSON')
         ws = [{'word': re.sub(r'\[[^\]]*\]', '', w.get('text', w.get('word', ''))).strip(), 'start': round(float(w['start']), 3), 'end': round(float(w['end']), 3)}
               for w in (words['words'] if isinstance(words, dict) else words)]
         ws = [w for w in ws if re.sub(r'\W', '', w['word'])]
@@ -531,7 +535,8 @@ def cmd_setup(install=False, whisper=False):
 def cmd_budget():
     print('Hub (engine hub, the default): narration (1 credit per character) and music (~15 credits per second) are billed to\n'
           "the company's ElevenLabs account, with no per-person cap. The Hub refuses a job only when that balance is exhausted\n"
-          '(it returns a notice) and adds a `warning` to results when less than 10 % is left: show either to the user verbatim.')
+          '(it returns a notice) and adds a `warning` to results when less than 10 % is left: show either to the user verbatim.\n'
+          'The Hub MCP tool get_voiceover_usage shows the credits left and this month\'s spend: call it before an estimate.')
     import eleven
     if not eleven.has_key(): return print('ElevenLabs (engine elevenlabs): no personal key')
     used, limit, reset = eleven.quota(); left = limit - used

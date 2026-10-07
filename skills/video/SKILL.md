@@ -1,6 +1,6 @@
 ---
 name: video
-description: Make a Rental Ninja animated video on your Mac — in-app campaign videos and Instagram/Facebook Reels, Stories and feed posts — in the house style (flat vector, Humaaans cast, brand palette, red banner + logo watermark), written from the Hub's marketing context, narrated and scored through the Hub (ElevenLabs brand voice and music), with burned-in captions and foley, rendered to MP4 and published to the Hub media library as a draft asset. Use when the user asks for a product video, feature video, promo, social video, in-app campaign video or animated explainer for Rental Ninja, wants to edit one of their films, or wants to put a finished film in the media library (Hub → Marketing → Library). Run it with `setup` once on a new Mac.
+description: Make a Rental Ninja animated video on your Mac — in-app campaign videos and Instagram/Facebook Reels, Stories and feed posts — in the house style (flat vector, Humaaans cast, brand palette, red banner + logo watermark), written from the Hub's marketing context, narrated and scored through the Hub (ElevenLabs brand voice and music), with burned-in captions and foley, rendered to MP4 and published to the Hub media library as a draft asset. Use when the user asks for a product video, feature video, promo, social video, in-app campaign video or animated explainer for Rental Ninja, wants to edit one of their films, or wants to put a finished film in the media library (Hub → Marketing → Media library). Run it with `setup` once on a new Mac.
 argument-hint: "setup | <what the video is about> | edit <film folder> | publish <film folder> [<film folder> …]"
 ---
 
@@ -63,8 +63,10 @@ Claude Code replaces `${CLAUDE_SKILL_DIR}` with this skill's folder (inside the 
 6. **Hub:** narration and music go through this plugin's Hub MCP server, so the Hub token must be set up (see the
    plugin README). If the `generate_voiceover` or `generate_music` tool is missing, ask the user to restart Claude
    Code or check the token. `generate_voiceover`, `generate_music` and `publish_marketing_asset` are gated: a tool
-   answering with a grant error means the person needs them in Hub → Staff access, group "Campaigns & media" (an
-   admin grants them; never work around it).
+   answering with a grant error means the person needs it in Hub → Staff access, group "Campaigns & media" (an admin
+   grants them; never work around it). Claude Code asks before each of these calls; the reads
+   (`get_marketing_context`, `list_marketing_voices`, `get_voiceover_usage`, the changelog and docs) run without a
+   prompt.
 7. Run `FILM setup` again until it prints `Ready.`
 
 ## Phases and gates
@@ -116,7 +118,8 @@ comes from the backend, spend is logged per `label` (see Budget). Input
 use_speaker_boost}, label?}`; output `{audio_url (signed, expires), expires_at, duration_s, voice_id, model,
 characters, words: [{text, start, end}]}`.
 
-1. **Voice.** `voice.engine: hub` (the template default). Call `list_marketing_voices` (free) and find `film.lang`:
+1. **Voice.** `voice.engine: hub` (the template default). Call `list_marketing_voices` (free, no grant, no prompt)
+   and find `film.lang`:
    - a `voice_id` → leave `voice.voice` empty (the Hub uses that brand voice) and write its `name` into `voice.name`;
    - `voice_id` null (no brand voice for that language yet) → ask the user for an ElevenLabs voice id, or to have one
      picked in Hub → Marketing → Voice & audio (`settings_url`), and set `voice.voice` (+ `voice.name`);
@@ -309,11 +312,15 @@ keeps the original paper-craft stop-motion engine (`template/`, kit notes furthe
 
 Everything audible is paid in ElevenLabs credits: narration 1 credit per character (`FILM takes` prints the
 characters), music ~15 credits per second (`FILM score --dry` prints the estimate: a 15 s Reel ≈ 225, a 30 s cut
-≈ 450, a 3 min promo ≈ 2,700); show that estimate to the user before spending. With engine `hub` they come from the
-company's ElevenLabs account, with no per-person cap: the Hub refuses a job only when the account balance is exhausted
-and then returns a notice, and its results carry a `warning` when less than 10 % is left. Show the notice or the
-warning to the user verbatim (a refusal stops the job; do not switch engines on your own). `FILM budget` explains
-this and shows a personal key's credits when there is one.
+≈ 450, a 3 min promo ≈ 2,700). With engine `hub` they come from the company's ElevenLabs account, with no per-person
+cap. Before showing an estimate, call `get_voiceover_usage` (free, no prompt): `account.remaining` is the company's
+credits left (`account` is null when the Hub cannot read the balance: say so) and `team_credits_used` this calendar
+month's Hub spend (`credits_used` and `by_kind` are yours). Show the user the estimate next to what is left and this
+month's spend, and say plainly when the estimate does not fit. Claude Code asks before every `generate_voiceover` and
+`generate_music` call: the plugin never auto-approves spending. The Hub refuses a job only when the account balance
+is exhausted and then returns a notice, and its results carry a `warning` when less than 10 % is left. Show the
+notice or the warning to the user verbatim (a refusal stops the job; do not switch engines on your own).
+`FILM budget` explains this and shows a personal key's credits when there is one.
 
 ## Rights before publishing
 
@@ -340,7 +347,8 @@ and you make the tool calls, in this order:
    `<slug>-<fmt>.mp4`; the 720p copies stay out), its poster and, for formats without burned-in captions (16x9 by
    default), the WebVTT subtitles (made from the `.srt` when missing), measured with ffprobe. Rights come from the
    film: voice = the `voice_id` of the picked Hub takes + `voice.name` + `voice.from_voice_library`; music =
-   `elevenlabs` + the composed model (`music.licence` for engine library); visuals = the house style +
+   `elevenlabs` + the composed model only when `music/composed.wav` exists (otherwise the clips or in-house cues, or
+   no music; `music.licence` for engine library; the note is cut at 500 characters); visuals = the house style +
    `rights.visuals`; `rights.other`. It prints the files with sizes, the rights and `CHECK` lines, and writes
    `library/manifest.json` + `library/upload_request.json`. Show the user the name, description, files and rights,
    resolve every `CHECK` (fix `film.yml`, re-run) and get their OK.

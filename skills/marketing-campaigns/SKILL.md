@@ -24,17 +24,20 @@ check their Hub token.
 2. **Context before copy.** Read `get_marketing_context` before writing or rewriting any text, and follow its brand
    voice, customer language and word lists.
 3. **Confirm before writing.** Show the plan (hypothesis, audience with its reach, sequence, Spanish and English
-   copy) before creating a draft; confirm every pause, end, deletion, approval, contact-rule change or suppression
-   with the user, naming exactly what it affects.
+   copy) before creating a draft; confirm every pause, end, deletion, approval, change to a saved audience, contact-rule
+   change or suppression with the user, naming exactly what it affects.
 4. **Tests only to yourself.** `send_campaign_test` reaches the user's own app account (the default) or a user of an
    internal Rental Ninja team, never a customer.
 5. **Spanish and English are yours, the rest is the translator's.** Write `es` and `en` yourself. Fill `ca`, `fr`,
    `de`, `it`, `nl`, `pt` only with `translate_campaign_messages`, which marks them machine-translated. Never
    hand-write those languages, and mark translations reviewed (`manage_campaign` `mark_translations_reviewed`) only
    after a person who reads that language checked them and says so.
-6. **Live campaigns change only while paused.** `update_campaign_draft` refuses an active campaign: pause it first
-   (`manage_campaign` `pause`, with the user's OK), then a person resumes it in the Hub. Once activated, a campaign's
-   audience and holdout are fixed and hand-picked teams can only be added.
+6. **A live campaign's own settings change only while paused; its saved audience changes it at once.**
+   `update_campaign_draft` refuses an active campaign: pause it first (`manage_campaign` `pause`, with the user's OK),
+   then a person resumes it in the Hub. Once activated, a campaign's choice of audience and its holdout are fixed and
+   hand-picked teams can only be added. A saved audience, though, is evaluated live: saving an existing one
+   (`save_marketing_audience` with `id`) changes who every active or paused campaign using it reaches from its next
+   send, without any pause. Confirm it first (step 3, "Changing a saved audience").
 7. **No invented facts.** Every number, price, offer or promise traces to the context's proof points,
    `list_campaign_options` (offers, plans) or the changelog/docs. No made-up statistics or testimonials.
 
@@ -50,7 +53,8 @@ check their Hub token.
   `manage_marketing_audience` (`archive`, `restore`, `delete`).
 - **Media library:** `list_marketing_assets`, `get_marketing_asset`, `get_marketing_asset_upload_urls`,
   `publish_marketing_asset`, `manage_marketing_asset` (`update`, `approve`, `back_to_draft`, `archive`, `add_usage`,
-  `remove_usage`, `delete_file`), `get_campaign_media_upload_url` (one-off popup files).
+  `remove_usage`, `delete_file`). Popup and email media come only from the library: upload with
+  `get_marketing_asset_upload_urls`, publish with `publish_marketing_asset`, approve, then pass the asset's `asset_id`.
 - **Voice & settings:** `list_marketing_voices`, `get_voiceover_usage`, `generate_voiceover`, `generate_music`,
   `marketing_settings` (`get`, `set_voice`, `update_contact_rules`, `update_guardrails`, `pause_all_sending`),
   `marketing_suppressions` (`list`, `add`).
@@ -114,8 +118,13 @@ Pick one, then check its size before writing copy:
 - `holdout_percent`: 10 by default for segments (at least 1), 0 for hand-picked teams. Results compare exposed and
   holdout teams and flag `small_sample` under 30 teams per group: tell the user when the audience is too small to
   measure anything, and keep the holdout unless they decide otherwise.
-- The audience tools (`list_marketing_audiences`, `preview_marketing_audience`, `save_marketing_audience`) are new:
-  if they are not available yet, use a segment or hand-picked teams.
+- **Changing a saved audience.** `save_marketing_audience` with `id` replaces the conditions of an audience that
+  campaigns may already use, and every active or paused one reaches the new set of teams from its next send (its
+  holdout baseline keeps the teams snapshotted at activation). Before saving: find the audience in
+  `list_marketing_audiences` and tell the user every campaign it lists, with its status, and which of them are live;
+  show the new reach with `preview_marketing_audience`; save only after their explicit OK. Then relay the response's
+  `campaigns` and `warning` word for word. When live campaigns use it and the user only wants a new segment, save a
+  new audience (no `id`) instead.
 
 ### 4. Channels and sequence
 
@@ -254,6 +263,7 @@ asks an admin for it (see Grants); the same action is always in the Hub too.
 | Add / remove hand-picked teams | `add_teams_to_campaign` / `manage_campaign` `remove_teams` | after activation teams can only be added |
 | A customer asks not to get marketing | `marketing_suppressions` `add` (`list` to check) | also tell the person handling that customer's thread |
 | Brand voice per language | `list_marketing_voices` / `marketing_settings` `set_voice` | the voice the `video` skill uses by default |
+| Change a saved audience | `save_marketing_audience` with `id` | live campaigns using it reach the new set from their next send: name them and get an OK first (step 3) |
 | Retire an audience | `manage_marketing_audience` `archive` | campaigns already using it keep working; new ones can't pick it |
 
 ## Notes and learnings
@@ -274,8 +284,9 @@ versions: `get_marketing_context` with `include_history` or `version`, and `upda
 
 ## Grants
 
-Read tools and the upload-URL tools need no grant. Every write tool needs the person's grant in Hub → Staff access,
-group **"Campaigns & media"**: a grant error means asking an admin, not working around it.
+Read tools and `get_marketing_asset_upload_urls` need no grant. Every write tool needs the person's grant in Hub →
+Staff access, group **"Campaigns & media"**, and `marketing_settings` and `marketing_suppressions` need theirs even
+to `get` or `list`: a grant error means asking an admin, not working around it.
 
 | Tool | Grant |
 |---|---|
@@ -291,6 +302,7 @@ group **"Campaigns & media"**: a grant error means asking an admin, not working 
 | `marketing_settings`, `marketing_suppressions` | Marketing settings, Marketing suppressions |
 | `generate_voiceover`, `generate_music` | Generate voiceover, Generate music |
 
-This plugin auto-approves the drafting tools. Claude Code still asks before every call that stops, deletes, approves
-or changes shared settings (`manage_campaign`, `manage_marketing_asset`, `manage_marketing_audience`,
-`marketing_settings`), because the whole team sees the result.
+The plugin's hook (`hooks/hooks.json`) runs the read tools without a prompt: the marketing context, campaign options,
+campaigns, previews, results, notes, audiences and their previews, the media library, `get_marketing_asset_upload_urls`,
+`list_marketing_voices` and `get_voiceover_usage`. Claude Code asks before every tool in the table above: they are grant-gated writes, and the
+hook approves none of them.

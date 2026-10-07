@@ -241,7 +241,9 @@ def import_music(s, name, src):
     """An audio URL / path, or a saved generate_music result (.json) -> music/<name>.wav."""
     R = s['root']; d = os.path.join(R, 'music'); os.makedirs(d, exist_ok=True)
     loc = lambda x: x if os.path.exists(x) else os.path.join(R, x); res = {}
-    if src.endswith('.json') and os.path.exists(loc(src)): res = json.load(open(loc(src))); src = res['audio_url']
+    if src.endswith('.json') and os.path.exists(loc(src)):
+        import library
+        res = library.mcp_result(json.load(open(loc(src))), src); src = res['audio_url']
     ext = os.path.splitext(urllib.parse.urlparse(src).path)[1] or '.mp3'; raw = f'{d}/{name}.orig{ext}'
     if re.match(r'https?://', src): subprocess.run(['curl', '-fsSL', '--retry', '2', '--max-time', '300', '-o', raw, src], check=True)
     elif os.path.realpath(loc(src)) != os.path.realpath(raw): shutil.copy(loc(src), raw)

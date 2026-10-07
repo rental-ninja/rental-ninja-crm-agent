@@ -64,7 +64,7 @@ If all RN-side data is clean and push logs show success, prepare an RU ticket wi
 
 ## Escalation
 
-Self-service: customer corrects data in RN and retries the push. CRM support: agent investigates provider logs and guides the customer. RU ticket: for channel-side issues where RN data is provably correct — use `generate_ru_ticket_body` then `create_ru_ticket` with `source_thread_id`. OTA direct: customer contacts the OTA for account-level issues (Booking.com Extranet Inbox, Airbnb support, Expedia Partner Central, VRBO Account Manager).
+Self-service: customer corrects data in RN and retries the push. CRM support: agent investigates provider logs and guides the customer. RU ticket: for channel-side issues where RN data is provably correct — draft it with `save_draft` (`thread_type: "ru_ticket"`, `source_thread_id`), then send it with `send_reply` once the user confirms. OTA direct: customer contacts the OTA for account-level issues (Booking.com Extranet Inbox, Airbnb support, Expedia Partner Central, VRBO Account Manager).
 
 ## Available Tools
 
@@ -75,6 +75,6 @@ Self-service: customer corrects data in RN and retries the push. CRM support: ag
 - `get_provider_log(path, offset, limit)` — read XML request/response (credentials auto-redacted)
 - `login_rentals_united(company_id)` — direct RU dashboard login URL (~30s)
 - `get_company_urls(company_id)` — all navigation URLs (Nova admin, white label, setup wizard, etc.)
-- `generate_ru_ticket_body(thread_id)` — AI-draft an RU support ticket from a thread
-- `create_ru_ticket(...)` — send ticket to RU (irreversible)
+- `save_draft(company_id, subject, body_html, thread_type: "ru_ticket", source_thread_id)` — open an RU support ticket as a draft (addressed to RU support, `WL - {account_id} - ` subject prefix), linked to the customer thread; you write the body
+- `send_reply(thread_id, to_emails: ["support@rentalsunited.com"], body_html)` — send that draft to RU (irreversible; confirm first)
 - `search_docs(query, repo)` — search `rentals-united-docs` and `ninja-docs` repos

@@ -97,34 +97,38 @@ Homebrew and ffmpeg you install yourself in Terminal (they may ask for your Mac 
 
 **Updates** replace the plugin's own folder only: your films and the tools cache live outside it, so nothing is lost.
 
-**Media library.** When a film is approved, `/rental-ninja-crm:video publish <film folder>` puts it in Hub → Marketing → Library (MP4 per format, poster, WebVTT subtitles, and the voice and music rights, from which the Hub says whether it may run as a paid ad). It lands as a draft until it is approved; only approved videos can be added to campaigns. The upload step needs only the `python3` and `curl` that come with macOS.
+**Media library.** When a film is approved, `/rental-ninja-crm:video publish <film folder>` puts it in Hub → Marketing → Media library (MP4 per format, poster, WebVTT subtitles, and the voice and music rights, from which the Hub says whether it may run as a paid ad). It lands as a draft until it is approved; only approved videos can be added to campaigns. The upload step needs only the `python3` and `curl` that come with macOS.
 
 ## Marketing
 
 Claude is the main way to run Rental Ninja's marketing; the Hub (Hub → Marketing) shows the same data and can do the same things.
 
-- **`marketing-campaigns`** drafts a campaign from the marketing context: a hypothesis ("If we show X to Y, Z will happen, measured by …"), the audience and its reach, a sequence of in-app popup, push and email (by default popup on day 0, push on day 2 to people who did not engage, email on day 5 to teams that did not convert), copy in Spanish and English that respects the channel lengths, the brand's word lists and a "no AI tells" list, the other languages machine-translated and marked for review, and a test of each channel sent to your own account. It also manages campaigns, audiences, contact rules, the marketing context and the brand voices as the Hub tools for them arrive.
+- **`marketing-campaigns`** drafts a campaign from the marketing context: a hypothesis ("If we show X to Y, Z will happen, measured by …"), the audience and its reach, a sequence of in-app popup, push and email (by default popup on day 0, push on day 2 to people who did not engage, email on day 5 to teams that did not convert), copy in Spanish and English that respects the channel lengths, the brand's word lists and a "no AI tells" list, the other languages machine-translated and marked for review, and a test of each channel sent to your own account. It also manages campaigns, audiences, contact rules, the marketing context and the brand voices.
 - **`marketing-review`** is the marketing loop: every week it reads each active campaign's results (guardrails, conversion against the holdout, with small-sample caution) and writes one note with 1–3 recommendations, and it writes a postmortem for every campaign that ended. It only writes notes and stops when the numbers look like a tracking bug. Schedule it from Claude Desktop (Scheduled tasks) or with `/schedule`; to stop it, disable the task.
 - **`video`** makes the videos and publishes them to the media library (above).
 
 **What stays human-only.** Only the actions that start or restart sending: activating a campaign, resuming a paused one, and turning "Pause all sending" back off. You do those in the Hub; Claude never does them. Anything else Claude does after showing you what it will change.
 
-**Grants.** Reading needs no grant. These tools need yours in Hub → Staff access, group **"Campaigns & media"** (ask an admin): Send campaign test, Generate voiceover, Generate music, Update marketing context, Publish to the media library, Add campaign notes.
+**Grants.** Reading needs no grant. Every marketing write tool, voice and music generation included, needs its own grant in Hub → Staff access, group **"Campaigns & media"** (ask an admin); the Grants table in [`skills/marketing-campaigns/SKILL.md`](skills/marketing-campaigns/SKILL.md#grants) says which tool needs which.
 
 ## Safety
 
-- Most CRM tools (reading threads, searching, adding notes, etc.) run automatically
-- These actions always ask for your confirmation first:
+The plugin's hook (`hooks/hooks.json`, a `PreToolUse` hook) approves a fixed list of Hub tools so they run without a prompt; every other tool asks you first.
+
+- **Run automatically:** every Hub tool that only reads (threads, companies, bookings, rentals, guests, accounting, logs, docs, changelog, translations, and the marketing context, campaigns, options, previews, results, notes, audiences, media library, brand voices and ElevenLabs credits), the upload-URL tools, and the low-risk CRM writes: assigning a thread or a company to it, snoozing, closing or reopening, thread and company notes, links, drafts, triage marks, presence and urgency. Linear lookups and filing a bug (which the `file-bug` skill confirms with you in the chat first) too.
+- **Always ask for your confirmation first:**
   - **Sending an email** to a customer — Claude drafts first, you review before sending
   - **Changing a company's pipeline stage** — may trigger automated emails
-  - **Creating a Rentals United ticket** — sends to RU support
-  - **Creating changelog content** — publish-facing text
+  - **Sending a Rentals United ticket** — drafted with `save_draft` (`thread_type: "ru_ticket"`), sent to RU support with `send_reply`
+  - **Creating or editing changelog content** — publish-facing text
   - **Forcing a Booking.com rate re-sync** — briefly pauses the whole hotel's rate plans
-  - **Opening a session as a team owner** — impersonation
+  - **Opening a session as a team owner or logging in to a customer's Rentals United dashboard** — customer logins
   - **Importing or removing a customer's past bookings** — writes into their account; needs the Imports tools in Staff access
-  - **Creating or changing a campaign draft, a campaign test, a campaign note or a media library upload** — the team sees them; tests only reach your own account
-- Read-only marketing tools (context, campaigns, results, notes, audiences, library, voices) run automatically
+  - **Editing app UI translations** — they reach the live apps on the next deploy
+  - **Every marketing write** — campaign drafts and edits, translations, tests, notes, saved audiences, the marketing context, the media library, marketing settings (reading them too) and suppressions; the team sees them, and tests only reach your own account
+  - **Generating a voiceover or music** — spends ElevenLabs credits
 - **Activating, resuming or un-pausing campaign sending** never happens from Claude: a person does it in the Hub
+- A deny or ask rule in your own Claude Code settings still applies to the tools the hook approves.
 
 ---
 
@@ -141,7 +145,7 @@ Team members add the marketplace once with the URL Pol sends them. The plugin re
 
 ### Releasing a new version
 
-1. Make your changes (skills, agents, settings, etc.)
+1. Make your changes (skills, hooks, etc.)
 2. Bump `version` in `.claude-plugin/plugin.json`
 3. Commit and push to `main`
 
@@ -149,7 +153,7 @@ Team members get the update on their next session.
 
 ### Changelog
 
-- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles); the read-only marketing tools are auto-approved.
+- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. The hook runs the read-only tools and the low-risk CRM writes without a prompt; destructive and grant-gated writes, customer logins, voice and music generation, saved audiences, suppressions and `manage_*` always ask. RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library.
 
 ### Adding a new team member
 
@@ -164,7 +168,8 @@ rental-ninja-crm-agent/
 ├── .claude-plugin/
 │   └── plugin.json               # Plugin manifest (name, version)
 ├── .mcp.json                     # Hub MCP server connection
-├── settings.json                 # Auto-approved tool permissions
+├── hooks/
+│   └── hooks.json                # Auto-approval: the PreToolUse hook and its list of tools that run without a prompt
 └── skills/
     ├── accounting/
     │   └── SKILL.md              # Payout & settlement investigation skill
