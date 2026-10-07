@@ -1,0 +1,105 @@
+<meta charset="utf-8">
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Ubuntu:wght@500;700&display=swap">
+<style>
+  /* Layout: a single screening-room column, film first, transport controls underneath. */
+  :root {
+    --bg: #14181D; --panel: #1E242B; --fg: #F2ECE2; --muted: #9AA3AD; --accent: #F0505C; --track: #343C45;
+    --display: "Fredoka", "Nunito", system-ui, sans-serif; --body: "Fredoka", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  html, body { background: var(--bg); color: var(--fg); }
+  body { font-family: var(--body); padding-inline: 16px; padding-block: 28px 40px; }
+  .wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 14px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 { font-family: var(--display); font-weight: 600; font-size: clamp(18px, 2.4vw, 24px); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+  h1 span { color: var(--accent); }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+  .screen { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 18px 50px rgba(0,0,0,.45); }
+  canvas { display: block; width: 100%; height: 100%; }
+  .big { position: absolute; inset: 0; margin: auto; width: clamp(56px, 12vw, 96px); height: clamp(56px, 12vw, 96px); border-radius: 50%; border: 0; background: var(--accent); color: #fff; cursor: pointer; display: grid; place-items: center; box-shadow: 0 8px 30px rgba(0,0,0,.4); transition: transform .15s; }
+  .big:hover { transform: scale(1.06); }
+  .big:focus-visible, .ctl button:focus-visible, input[type=range]:focus-visible { outline: 3px solid #FFD76A; outline-offset: 3px; }
+  .cap { position: absolute; left: 50%; bottom: 5%; transform: translateX(-50%); max-width: 86%; background: rgba(15,18,22,.78); color: #fff; font-size: clamp(13px, 1.9vw, 24px); line-height: 1.35; padding: .35em .8em; border-radius: 10px; text-align: center; font-weight: 500; }
+  .ctl { display: flex; align-items: center; gap: 12px; background: var(--panel); border-radius: 12px; padding: 10px 14px; }
+  .ctl button { background: transparent; border: 0; color: var(--fg); cursor: pointer; font: 600 14px var(--body); padding: 6px 8px; border-radius: 8px; min-width: 40px; }
+  .ctl button[aria-pressed="true"] { background: var(--track); }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; white-space: nowrap; }
+  .loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 16px; }
+  [hidden] { display: none !important; }
+  body.render { padding: 0; margin: 0; overflow: hidden; background: #000; }
+  body.render .wrap { display: block; max-width: none; }
+  body.render header, body.render .ctl, body.render .big, body.render .cap, body.render .loading { display: none !important; }
+  body.render .screen { width: 1920px; height: 1080px; border-radius: 0; box-shadow: none; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>{{HEADLINE}}</h1>
+    <p>{{SUBHEAD}}</p>
+  </header>
+  <div class="screen">
+    <canvas id="film" width="1920" height="1080" aria-label="{{ARIA}}"></canvas>
+    <div class="loading" id="loading">Cutting paper&hellip;</div>
+    <button class="big" id="big" aria-label="Play film" hidden>
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+    </button>
+    <div class="cap" id="cap" hidden></div>
+  </div>
+  <div class="ctl">
+    <button id="play" aria-label="Play">Play</button>
+    <input id="seek" type="range" min="0" max="60" step="0.01" value="0" aria-label="Seek">
+    <span class="time" id="time">0:00 / 0:00</span>
+    <button id="cc" aria-pressed="false" aria-label="Captions">CC</button>
+  </div>
+</div>
+<audio id="audio" preload="auto"></audio>
+
+{{SCRIPTS}}
+<script>
+(() => {
+  const cv = document.getElementById('film'), ctx = cv.getContext('2d');
+  const audio = document.getElementById('audio'), big = document.getElementById('big'), play = document.getElementById('play');
+  const seek = document.getElementById('seek'), time = document.getElementById('time'), cc = document.getElementById('cc'), cap = document.getElementById('cap');
+  const renderMode = /render/.test(location.search);
+  if (renderMode) document.body.classList.add('render');
+  const POSTER = DURATION - FILM.posterOffset; seek.max = DURATION;
+  let playing = false, captions = false, ready = false;
+  const fmt = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  function paint(t) {
+    renderFrame(ctx, t);
+    seek.value = t; time.textContent = fmt(t) + ' / ' + fmt(DURATION);
+    const line = (VO.caps || VO.vo).find(v => t >= v.start - .05 && t <= v.end);
+    cap.hidden = !(captions && line); if (line) cap.textContent = line.text;
+  }
+  let lastFrame = -1;
+  function loop() {
+    if (!playing) return;
+    const t = Math.min(audio.currentTime, DURATION - .001), f = Math.floor(t * FPS);
+    if (f !== lastFrame) { lastFrame = f; paint(t); } else { seek.value = t; time.textContent = fmt(t) + ' / ' + fmt(DURATION); }
+    requestAnimationFrame(loop);
+  }
+  function start() {
+    if (!ready) return;
+    if (audio.currentTime >= DURATION - .1) audio.currentTime = 0;
+    audio.play().then(() => { playing = true; big.hidden = true; play.textContent = 'Pause'; play.setAttribute('aria-label', 'Pause'); loop(); }).catch(() => { big.hidden = false; });
+  }
+  function stop() { audio.pause(); playing = false; play.textContent = 'Play'; play.setAttribute('aria-label', 'Play'); }
+  big.onclick = start; play.onclick = () => playing ? stop() : start();
+  cv.onclick = () => ready && (playing ? stop() : start());
+  audio.onended = () => { stop(); big.hidden = false; };
+  seek.oninput = () => { audio.currentTime = +seek.value; if (!playing) paint(+seek.value); };
+  cc.onclick = () => { captions = !captions; cc.setAttribute('aria-pressed', captions); paint(playing ? audio.currentTime : +seek.value); };
+  document.addEventListener('keydown', e => { if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); playing ? stop() : start(); } });
+  const audioReady = renderMode ? Promise.resolve() : fetch('audio/mix.mp3').then(r => { if (!r.ok) throw 0; return r.blob(); }).then(b => { audio.src = URL.createObjectURL(b); }).catch(() => { audio.src = 'audio/mix.mp3'; });
+  window.__ready = Promise.all([initFilm(), audioReady]).then(() => {
+    ready = true; document.getElementById('loading').hidden = true;
+    if (!renderMode) { big.hidden = false; paint(POSTER); seek.value = 0; time.textContent = '0:00 / ' + fmt(DURATION); }
+  });
+  window.__frame = (t, type = 'image/png', q) => { renderFrame(ctx, t); return cv.toDataURL(type, q); };
+  window.__cues = () => CUES;
+})();
+</script>
