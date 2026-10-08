@@ -117,11 +117,11 @@ One or two sentences, required before anyone can activate the campaign:
 > If we show **X** (the message and offer) to **Y** (the audience), **Z** will happen (the behaviour), measured by
 > **…** (the conversion goal from `conversion_goals`, exposed vs holdout).
 
-- ES: *Si mostramos a los admins del segmento 2 que sus borradores gratis de Smart Inbox les esperan y que un
-  borrador solo se gasta cuando lo usan, más equipos probarán Smart Inbox y se suscribirán, medido por la
+- ES: *Si mostramos a los admins del segmento 2 que les devolvemos sus borradores gratis de Smart Inbox y que un
+  borrador solo cuenta cuando lo envían, más equipos reactivarán la prueba y se suscribirán, medido por la
   suscripción a Smart Inbox frente al grupo de control.*
-- EN: *If we show segment 2 admins that their free Smart Inbox drafts are waiting and that a draft is only spent
-  when they use it, more teams will try Smart Inbox and subscribe, measured by Smart Inbox subscriptions against
+- EN: *If we show segment 2 admins that their free Smart Inbox drafts are back and that a draft only counts when
+  they send it, more teams will reactivate the trial and subscribe, measured by Smart Inbox subscriptions against
   the holdout.*
 
 ### 3. Audience
@@ -134,8 +134,9 @@ Pick one, then check its size before writing copy:
 | Saved audience | `audience: "saved_audience_<id>"` from `list_marketing_audiences`; `preview_marketing_audience` shows its count and sample; `save_marketing_audience` saves a new filter when the user asks for one |
 | Hand-picked teams | `team_ids` or `company_ids` (Hub companies); `add_teams_to_campaign` appends later |
 
-- `roles`: `admin` (admins and owner), `member`, or both. Admin-only buttons (`upgrade_dialog`, and `open_route`
-  to an admin-only screen) show members "Ask an admin" instead.
+- `roles`: `admin` (admins and owner), `member`, or both. Admin-only buttons (`upgrade_dialog`,
+  `reactivate_smart_inbox_trial` and `open_route` to an admin-only screen) show members "Ask an admin" instead;
+  send reactivate campaigns to admins only, since a member's request asks for an upgrade.
 - `holdout_percent`: 10 by default for segments (at least 1), 0 for hand-picked teams. Results compare exposed and
   holdout teams and flag `small_sample` under 30 teams per group: tell the user when the audience is too small to
   measure anything, and keep the holdout unless they decide otherwise.
