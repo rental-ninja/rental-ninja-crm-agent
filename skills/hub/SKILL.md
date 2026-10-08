@@ -100,7 +100,7 @@ The plugin's one reference for grants and auto-approval; the other skills and th
 | `generate_voiceover` | Generate voiceover | Campaigns & media | yes |
 | `generate_music` | Generate music | Campaigns & media | yes |
 
-The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too) and to reactivate a Smart Inbox trial; Marketing settings to change the contact rules or turn sending back on; Marketing suppressions to lift a suppression.
+The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too); Marketing settings to change the contact rules or turn sending back on; Marketing suppressions to lift a suppression.
 
 **Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs these without a prompt: the Hub tools that only read (marketing context, prices, campaigns, previews, results, notes, audiences, media library, voices and `get_voiceover_usage` included), `get_upload_url`, the low-risk CRM writes (assign a thread or its company, snooze/close/reopen, thread and company notes, links, drafts, triage, presence, urgency) and the Linear lookups (`get_issue`, `list_teams`, `list_projects`, `list_issue_labels`). Claude Code asks before every other tool: everything in the table above (the hook never lists a gated or destructive tool), `update_translation` / `retranslate_string` (live app texts) and creating or updating a Linear issue (`save_issue`). A deny or ask rule in the person's own Claude Code settings still applies.
 

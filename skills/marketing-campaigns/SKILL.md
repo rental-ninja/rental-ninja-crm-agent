@@ -117,10 +117,12 @@ One or two sentences, required before anyone can activate the campaign:
 > If we show **X** (the message and offer) to **Y** (the audience), **Z** will happen (the behaviour), measured by
 > **…** (the conversion goal from `conversion_goals`, exposed vs holdout).
 
-- ES: *Si mostramos a los admins del segmento 2 que Smart Inbox les prepara el borrador de cada respuesta, más
-  equipos activarán la prueba gratuita, medido por la conversión a la prueba frente al grupo de control.*
-- EN: *If we show segment 2 admins that Smart Inbox drafts every reply for them, more teams will start the free
-  trial, measured by trial starts against the holdout.*
+- ES: *Si mostramos a los admins del segmento 2 que sus borradores gratis de Smart Inbox les esperan y que un
+  borrador solo se gasta cuando lo usan, más equipos probarán Smart Inbox y se suscribirán, medido por la
+  suscripción a Smart Inbox frente al grupo de control.*
+- EN: *If we show segment 2 admins that their free Smart Inbox drafts are waiting and that a draft is only spent
+  when they use it, more teams will try Smart Inbox and subscribe, measured by Smart Inbox subscriptions against
+  the holdout.*
 
 ### 3. Audience
 
@@ -132,8 +134,8 @@ Pick one, then check its size before writing copy:
 | Saved audience | `audience: "saved_audience_<id>"` from `list_marketing_audiences`; `preview_marketing_audience` shows its count and sample; `save_marketing_audience` saves a new filter when the user asks for one |
 | Hand-picked teams | `team_ids` or `company_ids` (Hub companies); `add_teams_to_campaign` appends later |
 
-- `roles`: `admin` (admins and owner), `member`, or both. Admin-only buttons (`upgrade_dialog`,
-  `reactivate_smart_inbox_trial`) show members "Ask an admin" instead.
+- `roles`: `admin` (admins and owner), `member`, or both. Admin-only buttons (`upgrade_dialog`, and `open_route`
+  to an admin-only screen) show members "Ask an admin" instead.
 - `holdout_percent`: 10 by default for segments (at least 1), 0 for hand-picked teams. Results compare exposed and
   holdout teams and flag `small_sample` under 30 teams per group: tell the user when the audience is too small to
   measure anything, and keep the holdout unless they decide otherwise.
