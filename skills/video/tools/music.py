@@ -229,12 +229,14 @@ def hub_jobs(s, p, film_py):
                      'import': ' '.join(shlex.quote(str(v)) for v in ['python3', film_py, 'import-music', R, x['name'], res])})
     out = os.path.join(d, 'hub_jobs.json'); json.dump(jobs, open(out, 'w'), indent=1, ensure_ascii=False)
     print(f"{n} generate_music job{'s' if n > 1 else ''} ({p['seconds']:.1f}s, ~{p['credits']} credits, billed to the company ElevenLabs account) -> {out}\n"
-          'For each job, in order: call the Hub MCP tool generate_music with job.input exactly as written, save its JSON result to\n'
-          'job.save_result_as, then run job.import right away (the audio URL expires).'
+          'Run the jobs sequentially, in order, one at a time, never as parallel tool calls: call the Hub MCP tool generate_music\n'
+          'with job.input exactly as written, save its JSON result to job.save_result_as, run job.import right away (the audio\n'
+          'URL expires), then go on to the next job. "... still being generated" means the previous job is still running:\n'
+          'wait, then call again (not a refusal).'
           + (f"\nThe {n} parts are one piece: keep every input as written (the same seed {p['seed']}, and the same key, BPM and\n"
              'instrumentation in every chunk); do not reword a part. The last import joins them into music/composed.wav.' if n > 1 else '')
-          + '\nIf the Hub refuses (the ElevenLabs balance is exhausted), show its notice to the user verbatim and stop; pass on any\n'
-          '`warning` in a result (under 10 % left) verbatim too.')
+          + '\nIf the Hub refuses a job (the credits left are fewer than it needs), show its notice to the user verbatim and stop:\n'
+          'a later part can be refused after earlier ones succeeded. Pass on any `warning` in a result (under 10 % left) verbatim too.')
 
 
 def import_music(s, name, src):
@@ -243,13 +245,18 @@ def import_music(s, name, src):
     loc = lambda x: x if os.path.exists(x) else os.path.join(R, x); res = {}
     if src.endswith('.json') and os.path.exists(loc(src)):
         import library
-        res = library.mcp_result(json.load(open(loc(src))), src); src = res['audio_url']
+        res = library.mcp_result(json.load(open(loc(src))), src)
+        if not (isinstance(res, dict) and res.get('audio_url')):
+            notice = res.get('notice') if isinstance(res, dict) else None
+            sys.exit(f'{src}: no audio_url in this generate_music result. '
+                     + (f'Hub notice (show it to the user verbatim): {notice}' if notice else json.dumps(res, ensure_ascii=False)[:500]))
+        for k in ('notice', 'warning'):
+            if res.get(k): print(f'Hub {k} (show it to the user verbatim): {res[k]}')
+        src = res['audio_url']
     ext = os.path.splitext(urllib.parse.urlparse(src).path)[1] or '.mp3'; raw = f'{d}/{name}.orig{ext}'
     if re.match(r'https?://', src): subprocess.run(['curl', '-fsSL', '--retry', '2', '--max-time', '300', '-o', raw, src], check=True)
     elif os.path.realpath(loc(src)) != os.path.realpath(raw): shutil.copy(loc(src), raw)
     jobs = os.path.join(d, 'hub_jobs.json'); job = next((j for j in (json.load(open(jobs)) if os.path.exists(jobs) else []) if j['name'] == name), {})
-    for k in ('notice', 'warning'):
-        if res.get(k): print(f'Hub {k} (show it to the user verbatim): {res[k]}')
     finish(s, raw, name, {'source': 'hub' if res else 'import', 'plan_sha': job.get('plan_sha'), 'model': res.get('model') or job.get('input', {}).get('model'),
                           'seed': job.get('input', {}).get('seed'), 'credits': res.get('credits'), 'credits_estimate': job.get('credits_estimate'), 'label': res.get('label')},
            job.get('length_s') if job.get('parts', 1) > 1 else None)

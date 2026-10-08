@@ -141,9 +141,11 @@ def hub_jobs(s, idx, tk, force):
             jobs.append({'line': n, 'take': t, 'input': inp, 'save_result_as': res, 'import': imp})
     out = os.path.join(R, 'vo/hub_jobs.json'); json.dump(jobs, open(out, 'w'), indent=1, ensure_ascii=False)
     print(f"{len(jobs)} takes for the Hub ({sum(len(j['input']['text']) for j in jobs)} characters = credits, billed to the company ElevenLabs account) -> {out}")
-    if jobs: print('For each job: call the Hub MCP tool generate_voiceover with job.input, save its JSON result to job.save_result_as,\n'
-                   'then run job.import (or: import-take DIR LINE TAKE <audio_url> <words JSON>) right away: the audio URL expires.\n'
-                   'If the Hub refuses (the ElevenLabs balance is exhausted), show its notice to the user verbatim and stop;\n'
+    if jobs: print('Run the jobs sequentially, one at a time, never as parallel tool calls: call the Hub MCP tool generate_voiceover\n'
+                   'with job.input, save its JSON result to job.save_result_as, run job.import (or: import-take DIR LINE TAKE\n'
+                   '<audio_url> <words JSON>) right away (the audio URL expires), then go on to the next job.\n'
+                   '"... still being generated" means the previous job is still running: wait, then call again (not a refusal).\n'
+                   'If the Hub refuses a job (the credits left are fewer than it needs), show its notice to the user verbatim and stop;\n'
                    'pass on any `warning` in a result (under 10 % left) verbatim too.\n'
                    'Then set pick per line and run `film.py vo DIR` (it uses the Hub word timings, no transcription).')
 
@@ -534,8 +536,9 @@ def cmd_setup(install=False, whisper=False):
 
 def cmd_budget():
     print('Hub (engine hub, the default): narration (1 credit per character) and music (~15 credits per second) are billed to\n'
-          "the company's ElevenLabs account, with no per-person cap. The Hub refuses a job only when that balance is exhausted\n"
-          '(it returns a notice) and adds a `warning` to results when less than 10 % is left: show either to the user verbatim.\n'
+          "the company's ElevenLabs account, with no per-person cap. The Hub runs one job per person at a time (call the tools\n"
+          'sequentially, never in parallel), refuses a job when the credits left are fewer than it needs (it returns a notice)\n'
+          'and adds a `warning` to results when less than 10 % is left: show either to the user verbatim.\n'
           'The Hub MCP tool get_voiceover_usage shows the credits left and this month\'s spend: call it before an estimate.')
     import eleven
     if not eleven.has_key(): return print('ElevenLabs (engine elevenlabs): no personal key')

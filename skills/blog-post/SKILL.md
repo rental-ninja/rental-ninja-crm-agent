@@ -18,10 +18,10 @@ behaviour — gather the facts first:
 
 | Need | Tool |
 |---|---|
-| What actually shipped | `mcp__hub__search_changelog`, `list_changelog_items`, `get_changelog_draft` |
-| How a feature really works | `mcp__hub__search_docs` (repos: `ninja-docs` for help-center, `ninja` for backend, `ninja_app` for the manager app, `ninja_app_client` for the guest app, `rentals-united-docs` for channel/OTA) |
-| Real customer pain points, in their own words | `mcp__hub__search_threads`, `search_closure_summaries`, `get_thread_detail` |
-| Channel/OTA specifics | `mcp__hub__search_docs` with `repo: rentals-united-docs` |
+| What actually shipped | `search_changelog`, `list_changelog_items`, `get_changelog_draft` |
+| How a feature really works | `search_docs` (repos: `ninja-docs` for help-center, `ninja` for backend, `ninja_app` for the manager app, `ninja_app_client` for the guest app, `rentals-united-docs` for channel/OTA) |
+| Real customer pain points, in their own words | `search_threads`, `search_closure_summaries`, `get_thread_detail` |
+| Channel/OTA specifics | `search_docs` with `repo: rentals-united-docs` |
 
 `reference/product-knowledge.md` is a snapshot of the main features and their
 real names — read it to know *what to search for*, then verify with the live

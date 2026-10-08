@@ -60,13 +60,13 @@ Claude Code replaces `${CLAUDE_SKILL_DIR}` with this skill's folder (inside the 
    run `sudo` or the Homebrew installer yourself.
 5. **Optional:** `FILM setup --install --whisper` adds faster-whisper for local word timings. Hub and ElevenLabs takes
    carry their own timings, so only imported audio without timings needs it.
-6. **Hub:** narration and music go through this plugin's Hub MCP server, so the Hub token must be set up (see the
-   plugin README). If the `generate_voiceover` or `generate_music` tool is missing, ask the user to restart Claude
-   Code or check the token. `generate_voiceover`, `generate_music` and `publish_marketing_asset` are gated: a tool
-   answering with a grant error means the person needs it in Hub → Staff access, group "Campaigns & media" (an admin
-   grants them; never work around it). Claude Code asks before each of these calls; the reads
-   (`get_marketing_context`, `list_marketing_voices`, `get_voiceover_usage`, the changelog and docs) run without a
-   prompt.
+6. **Hub:** narration, music and publishing go through this plugin's Hub MCP server (Hub token: the plugin README).
+   No Hub tools at all: ask the user to restart Claude Code or check the token. `generate_voiceover`,
+   `generate_music`, `publish_marketing_asset` and `manage_marketing_asset` are grant-gated: one missing from your
+   tools means the person lacks its grant ("Generate voiceover", "Generate music", "Publish to the media library",
+   "Manage library assets"). They ask an admin for it in Hub → Staff access → Campaigns & media, then restart Claude
+   Code (the tool list is cached about 5 minutes); never work around it. Which tools ask before running: **Grants and
+   approvals** in the `hub` skill (`${CLAUDE_SKILL_DIR}/../hub/SKILL.md`).
 7. Run `FILM setup` again until it prints `Ready.`
 
 ## Phases and gates
@@ -129,12 +129,12 @@ characters, words: [{text, start, end}]}`.
    `FILM takes <folder>` calls nothing: it writes `vo/hub_jobs.json`, one job per line × take: `input` (text =
    `say:` or `text`, locale, model, settings, label `<slug> line N take T`), `save_result_as`, `import`. It prints
    the characters the takes will use (1 credit each); fewer takes (`--takes a,b`, `--lines 3,4`) spend less.
-2. For each job call `generate_voiceover` with `job.input`, write its JSON result to `job.save_result_as`, and run
-   `job.import` straight away (the URL expires): `FILM import-take <folder> LINE TAKE RESULT.json`. The general form is
+2. Run the jobs one at a time, never as parallel tool calls (see Budget): call `generate_voiceover` with
+   `job.input`, write its JSON result to `job.save_result_as`, run `job.import` straight away (the URL expires):
+   `FILM import-take <folder> LINE TAKE RESULT.json`, then go on to the next job. The general form is
    `FILM import-take <folder> LINE TAKE AUDIO_URL_OR_PATH [WORDS_JSON_PATH_OR_INLINE]`: it downloads (curl) or copies
-   the audio to `vo/lines/l<N>_<take>.wav` (48 kHz mono) and the words to `l<N>_<take>.words.json`. If the Hub
-   refuses a take (the ElevenLabs balance is exhausted), show its notice to the user verbatim and stop; do not switch engines on your own. A `warning` in a result (under 10 %
-   left) goes to the user verbatim too.
+   the audio to `vo/lines/l<N>_<take>.wav` (48 kHz mono) and the words to `l<N>_<take>.words.json`. A refusal or a
+   `warning`: see Hub notices (Budget).
 3. Let the user listen (`afplay <folder>/vo/lines/l<N>_<take>.wav` plays a take) and set `pick` per line, then
    `FILM vo <folder>`: a picked take with a
    `.words.json` skips transcription; the words are shifted by the leading silence the cleanup chain trims and clamped
@@ -164,14 +164,14 @@ with the end card.
    writes `music/plan.json`. Show it to the user before spending.
 2. **Hub jobs.** `FILM score <folder>` calls nothing: it writes `music/hub_jobs.json`, one job per part (`input` =
    `{composition_plan, instrumental: false, model, label, seed?}` or, with `music.prompt`, `{prompt, length_s,
-   instrumental: true, model, label}`; `save_result_as`; `import`). For each job, in order, call the Hub MCP tool
-   `generate_music` with `job.input` exactly as written, write its JSON result (`{audio_url, expires_at, duration_s,
-   model, credits, label, warning?}`) to `job.save_result_as` and run `job.import` straight away (the URL expires):
-   `FILM import-music <folder> composed RESULT.json` (or `composed.p1`, `composed.p2`, …). The general form
-   `FILM import-music <folder> NAME AUDIO_URL_OR_PATH_OR_RESULT_JSON` → `music/NAME.wav` (other names become extra
-   clips). If the Hub refuses (the ElevenLabs balance is exhausted), show its notice to the user verbatim and stop; do not switch engines on your own; pass a result's `warning` (under 10 %
-   left) to the user verbatim. `instrumental: false` with a plan is deliberate: ElevenLabs rejects `force_instrumental`
-   together with a composition plan (422); the plan's styles exclude vocals instead.
+   instrumental: true, model, label}`; `save_result_as`; `import`). Run the jobs one at a time, in order, never as
+   parallel tool calls (see Budget): call the Hub MCP tool `generate_music` with `job.input` exactly as written, write
+   its JSON result (`{audio_url, expires_at, duration_s, model, credits, label, warning?}`) to `job.save_result_as`
+   and run `job.import` straight away (the URL expires): `FILM import-music <folder> composed RESULT.json` (or
+   `composed.p1`, `composed.p2`, …). The general form `FILM import-music <folder> NAME AUDIO_URL_OR_PATH_OR_RESULT_JSON`
+   → `music/NAME.wav` (other names become extra clips). A refusal or a `warning`: see Hub notices (Budget).
+   `instrumental: false` with a plan is deliberate: ElevenLabs rejects `force_instrumental` together with a
+   composition plan (422); the plan's styles exclude vocals instead.
    **Parts.** `generate_music` takes at most 90 s per call. A longer plan is cut into parts of ≤ 90 s at chunk
    boundaries (a section longer than that is first split into equal sub-sections with the same styles); `score --dry`
    lists them. Every part carries the same seed (the `music.seed`, else one derived from the plan) and the same key, BPM
@@ -317,10 +317,16 @@ cap. Before showing an estimate, call `get_voiceover_usage` (free, no prompt): `
 credits left (`account` is null when the Hub cannot read the balance: say so) and `team_credits_used` this calendar
 month's Hub spend (`credits_used` and `by_kind` are yours). Show the user the estimate next to what is left and this
 month's spend, and say plainly when the estimate does not fit. Claude Code asks before every `generate_voiceover` and
-`generate_music` call: the plugin never auto-approves spending. The Hub refuses a job only when the account balance
-is exhausted and then returns a notice, and its results carry a `warning` when less than 10 % is left. Show the
-notice or the warning to the user verbatim (a refusal stops the job; do not switch engines on your own).
-`FILM budget` explains this and shows a personal key's credits when there is one.
+`generate_music` call: the plugin never auto-approves spending. `FILM budget` explains this and shows a personal
+key's credits when there is one.
+
+- **One job at a time.** The Hub runs one generation per person at a time, so never call `generate_voiceover` or
+  `generate_music` as parallel tool calls. "Another voiceover or music track of yours is still being generated" is
+  not a refusal: wait for the running job, then call again.
+- **Hub notices.** The Hub refuses a job up front when the company account has fewer credits left than that job
+  needs, so a later take or part can be refused after earlier ones succeeded; a result carries a `warning` when less
+  than 10 % is left. Show the refusal notice or the warning to the user verbatim; after a refusal, stop: no retry,
+  smaller job or other engine on your own.
 
 ## Rights before publishing
 
@@ -360,11 +366,10 @@ and you make the tool calls, in this order:
    again. It needs only the system `python3` and `curl`.
 4. Call `publish_marketing_asset` with `library/publish_request.json` exactly as written and write its result to
    `library/published.json` (`publish` then refuses a second asset from the same folder unless `--force`). Give the
-   user the `hub_url` and pass the `paid_ads` verdict on word for word. The tool is gated: "Publish to the media
-   library" in Hub → Staff access, group "Campaigns & media".
+   user the `hub_url` and pass the `paid_ads` verdict on word for word. Tool missing: Setup step 6.
 
 The asset always lands as a **draft**, and only approved assets can be linked to campaigns. Approve it once the user
-has watched the delivered film and says so: `manage_marketing_asset` `approve` (gated: "Manage library assets"), or
+has watched the delivered film and says so: `manage_marketing_asset` `approve`, or
 the user approves it in Hub → Marketing → Media library. Publish only films the user approved.
 `list_marketing_assets` / `get_marketing_asset` show what is already in the library: check for an earlier version
 before adding a duplicate. Rights, usages and archiving: `manage_marketing_asset` (`update`, `add_usage`,

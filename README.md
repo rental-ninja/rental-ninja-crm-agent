@@ -27,7 +27,7 @@ You only need to do this once.
 ### Step 2: Install the plugin
 
 ```
-/plugin install ninja-hub
+/plugin install rental-ninja-crm
 ```
 
 ### Step 3: Set up your token
@@ -41,14 +41,14 @@ Close and reopen Claude Code one last time so the CRM connection activates.
 Navigate to the folder where you'll use the CRM (e.g. your work directory), open Claude Code there, and run:
 
 ```
-/ninja-hub:setup-hub
+/rental-ninja-crm:setup-hub
 ```
 
 This creates a `CLAUDE.md` file that tells Claude to use the CRM tools when you ask about work stuff. Run it again anytime to check for updates.
 
 ### You're done
 
-Type `/ninja-hub:hub help` to see what you can do. The plugin keeps itself up to date.
+Type `/rental-ninja-crm:hub help` to see what you can do. The plugin keeps itself up to date.
 
 If something isn't working, check the [Troubleshooting](#troubleshooting) section below or ask Pol.
 
@@ -56,12 +56,13 @@ If something isn't working, check the [Troubleshooting](#troubleshooting) sectio
 
 | Command | What it does |
 |---------|-------------|
-| `/ninja-hub:hub triage` | Shows your inbox sorted by priority — emails, snoozed threads, RU tickets |
-| `/ninja-hub:hub thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
-| `/ninja-hub:hub research 1234` | Deep investigation on a thread, company, or topic |
-| `/ninja-hub:hub help` | Quick reference card |
-| `/ninja-hub:accounting <query>` | Investigate payouts, settlements, payee strategies, and discrepancies |
-| `/ninja-hub:blog-post <topic>` | Writes a multilingual blog article grounded in the Hub (changelog, docs, real threads) and saves an `.html` file to upload at `/admin/blog/import` in the CMS |
+| `/rental-ninja-crm:hub triage` | Shows your inbox sorted by priority — emails, snoozed threads, RU tickets |
+| `/rental-ninja-crm:hub thread 1234` | Pulls up a thread with full context, then offers actions (reply, escalate, snooze, etc.) |
+| `/rental-ninja-crm:hub research 1234` | Deep investigation on a thread, company, or topic |
+| `/rental-ninja-crm:hub help` | Quick reference card |
+| `/rental-ninja-crm:hub <payout question>` | Investigate payouts, settlements, payee strategies, and discrepancies |
+| `/rental-ninja-crm:file-bug <thread id>` | Files a Linear bug from a thread or a description, after you confirm it |
+| `/rental-ninja-crm:blog-post <topic>` | Writes a multilingual blog article grounded in the Hub (changelog, docs, real threads) and saves an `.html` file to upload at `/admin/blog/import` in the CMS |
 | `/rental-ninja-crm:video <topic>` | Makes an animated Rental Ninja video (in-app campaign 16:9, Instagram/Facebook 9:16, 1:1, 4:5) narrated and scored through the Hub and rendered to MP4 on your Mac, then publishes it to the Hub media library — see [Videos](#videos-mac) |
 | `/rental-ninja-crm:marketing-campaigns <goal>` | Drafts a campaign (in-app popup, push, email) from the marketing context and manages it — see [Marketing](#marketing) |
 | `/rental-ninja-crm:marketing-review weekly` | Reviews the active campaigns and writes postmortems as Hub notes; built to run weekly on a schedule — see [Marketing](#marketing) |
@@ -93,7 +94,7 @@ No OpenRouter or Google key is needed: voice and music both come from ElevenLabs
 
 Homebrew and ffmpeg you install yourself in Terminal (they may ask for your Mac password); Claude never installs system software.
 
-**Narration and music** go through the Hub: the brand voice for each language and a score composed for each film by ElevenLabs Music (it follows the film's acts and ends with the end card), with no API key on your Mac. Both are paid in ElevenLabs credits from the company account, with no per-person cap: about 1 per narrated character and 15 per second of music (a 15-second Reel's score ≈ 225), so Claude shows you the script and the music plan with its estimate before spending. If the account runs low (under 10 % left) or runs out, Claude passes on the Hub's message word for word. ElevenLabs output is cleared for commercial use, social posts and paid ads included. If you have your own ElevenLabs key, the film's `film.yml` can use it instead.
+**Narration and music** go through the Hub: the brand voice for each language and a score composed for each film by ElevenLabs Music (it follows the film's acts and ends with the end card), with no API key on your Mac. Both are paid in ElevenLabs credits from the company account, with no per-person cap: about 1 per narrated character and 15 per second of music (a 15-second Reel's score ≈ 225), so Claude shows you the script and the music plan with its estimate before spending. If the account runs low (under 10 % left) or has fewer credits left than a take or a score needs, Claude passes on the Hub's message word for word. ElevenLabs output is cleared for commercial use, social posts and paid ads included. If you have your own ElevenLabs key, the film's `film.yml` can use it instead.
 
 **Updates** replace the plugin's own folder only: your films and the tools cache live outside it, so nothing is lost.
 
@@ -109,26 +110,13 @@ Claude is the main way to run Rental Ninja's marketing; the Hub (Hub → Marketi
 
 **What stays human-only.** Only the actions that start or restart sending: activating a campaign, resuming a paused one, and turning "Pause all sending" back off. You do those in the Hub; Claude never does them. Anything else Claude does after showing you what it will change.
 
-**Grants.** Reading needs no grant. Every marketing write tool, voice and music generation included, needs its own grant in Hub → Staff access, group **"Campaigns & media"** (ask an admin); the Grants table in [`skills/marketing-campaigns/SKILL.md`](skills/marketing-campaigns/SKILL.md#grants) says which tool needs which.
+**Grants.** Reading needs no grant. Every marketing write, voice and music generation included, needs its own grant in Hub → Staff access → Campaigns & media: see [Grants and approvals](skills/hub/SKILL.md#grants-and-approvals).
 
 ## Safety
 
-The plugin's hook (`hooks/hooks.json`, a `PreToolUse` hook) approves a fixed list of Hub tools so they run without a prompt; every other tool asks you first.
+The plugin's `PreToolUse` hook (`hooks/hooks.json`) lets the Hub tools that only read, the low-risk CRM writes (assigning, snoozing, closing, notes, links, drafts, triage) and the Linear lookups run without a prompt. Claude Code asks you before everything else: sending an email or an RU ticket, changing a company's pipeline stage, customer logins, imports, changelog and app translations, every marketing write, voice and music generation, and filing or updating a Linear issue. Activating, resuming or un-pausing campaign sending never happens from Claude: a person does it in the Hub. A deny or ask rule in your own Claude Code settings still applies.
 
-- **Run automatically:** every Hub tool that only reads (threads, companies, bookings, rentals, guests, accounting, logs, docs, changelog, translations, and the marketing context, campaigns, options, previews, results, notes, audiences, media library, brand voices and ElevenLabs credits), the upload-URL tools, and the low-risk CRM writes: assigning a thread or a company to it, snoozing, closing or reopening, thread and company notes, links, drafts, triage marks, presence and urgency. Linear lookups and filing a bug (which the `file-bug` skill confirms with you in the chat first) too.
-- **Always ask for your confirmation first:**
-  - **Sending an email** to a customer — Claude drafts first, you review before sending
-  - **Changing a company's pipeline stage** — may trigger automated emails
-  - **Sending a Rentals United ticket** — drafted with `save_draft` (`thread_type: "ru_ticket"`), sent to RU support with `send_reply`
-  - **Creating or editing changelog content** — publish-facing text
-  - **Forcing a Booking.com rate re-sync** — briefly pauses the whole hotel's rate plans
-  - **Opening a session as a team owner or logging in to a customer's Rentals United dashboard** — customer logins
-  - **Importing or removing a customer's past bookings** — writes into their account; needs the Imports tools in Staff access
-  - **Editing app UI translations** — they reach the live apps on the next deploy
-  - **Every marketing write** — campaign drafts and edits, translations, tests, notes, saved audiences, the marketing context, the media library, marketing settings (reading them too) and suppressions; the team sees them, and tests only reach your own account
-  - **Generating a voiceover or music** — spends ElevenLabs credits
-- **Activating, resuming or un-pausing campaign sending** never happens from Claude: a person does it in the Hub
-- A deny or ask rule in your own Claude Code settings still applies to the tools the hook approves.
+The full list, and the Staff access grant each gated tool needs: [Grants and approvals](skills/hub/SKILL.md#grants-and-approvals).
 
 ---
 
@@ -153,7 +141,7 @@ Team members get the update on their next session.
 
 ### Changelog
 
-- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. The hook runs the read-only tools and the low-risk CRM writes without a prompt; destructive and grant-gated writes, customer logins, voice and music generation, saved audiences, suppressions and `manage_*` always ask. RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library.
+- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. The hook runs the read-only tools, the low-risk CRM writes and the Linear lookups without a prompt; destructive and grant-gated tools and creating or updating a Linear issue always ask ([Grants and approvals](skills/hub/SKILL.md#grants-and-approvals)). RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library.
 
 ### Adding a new team member
 
@@ -167,15 +155,15 @@ Team members get the update on their next session.
 rental-ninja-crm-agent/
 ├── .claude-plugin/
 │   └── plugin.json               # Plugin manifest (name, version)
-├── .mcp.json                     # Hub MCP server connection
+├── .mcp.json                     # Hub and Linear MCP server connections
 ├── hooks/
 │   └── hooks.json                # Auto-approval: the PreToolUse hook and its list of tools that run without a prompt
 └── skills/
-    ├── accounting/
-    │   └── SKILL.md              # Payout & settlement investigation skill
     ├── blog-post/
     │   ├── SKILL.md              # Hub-grounded multilingual blog writer
     │   └── reference/            # CMS import template + product-knowledge snapshot
+    ├── file-bug/
+    │   └── SKILL.md              # Linear bug filing from a thread or a description
     ├── marketing-campaigns/
     │   └── SKILL.md              # Campaign drafting and management through the Hub tools
     ├── marketing-review/
@@ -189,9 +177,8 @@ rental-ninja-crm-agent/
     │   ├── reference/            # Scene code of two complete films
     │   └── library/              # Humaaans cast, with its licence record
     └── hub/
-        ├── SKILL.md              # CRM operator skill (persona, safety, workflows)
-        └── agents/
-            └── hub-crm-operator.md   # Sub-agent for autonomous CRM tasks
+        ├── SKILL.md              # CRM operator skill (persona, safety, workflows, grants and approvals)
+        └── references/           # Accounting, booking/rental, channel sync, docs, tone
 ```
 
 ## Troubleshooting
@@ -201,9 +188,12 @@ rental-ninja-crm-agent/
 2. Try closing and reopening Claude Code
 3. If it still doesn't work, ask Pol to check your token is valid
 
+**One Hub tool missing while the others work** (e.g. `generate_voiceover`, `create_campaign_draft`)
+- You lack its grant: ask an admin to give it to you in Hub → Staff access ([which grant](skills/hub/SKILL.md#grants-and-approvals)), then restart Claude Code. The tool list is cached about 5 minutes.
+
 **"Permission denied" or "Unauthorized"**
 - Your token may have expired — ask Pol for a new one
 
 **Commands not showing up**
 - Make sure the plugin is installed: type `/plugin` and check the list
-- Try updating: `/plugin update ninja-hub`
+- Try updating: `/plugin update rental-ninja-crm`

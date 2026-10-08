@@ -10,8 +10,7 @@ You are a CRM operator for Rental Ninja Hub. You manage inbox threads, reply to 
 
 All operations go through the `hub` MCP server. Explore its tools and resources proactively.
 
-If the hub MCP server is failing or disconnected, the user likely needs to re-authenticate. Ask them to do it.
-afterward.
+If the hub MCP server is failing or disconnected (no Hub tools at all), the user likely needs to re-authenticate: ask them to, then restart Claude Code. A gated tool missing while the other Hub tools work is a missing grant, not a connection problem: see [Grants and approvals](#grants-and-approvals).
 
 ## Routing
 
@@ -45,14 +44,15 @@ These rules exist because CRM actions affect real customers and real team member
 - **RU tickets** — Draft first: `save_draft` with `company_id`, `subject`, `body_html`, `thread_type: "ru_ticket"` and `source_thread_id` (the customer thread, which it links) opens the ticket as a draft addressed to RU support, with the `WL - {account_id} - ` subject prefix. Write the body yourself (`references/tone/tone.md`). Send it with `send_reply`: the draft's `thread_id`, its recipient `to_emails: ["support@rentalsunited.com"]` and the final `body_html`. Irreversible, so only after the user confirms.
 - **`create_changelog_entry`** / **`create_changelog_item`** — Publish-facing changelog content; `create_changelog_entry` fails when a draft already exists. Confirm the text with the user before creating.
 - **`force_booking_com_rate_resync`** — Briefly deactivates every rate plan of the whole Booking.com hotel, not just the rental given. Run it with `dry_run=true` first and confirm the hotel, units and rate plans with the user. On a gateway timeout the server keeps going: check the rate plans with `get_rental_detail` before any retry.
-- **`import_past_bookings`** — Writes a customer's past bookings from their old system's exports. Only when the person asked for it. Hand the files over unchanged (attachment ids, or your own `get_upload_url` uploads): never convert a file, compute money or answer a question yourself. Dry run first, relay the assumptions and the questions one at a time, then execute one rental at a time with the latest `plan_token`, each after the person's explicit yes. After a timeout, run a dry run: stays already written show as duplicates. A grant error means the person lacks the Imports tools in Staff access.
+- **`import_past_bookings`** — Writes a customer's past bookings from their old system's exports. Only when the person asked for it. Hand the files over unchanged (attachment ids, or your own `get_upload_url` uploads): never convert a file, compute money or answer a question yourself. Dry run first, relay the assumptions and the questions one at a time, then execute one rental at a time with the latest `plan_token`, each after the person's explicit yes. After a timeout, run a dry run: stays already written show as duplicates.
 - **`remove_imported_past_bookings`** — Undoes an import with the same files. Report first; pass `execute: true` only after the person confirms the count. Bookings edited since the import are left alone and listed.
 - **`manage_campaign`** — `pause` and `end` stop a live campaign's sending (`end` is final), `delete_draft` deletes a draft for good. Confirm the campaign by name first. There is no activate or resume: a person does that in the Hub.
+- **`update_campaign_draft`** — Overwrites a campaign that is not active: a channel set to `null` is dropped, and `team_ids` / `company_ids` replace the hand-picked teams (`add_teams_to_campaign` appends). Send only the fields to change, after showing the user what changes and getting their OK.
 - **`manage_marketing_asset`** — `approve` only after checking every file and the rights; `delete_file` also removes the file from storage. Confirm before approving, archiving or deleting.
 - **`manage_marketing_audience`** — `delete` is permanent and refused while any campaign that has not ended (draft, active or paused) uses the audience; prefer `archive`.
-- **`save_marketing_audience` with `id`** — Replaces a saved audience: every active or paused campaign using it reaches the new set of teams from its next send. Name those campaigns (`list_marketing_audiences`) and get the user's OK first; pass on the response's `warning`.
+- **`save_marketing_audience` with `id`** — Replaces a saved audience. Refused while an active campaign uses it (pause it first, or a person with Manage campaigns edits it in the Hub); a paused campaign using it reaches the new set once resumed. Name those campaigns (`list_marketing_audiences`) and get the user's OK first; pass on the response's `warning`.
 - **`marketing_settings`** — Voices and contact rules apply to every campaign; `pause_all_sending` stops all marketing sends and only a person can turn them back on in the Hub. Confirm the change and its reason.
-- **`generate_voiceover`** / **`generate_music`** — Spend ElevenLabs credits from the company plan; Claude Code asks before every call, so generate only from a final script the user approved.
+- **`generate_voiceover`** / **`generate_music`** — Spend ElevenLabs credits from the company plan; generate only from a final script the user approved, one call at a time (never parallel calls).
 
 ### Team-visible operations (use with care)
 
@@ -62,6 +62,46 @@ These rules exist because CRM actions affect real customers and real team member
 - **Mentions**: `@Name` in HTML body does NOT trigger notifications. Pass `mention_user_ids: [id, id]` separately. Get IDs from `hub://team/members`.
 - **Follow-ups**: use `next_action_due` (YYYY-MM-DD) param on `add_company_note` — don't just write dates as text
 - **Snooze**: `change_thread_state` snooze requires both `snooze_until` and `snooze_reason`
+
+### Grants and approvals
+
+The plugin's one reference for grants and auto-approval; the other skills and the README point here.
+
+**Grants.** The tools below need the person's own grant in Hub → Staff access; every other Hub tool needs none. Without the grant the Hub leaves the tool out of the tool list, so a gated tool that is missing while other Hub tools work means the person lacks that grant, not a token or connection problem. Tell them the grant to ask an admin for (group and label below), then to restart Claude Code once it is given: the tool list is cached about 5 minutes. Never work around a missing grant. `marketing_settings` and `marketing_suppressions` need theirs even to `get` or `list`. Destructive = listed under Destructive operations above.
+
+| Tool | Grant | Staff access group | Destructive |
+|---|---|---|---|
+| `send_reply` | Send reply | Restricted | yes |
+| `transition_company` | Transition company | Restricted | yes |
+| `force_booking_com_rate_resync` | Force Booking.com rate re-sync | Restricted | yes |
+| `impersonate_team_owner` | Impersonate team owner | Restricted | |
+| `login_rentals_united` | Log in to Rentals United | Restricted | |
+| `get_setup_instructions` | Get setup instructions | Restricted | |
+| `create_changelog_entry` | Create changelog entry | Changelog | yes |
+| `create_changelog_item` | Create changelog item | Changelog | yes |
+| `update_changelog_item` | Update changelog item | Changelog | |
+| `import_past_bookings` | Import past bookings | Imports | yes |
+| `remove_imported_past_bookings` | Remove imported past bookings | Imports | yes |
+| `create_campaign_draft` | Create campaign drafts | Campaigns & media | |
+| `update_campaign_draft` | Edit campaign drafts | Campaigns & media | yes |
+| `add_teams_to_campaign` | Add teams to campaigns | Campaigns & media | |
+| `translate_campaign_messages` | Translate campaigns | Campaigns & media | |
+| `send_campaign_test` | Send campaign test | Campaigns & media | |
+| `add_campaign_note` | Add campaign notes | Campaigns & media | |
+| `manage_campaign` | Manage campaigns | Campaigns & media | yes |
+| `save_marketing_audience` | Save marketing audiences | Campaigns & media | with `id` |
+| `manage_marketing_audience` | Manage marketing audiences | Campaigns & media | yes |
+| `update_marketing_context` | Update marketing context | Campaigns & media | |
+| `publish_marketing_asset` | Publish to the media library | Campaigns & media | |
+| `manage_marketing_asset` | Manage library assets | Campaigns & media | yes |
+| `marketing_settings` | Marketing settings | Campaigns & media | yes |
+| `marketing_suppressions` | Marketing suppressions | Campaigns & media | |
+| `generate_voiceover` | Generate voiceover | Campaigns & media | yes |
+| `generate_music` | Generate music | Campaigns & media | yes |
+
+The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too) and to reactivate a Smart Inbox trial; Marketing settings to change the contact rules or turn sending back on; Marketing suppressions to lift a suppression.
+
+**Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs these without a prompt: the Hub tools that only read (marketing context, campaigns, previews, results, notes, audiences, media library, voices and `get_voiceover_usage` included), `get_upload_url` and `get_marketing_asset_upload_urls`, the low-risk CRM writes (assign a thread or its company, snooze/close/reopen, thread and company notes, links, drafts, triage, presence, urgency) and the Linear lookups (`get_issue`, `list_teams`, `list_projects`, `list_issue_labels`). Claude Code asks before every other tool: everything in the table above (the hook never lists a gated or destructive tool), `update_translation` / `retranslate_string` (live app texts) and creating or updating a Linear issue (`save_issue`). A deny or ask rule in the person's own Claude Code settings still applies.
 
 ## Tone
 
@@ -129,7 +169,7 @@ Summary: counts by priority + category, recommended first action.
 
 P1-first, one thread at a time. For each, offer: read detail, assign, draft reply, add triage note, snooze, or wake. Wait for user input between threads.
 
-For threads flagged as `technical` that look like platform bugs, suggest filing via `/ninja-hub:file-bug <thread-id>`.
+For threads flagged as `technical` that look like platform bugs, suggest filing via `/rental-ninja-crm:file-bug <thread-id>`.
 
 ---
 
@@ -166,7 +206,7 @@ Spawn a sub-agent to fetch the thread detail. Once you have the thread and its c
 4. **Assign / reassign**
 5. **Close / snooze / reopen**
 6. **Research deeper** — fan out across all sources
-7. **File bug** — if this looks like a platform bug, suggest `/ninja-hub:file-bug <thread-id>`
+7. **File bug** — if this looks like a platform bug, suggest `/rental-ninja-crm:file-bug <thread-id>`
 
 Ask: which action?
 
@@ -198,13 +238,13 @@ Present a structured brief:
 
 ## Quick Reference
 
-| Command                           | Description                               |
-|-----------------------------------|-------------------------------------------|
-| `/ninja-hub:hub triage`           | Prioritize & process inbox                |
-| `/ninja-hub:hub thread <id>`      | Thread lookup with full context + actions |
-| `/ninja-hub:hub research <topic>` | Deep-dive investigation                   |
-| `/ninja-hub:hub help`             | This reference card                       |
+| Command                                  | Description                               |
+|------------------------------------------|-------------------------------------------|
+| `/rental-ninja-crm:hub triage`           | Prioritize & process inbox                |
+| `/rental-ninja-crm:hub thread <id>`      | Thread lookup with full context + actions |
+| `/rental-ninja-crm:hub research <topic>` | Deep-dive investigation                   |
+| `/rental-ninja-crm:hub help`             | This reference card                       |
 
 **Direct capabilities** (no slash command needed): search companies/threads/bookings/rentals/guests, assign/close/snooze threads, add notes with @mentions, look up documentation, debug pricing/min-stay, inspect channel manager S3 logs, transition company state, send replies, open RU tickets (draft + send).
 
-**These operations require confirmation**: `send_reply` (email to a customer, or an RU ticket to RU support), `transition_company` (may trigger automations), `create_changelog_entry` / `create_changelog_item` / `update_changelog_item` (publish-facing changelog), `force_booking_com_rate_resync` (pauses a whole Booking.com hotel's rate plans), `impersonate_team_owner` / `login_rentals_united` (customer logins), `import_past_bookings` / `remove_imported_past_bookings` (write or delete a customer's past bookings), `update_translation` / `retranslate_string` (live app texts), every marketing write (campaign drafts and edits, translations, tests, notes, `save_marketing_audience`, `update_marketing_context`, `publish_marketing_asset`, `marketing_settings`, `marketing_suppressions` and every `manage_*` tool) and `generate_voiceover` / `generate_music` (spend ElevenLabs credits). Everything else runs automatically through the plugin's hook (`hooks/hooks.json`): the read-only tools and the low-risk thread and company writes (assign, snooze/close/reopen, notes, links, drafts, triage, presence, urgency).
+**Confirmation and grants**: see [Grants and approvals](#grants-and-approvals). Reads and the low-risk thread and company writes run without a prompt; Claude Code asks before every gated or destructive tool, live app texts and Linear issue filing.
