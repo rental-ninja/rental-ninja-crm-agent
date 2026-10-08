@@ -92,7 +92,8 @@ In parallel:
   `sending` (whether sending is paused) and `conversion_goals`.
 - `list_campaigns`, then `list_campaign_notes` of the related or recent ones: their postmortems and hypotheses say
   what was tried and what it taught. Do not repeat an idea that failed without a new angle.
-- `list_marketing_assets` (status approved) when a video would help the popup or the email.
+- `list_marketing_assets` (status approved) whenever the campaign may have a popup or an email: their video comes
+  from the library (step 5, "Video").
 
 ### 2. Hypothesis
 
@@ -194,6 +195,16 @@ Also: at most one list of three or one fragment per message; no emoji unless the
 test — if a competitor could send the message unchanged, add the Rental Ninja specific. Before saving, read every
 text for these, then fix every `copy_warnings` entry the tools return.
 
+**Video.** A short video shows the feature working in a way the popup text can't, so whenever the plan has a popup
+(or an email), recommend one in the plan without waiting to be asked:
+
+- If an approved library asset fits the message, propose it by name.
+- Otherwise offer to make one now with the `video` skill, briefed from this campaign: the audience, the pain in
+  their words, what changes, the button, the languages, 16:9 for the popup, 20–30 seconds. Say that the voice and
+  the music spend ElevenLabs credits (`get_voiceover_usage` shows what is left), and start it only on the user's yes.
+- Don't hold the draft for it: create the draft without `asset_id`, and add the video with `update_campaign_draft`
+  once the user has watched it and it is approved (step 7).
+
 ### 6. Contact rules
 
 The Hub enforces these (defaults; live values in `list_campaign_options` or `marketing_settings` `get`; changed with
@@ -247,6 +258,7 @@ Give the user:
 
 - the hypothesis, the audience with its reach and holdout, the sequence (day, channel, condition, one-line summary);
 - the languages written by you and the machine-translated ones awaiting review;
+- the popup's video: linked, waiting for approval in the media library, or none (and why);
 - copy warnings left on purpose, and anything that will not send (email off, no push devices);
 - the tests sent;
 - the `hub_url`, with: "When you are happy with it, activate it in the Hub: starting the sending is the one step I
