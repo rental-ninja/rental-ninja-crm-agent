@@ -15,7 +15,8 @@ brief:
   goal: what it is, the pain it removes, the top features, social proof, how to start
   tone: warm, witty, calm; problem first (act 1), turn (line 5), features (acts 2-3), proof and CTA (act 4)
   keep_out: [AI website builder]
-  claims:               # every number on screen needs a source
+  claims:               # examples from an older film: re-source any you reuse (a tool result from your session);
+                        # counts like '12,500+ properties' no longer go in a film
     - {claim: '12,500+ properties', source: 'https://try.rental-ninja.com'}
     - {claim: '50+ channels', source: 'https://try.rental-ninja.com'}
     - {claim: 'G2 4.9 / Capterra 4.8', source: 'https://try.rental-ninja.com'}

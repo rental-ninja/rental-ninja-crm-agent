@@ -108,6 +108,8 @@ Claude is the main way to run Rental Ninja's marketing; the Hub (Hub → Marketi
 - **`marketing-review`** is the marketing loop: every week it reads each active campaign's results (guardrails, conversion against the holdout, with small-sample caution) and writes one note with 1–3 recommendations, and it writes a postmortem for every campaign that ended. It only writes notes and stops when the numbers look like a tracking bug. Schedule it from Claude Desktop (Scheduled tasks) or with `/schedule`; to stop it, disable the task.
 - **`video`** makes the videos and publishes them to the media library (above).
 
+**Facts come live.** Prices, offers, features, limits and counts in campaign, video and blog copy come from Hub tools in the same session (`get_pricing_catalogue`, `get_company_pricing`, `list_campaign_options`, changelog and docs), never from the marketing context, which holds only voice and positioning; copy that goes to many accounts states no amounts.
+
 **What stays human-only.** Only the actions that start or restart sending: activating a campaign, resuming a paused one, and turning "Pause all sending" back off. You do those in the Hub; Claude never does them. Anything else Claude does after showing you what it will change.
 
 **Grants.** Reading needs no grant. Every marketing write, voice and music generation included, needs its own grant in Hub → Staff access → Campaigns & media: see [Grants and approvals](skills/hub/SKILL.md#grants-and-approvals).
@@ -141,7 +143,7 @@ Team members get the update on their next session.
 
 ### Changelog
 
-- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. The hook runs the read-only tools, the low-risk CRM writes and the Linear lookups without a prompt; destructive and grant-gated tools and creating or updating a Linear issue always ask ([Grants and approvals](skills/hub/SKILL.md#grants-and-approvals)). RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library.
+- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. The hook runs the read-only tools, the low-risk CRM writes and the Linear lookups without a prompt; destructive and grant-gated tools and creating or updating a Linear issue always ask ([Grants and approvals](skills/hub/SKILL.md#grants-and-approvals)). RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library. Campaign, video and blog copy take prices, offers and features from live tools (new read-only `get_pricing_catalogue` and `get_company_pricing`, auto-approved), never from the marketing context.
 
 ### Adding a new team member
 
@@ -161,7 +163,7 @@ rental-ninja-crm-agent/
 └── skills/
     ├── blog-post/
     │   ├── SKILL.md              # Hub-grounded multilingual blog writer
-    │   └── reference/            # CMS import template + product-knowledge snapshot
+    │   └── reference/            # CMS import template + product feature names (no figures)
     ├── file-bug/
     │   └── SKILL.md              # Linear bug filing from a thread or a description
     ├── marketing-campaigns/

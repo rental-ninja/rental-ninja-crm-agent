@@ -92,6 +92,7 @@ The plugin's one reference for grants and auto-approval; the other skills and th
 | `save_marketing_audience` | Save marketing audiences | Campaigns & media | with `id` |
 | `manage_marketing_audience` | Manage marketing audiences | Campaigns & media | yes |
 | `update_marketing_context` | Update marketing context | Campaigns & media | |
+| `get_marketing_asset_upload_urls` | Publish to the media library | Campaigns & media | |
 | `publish_marketing_asset` | Publish to the media library | Campaigns & media | |
 | `manage_marketing_asset` | Manage library assets | Campaigns & media | yes |
 | `marketing_settings` | Marketing settings | Campaigns & media | yes |
@@ -101,7 +102,7 @@ The plugin's one reference for grants and auto-approval; the other skills and th
 
 The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too) and to reactivate a Smart Inbox trial; Marketing settings to change the contact rules or turn sending back on; Marketing suppressions to lift a suppression.
 
-**Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs these without a prompt: the Hub tools that only read (marketing context, campaigns, previews, results, notes, audiences, media library, voices and `get_voiceover_usage` included), `get_upload_url` and `get_marketing_asset_upload_urls`, the low-risk CRM writes (assign a thread or its company, snooze/close/reopen, thread and company notes, links, drafts, triage, presence, urgency) and the Linear lookups (`get_issue`, `list_teams`, `list_projects`, `list_issue_labels`). Claude Code asks before every other tool: everything in the table above (the hook never lists a gated or destructive tool), `update_translation` / `retranslate_string` (live app texts) and creating or updating a Linear issue (`save_issue`). A deny or ask rule in the person's own Claude Code settings still applies.
+**Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs these without a prompt: the Hub tools that only read (marketing context, prices, campaigns, previews, results, notes, audiences, media library, voices and `get_voiceover_usage` included), `get_upload_url`, the low-risk CRM writes (assign a thread or its company, snooze/close/reopen, thread and company notes, links, drafts, triage, presence, urgency) and the Linear lookups (`get_issue`, `list_teams`, `list_projects`, `list_issue_labels`). Claude Code asks before every other tool: everything in the table above (the hook never lists a gated or destructive tool), `update_translation` / `retranslate_string` (live app texts) and creating or updating a Linear issue (`save_issue`). A deny or ask rule in the person's own Claude Code settings still applies.
 
 ## Tone
 
@@ -129,6 +130,13 @@ Domain knowledge and investigation guides live in `references/`. See `references
 ## Doc search
 
 `search_docs` repos: `ninja-docs` (help center), `ninja` (backend/DB), `ninja_app` (PMS app), `rentals-united-docs` (RU API), `ninja_app_client` (guest app). Omit `repo` for broad search.
+
+## Rental Ninja prices (read-only)
+
+- **`get_pricing_catalogue`** — list prices for sale: plans with monthly and yearly tiers and worked totals, add-ons, default usage rates, Smart Inbox trial credits, campaign offers with their text, and the caveat that teams can pay otherwise.
+- **`get_company_pricing`** {`company_id`} — what one account pays and would pay: plan price per cycle, Smart Plan for them, coupons and discount, currency, billing cycle, negotiated lines, their usage rates.
+
+Teams pay different prices (legacy prices, coupons, negotiated lines, yearly billing): a price for one customer comes from `get_company_pricing` for that account, never from the catalogue, memory or the marketing context.
 
 ---
 

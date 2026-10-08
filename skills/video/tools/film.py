@@ -67,6 +67,11 @@ T = os.path.join(SKILL, 'tools')
 PY = sys.executable
 BASE_PKGS = ['pyyaml', 'numpy', 'playwright', 'pillow']
 WHISPER_PKGS = ['faster-whisper==1.2.1', 'av<19']
+CTA_EMPTY = "end_card.cta is empty, so the end card says 'Book a demo': an in-app film takes the action of the campaign's button"
+
+
+def cta_set(s):
+    return bool(str((s.get('end_card') or {}).get('cta') or '').strip())
 
 
 def sh(*a, **k):
@@ -101,6 +106,7 @@ def cmd_check(root):
     if f['format'] not in spec.FORMATS: print(f"film.format {f['format']!r}: use one of {list(spec.FORMATS)}"); ok = False
     elif f['format'] != '16x9' and f['style'] != 'flat': print('film.format other than 16x9 needs style: flat'); ok = False
     if cap['style'] not in ('pill', 'karaoke'): print(f"captions.style {cap['style']!r}: pill or karaoke"); ok = False
+    if not cta_set(s): print(CTA_EMPTY); ok = False
     import library
     if f['lang'] not in library.LOCALES:
         print(f"film.lang {f['lang']!r} is not a Hub app language ({', '.join(library.LOCALES)}): no brand voice and no media library for it")
@@ -357,7 +363,7 @@ def cmd_page(root):
         html = html.replace('{{' + k + '}}', v)
     open(os.path.join(s['root'], 'app/index.html'), 'w').write(html)
     missing = [x for x in s['app']['scripts'] if not os.path.exists(os.path.join(s['root'], 'app/js', x))]
-    print('page written' + (f'; missing scripts: {missing}' if missing else ''))
+    print('page written' + (f'; missing scripts: {missing}' if missing else '') + ('' if cta_set(s) else f'; {CTA_EMPTY}'))
 
 
 # ---------- pictures ----------

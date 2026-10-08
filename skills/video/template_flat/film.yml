@@ -26,7 +26,8 @@ brief:                               # filled in and approved with the user BEFO
   tone: warm, witty, calm
   features: []                       # the list the user approved, in film order
   keep_out: []                       # things the user said not to show or mention
-  claims: []                         # {claim, source}: every number or promise on screen needs a source
+  claims: []                         # {claim, source}: a tool result from this session or a context positioning line;
+                                     # no prices, discounts, offers, end dates or customer counts
 
 timing:
   first_line_at: 1.6                 # seconds of music before the first word
@@ -60,7 +61,8 @@ scenes:                              # the plan: one scene per line or line rang
   - {lines: [1, 1], name: opening, bg: C.sky, idea: 'street with the red banner, host waves'}
   - {lines: [2, 2], name: end card, bg: C.navy, idea: 'endCardScene(2): logo, tagline, CTA, URL'}
 
-end_card: {tagline: 'Your whole rental business, in one place.', cta: Book a demo, url: rental-ninja.com}
+# cta: in-app = the action of the campaign's button (its label, e.g. Try Smart Inbox); social for prospects = Book a demo
+end_card: {tagline: 'Your whole rental business, in one place.', cta: '', url: rental-ninja.com}
 
 # app.scripts defaults to the house-style list in tools/spec.py (STYLE['flat']); add your own scenes_*.js before main_flat.js.
 

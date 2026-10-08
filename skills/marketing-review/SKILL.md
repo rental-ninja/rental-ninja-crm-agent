@@ -66,6 +66,9 @@ Parse `$ARGUMENTS`:
      measured), bounces, complaints; skipped deliveries by reason (send window, contact limits,
      no device, email sending off).
    - **Against the hypothesis:** is the behaviour it predicted happening? Compare with the last review's numbers.
+   - **Facts still true?** Compare the texts (`preview_campaign`) with `list_campaign_options` `offers` and
+     `get_pricing_catalogue`, and check every date in the copy. An offer that is gone or a date that has passed is the
+     first recommendation, with any `red` guardrail: pause the campaign and fix the copy.
 6. Write **one** `add_campaign_note`, `kind: note`, markdown, in the language of the campaign's earlier notes
    (English when there are none):
 
@@ -86,7 +89,7 @@ Parse `$ARGUMENTS`:
    Recommendations are 1–3, concrete and doable: a copy line to change, a step to add or drop, an audience to narrow,
    a date to end it. Each names who acts.
 7. Keep a line per campaign for the summary: reviewed / skipped (recent review) / stopped (suspected bug), and any
-   `red` guardrail.
+   `red` guardrail or stale fact.
 
 ## Postmortems
 

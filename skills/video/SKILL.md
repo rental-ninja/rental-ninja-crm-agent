@@ -73,17 +73,24 @@ Claude Code replaces `${CLAUDE_SKILL_DIR}` with this skill's folder (inside the 
 
 1. **Brief → feature list → user approval (gate).** Ask where the video will play (in-app = 16x9; Reels/Stories
    9x16; feed 1x1 or 4x5), who it is for and in which languages (one film folder per language). Read the Hub's
-   marketing context first (`get_marketing_context`): the audience and roles, their pain points, the customer
-   language for the film's language (their own words, verbatim), the words to use and avoid, the brand voice and the
-   proof points. If it is empty, say so and work from the docs; never invent it. Ground every feature in the Hub
-   before listing it: what shipped (`search_changelog`, `list_changelog_items`) and how it really works
-   (`search_docs`, repos `ninja-docs`, `ninja_app`, `ninja_app_client`). Then send the user the list of
-   features/beats you will show, in order, and wait for approval. Respect `keep_out`. Every number or promise on
-   screen needs a source: record it in `brief.claims` (a context proof point counts, with its source). Never show a
-   real customer, guest, property or booking.
+   marketing context first (`get_marketing_context`) for style and positioning: the audience and roles, their pain
+   points, the customer language for the film's language (their own words, verbatim), the words to use and avoid, the
+   brand voice, the differentiation and what never to claim. If it is empty, say so and work from the docs; never
+   invent it. Ground every feature in the Hub before listing it: what shipped (`search_changelog`,
+   `list_changelog_items`) and how it really works (`search_docs`, repos `ninja-docs`, `ninja_app`,
+   `ninja_app_client`). Then send the user the list of features/beats you will show, in order, and wait for approval.
+   Respect `keep_out`.
+   **Claims.** Every claim on screen or in the narration has its source in `brief.claims`: a tool result from this
+   session or a positioning line of the context. No prices, discounts, offers, end dates or customer counts, on screen
+   or in the narration: the film outlives the campaign, and teams pay different prices. The claims in
+   `reference/*/film.yml` are examples: re-source any you reuse. Never show a real customer, guest, property or
+   booking.
 2. **Script.** `FILM new <folder>`, then fill `film.yml`: one narration line ≈ one scene; 8–14 words a line,
    ~150 wpm (`FILM check` estimates the length). Problem → turn → features → proof → CTA for promos; the last line is
-   always the brand + tagline over the series end card. Write it in the context's brand voice: open on the pain in the
+   always the brand + tagline over the series end card. The end card's button (`end_card.cta`, empty in a new film
+   until you set it): for an in-app film, the action of the campaign's button (its label, e.g. "Try Smart Inbox"),
+   since the viewers are customers already; "Book a demo" only for social films aimed at prospects. Write the script
+   in the context's brand voice: open on the pain in the
    customers' own words, use the words to use, never the words to avoid, no stock phrases ("di adiós a", "lleva tu …
    al siguiente nivel", "unlock the power", "seamless") and no "it's not X, it's Y". Show the script to the user
    before recording: every take spends ElevenLabs credits (see Budget).
@@ -337,7 +344,7 @@ key's credits when there is one.
   (the company account through the Hub; a personal key follows its own plan). Film/TV, broadcast and large games need
   an ElevenLabs Enterprise licence. Music you bring yourself (`engine: library`) needs its own licence.
 - **Cast:** Humaaans are CC0 (record in `library/humaaans/LICENSE.md`).
-- **Claims:** every number or promise on screen needs its `brief.claims` source; no real customer data on screen.
+- **Claims:** sourced in `brief.claims` (phase 1, Claims); no real customer data on screen.
 - **Record:** `FILM publish` writes these rights into the media library asset, and the Hub turns them into a paid-ads
   verdict (yes, or check first with the reasons). A Voice Library voice always gives "check first".
 

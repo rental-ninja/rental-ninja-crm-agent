@@ -21,8 +21,9 @@ check their Hub token. A single tool missing: the person lacks its grant (see Gr
    a paused one, and turning **"Pause all sending" back off**. MCP does not offer them; never look for a way around
    that (no impersonation, no clicking through the Hub in a browser, no asking another agent). Everything else in
    Marketing you can do here.
-2. **Context before copy.** Read `get_marketing_context` before writing or rewriting any text, and follow its brand
-   voice, customer language and word lists.
+2. **Context before copy.** Read `get_marketing_context` before writing or rewriting any text, for the brand voice,
+   customer language, words to use and avoid, pain points, objections, positioning, what never to claim and
+   sensitive topics. It holds no prices or figures: facts come from the tools (rule 7).
 3. **Confirm before writing.** Show the plan (hypothesis, audience with its reach, sequence, Spanish and English
    copy) before creating a draft; confirm every edit (`update_campaign_draft` can drop a channel or replace the
    hand-picked teams), pause, end, deletion, approval, change to a saved audience, contact-rule change or suppression
@@ -41,13 +42,23 @@ check their Hub token. A single tool missing: the person lacks its grant (see Gr
    with `id` is refused while an active campaign uses it (pause that campaign first, or a person with Manage
    campaigns edits the audience in the Hub). A paused campaign using it reaches the new set once resumed. Confirm it
    first (step 3, "Changing a saved audience").
-7. **No invented facts.** Every number, price, offer or promise traces to the context's proof points,
-   `list_campaign_options` (offers, plans) or the changelog/docs. No made-up statistics or testimonials.
+7. **Live facts only.** Every fact in the copy comes from a tool in this session, never from memory, the context or
+   an earlier campaign:
+   - prices → `get_pricing_catalogue` (list prices) or `get_company_pricing` (what one account pays);
+   - offers → the text of `list_campaign_options` `offers`, word for word, and only after the user confirms billing
+     applies it to every account that converts;
+   - features → `search_changelog` + `search_docs`;
+   - limits and sending → `list_campaign_options` / `marketing_settings` `get`;
+   - counts → `preview_marketing_audience`.
+
+   If a tool and the context disagree, the tool wins: tell the user. No made-up statistics or testimonials.
 
 ## Tools
 
 - **Context:** `get_marketing_context` (`version`, `include_history`), `update_marketing_context` (new version, or
   `restore_version`).
+- **Facts (read-only):** `get_pricing_catalogue`, `get_company_pricing` {`company_id`}, `get_company_subscription`,
+  `search_changelog`, `search_docs`.
 - **Campaigns:** `list_campaign_options`, `list_campaigns`, `create_campaign_draft`, `update_campaign_draft`,
   `translate_campaign_messages`, `add_teams_to_campaign`, `preview_campaign`, `send_campaign_test`,
   `get_campaign_results`, `list_campaign_notes`, `add_campaign_note`, and `manage_campaign` with an `action`: `pause`,
@@ -84,9 +95,13 @@ Parse `$ARGUMENTS`:
 
 In parallel:
 
-- `get_marketing_context`: product, audience and roles, pain points, objections, customer language per language,
-  words to use and avoid, brand voice, proof points, goals. If `version` is null, nobody has written it yet: tell the
-  user and offer to draft it (step "Marketing context" below) before writing copy.
+- `get_marketing_context`: audience and roles, pain points, objections, customer language per language, words to
+  use and avoid, brand voice, positioning and what never to claim, sensitive topics. If `version` is null, nobody has
+  written it yet: tell the user and offer to draft it (step "Marketing context" below) before writing copy.
+- `search_changelog` + `search_docs` (repos `ninja-docs`, `ninja_app`) for the feature being promoted: what it does
+  today and its exact path and label in the app.
+- `get_pricing_catalogue` when the campaign sells a plan, an add-on or a trial: what is for sale and the caveat that
+  teams can pay otherwise.
 - `list_campaign_options`: audiences with `matches_today`, placements, app screens (`routes`, `email_routes`),
   button types (`cta_types` and which are admin-only), `offers`, `plans`, text limits, the push and email rules,
   `sending` (whether sending is paused) and `conversion_goals`.
@@ -122,6 +137,10 @@ Pick one, then check its size before writing copy:
 - `holdout_percent`: 10 by default for segments (at least 1), 0 for hand-picked teams. Results compare exposed and
   holdout teams and flag `small_sample` under 30 teams per group: tell the user when the audience is too small to
   measure anything, and keep the holdout unless they decide otherwise.
+- **One text reaches every team.** Each language has one text for the whole audience. Before the copy states anything
+  plan-, country- or size-specific, narrow the audience with saved-audience conditions (`plan`, `country`,
+  `channel_manager`, `rentals`) so it is true for every team, or drop it. Spot-check 3–5 teams from
+  `preview_marketing_audience` with `get_company_subscription` / `get_company_pricing`.
 - **Changing a saved audience.** `save_marketing_audience` with `id` replaces the conditions of an audience that
   campaigns may already use. It is refused while an active campaign uses it; a paused one reaches the new set of
   teams once resumed (its holdout baseline keeps the teams snapshotted at activation). Before saving: find the audience in
@@ -165,9 +184,9 @@ Lengths that read whole (`copy_warnings` flags the rest; `list_campaign_options`
 | In-app popup | title / body | ≤ 60 / ≤ 280 characters |
 | Push | title / body | ≤ 50 / ≤ 150 characters |
 | Email | subject / preheader | 40–60 / 90–140 characters |
-| Email | body | short markdown: the pain, what changes, the proof, the button; one link at most (the button) |
+| Email | body | short markdown: the pain, what changes, one sourced fact, the button; one link at most (the button) |
 
-Write from the context:
+Write from the context, with facts from the tools:
 
 - Open on the pain in the customers' own words (the context's customer language for that language), then what
   changes for them, concretely ("el borrador de cada respuesta, listo en tu bandeja", not "ahorra tiempo").
@@ -175,7 +194,12 @@ Write from the context:
   Inbox, Smart Plan.
 - Follow the brand voice for form of address and tone (tú/usted, warmth). Native Spanish and native English, not
   translations of each other.
-- A number or offer only with its source (proof points, `offers`).
+- **No amounts** in copy for many accounts: teams pay different prices (legacy prices, coupons, negotiated lines,
+  their own usage rates, yearly billing). Send admins to their own price instead: the popup button `upgrade_dialog`
+  (`cta_params` plan `smart-plan`) shows each team its own Smart Inbox prices and leads to Billing; push and email
+  open the `subscription` route (Billing). Both are admin-only.
+- No `{placeholders}`: nothing fills them in.
+- Every other fact per rule 7.
 
 **No AI tells** (adapted from the copywriting rules of
 [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT):
@@ -193,7 +217,7 @@ Write from the context:
 
 Also: at most one list of three or one fragment per message; no emoji unless the brand voice allows them; the swap
 test — if a competitor could send the message unchanged, add the Rental Ninja specific. Before saving, read every
-text for these, then fix every `copy_warnings` entry the tools return.
+text for these, then fix every `copy_warnings` entry the tools return (lengths, amounts, `{placeholders}`).
 
 **Video.** A short video shows the feature working in a way the popup text can't, so whenever the plan has a popup
 (or an email), recommend one in the plan without waiting to be asked:
@@ -240,8 +264,8 @@ per channel: `in_app` {`placement`, `title`, `body`, `cta_label`, `cta_type`, `c
 
 ### 8. Translate, preview, test
 
-1. `translate_campaign_messages` fills the missing languages from English (else Spanish), keeping links,
-   placeholders, limits and product names. It lists what it rejected: leave those languages to fall back to English,
+1. `translate_campaign_messages` fills the missing languages from English (else Spanish), keeping links, limits and
+   product names. It lists what it rejected: leave those languages to fall back to English,
    or ask the user. Every language it wrote is machine-translated and needs a human review before activation: list
    them for the user. When a person who reads the language has checked one and says so, mark it reviewed
    (`manage_campaign` `mark_translations_reviewed`, or in the Hub editor).
@@ -257,6 +281,7 @@ per channel: `in_app` {`placement`, `title`, `body`, `cta_label`, `cta_type`, `c
 Give the user:
 
 - the hypothesis, the audience with its reach and holdout, the sequence (day, channel, condition, one-line summary);
+- each fact in the copy with the tool it came from (rule 7);
 - the languages written by you and the machine-translated ones awaiting review;
 - the popup's video: linked, waiting for approval in the media library, or none (and why);
 - copy warnings left on purpose, and anything that will not send (email off, no push devices);
@@ -289,17 +314,21 @@ means the person lacks its grant (see Grants); the same action is always in the 
 ## Marketing context
 
 `update_marketing_context` saves a new version of the whole document. Only when the user asks: start from
-`get_marketing_context`, keep what still holds, follow the section template (## headings in order: Product overview,
-Target audience & roles, Problems & pain points, Competitive landscape, Differentiation, Objections, Customer
-language, Words to use/avoid, Brand voice, Proof points, Goals, Changelog), quote customers verbatim with where it
-comes from, mark guesses, add a Changelog line and pass the same summary as `change_note`. Customer language comes
-from real threads (`search_threads`, `search_closure_summaries`): phrasing only, never a customer's name. Earlier
-versions: `get_marketing_context` with `include_history` or `version`, and `update_marketing_context`
+`get_marketing_context`, keep what still holds, follow the section template in the tool's description, quote
+customers verbatim with where it comes from, mark guesses and pass a one-line summary as `change_note`. Customer
+language comes from real threads (`search_threads`, `search_closure_summaries`): phrasing only, never a customer's
+name. Earlier versions: `get_marketing_context` with `include_history` or `version`, and `update_marketing_context`
 `restore_version` to bring one back as a new version.
+
+It holds what stays true for months: style and positioning (product overview in one paragraph, audience and roles,
+pain points, customer language, brand voice, words to use and avoid, how to talk about price, differentiation and
+what never to claim, objections, dated competitive notes, sensitive topics). Never prices, offer terms, limits,
+counts or offer dates: those change without anyone editing the document and live in the tools (rule 7). If you find
+any there, don't use them: tell the user and propose removing them in a new version.
 
 ## Grants
 
-Reading and `get_marketing_asset_upload_urls` need no grant. Every other tool needs its own grant in Hub → Staff
+Reading needs no grant; `get_marketing_asset_upload_urls` needs "Publish to the media library", like `publish_marketing_asset`. Every other tool needs its own grant in Hub → Staff
 access → Campaigns & media (`marketing_settings` and `marketing_suppressions` even to `get` or `list`); one missing
 from your tools means the person lacks that grant. The grant labels, what to tell the person and which tools run
 without a prompt: **Grants and approvals** in the `hub` skill (`${CLAUDE_SKILL_DIR}/../hub/SKILL.md`).
