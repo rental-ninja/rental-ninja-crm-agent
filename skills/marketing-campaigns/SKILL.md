@@ -34,7 +34,8 @@ check their Hub token.
    after a person who reads that language checked them and says so.
 6. **A live campaign's own settings change only while paused; its saved audience changes it at once.**
    `update_campaign_draft` refuses an active campaign: pause it first (`manage_campaign` `pause`, with the user's OK),
-   then a person resumes it in the Hub. Once activated, a campaign's choice of audience and its holdout are fixed and
+   then a person with Manage campaigns resumes it in the Hub, where the same grant is needed to change a live
+   campaign or add accounts to it. Once activated, a campaign's choice of audience and its holdout are fixed and
    hand-picked teams can only be added. A saved audience, though, is evaluated live: saving an existing one
    (`save_marketing_audience` with `id`) changes who every active or paused campaign using it reaches from its next
    send, without any pause. Confirm it first (step 3, "Changing a saved audience").
@@ -194,7 +195,7 @@ text for these, then fix every `copy_warnings` entry the tools return.
 ### 6. Contact rules
 
 The Hub enforces these (defaults; live values in `list_campaign_options` or `marketing_settings` `get`; changed with
-`marketing_settings` `update_contact_rules` only when the user asks, or in Marketing → Marketing settings). Plan
+`marketing_settings` `update_contact_rules` only when the user asks, or in the Hub's Rental Ninja Settings → Marketing). Plan
 around them so the sequence lands as intended. Customers are businesses, reached at work:
 
 - **Send window:** push and email go out on weekdays, 09:00–19:00 in each team's timezone; outside it they wait.
@@ -205,7 +206,7 @@ around them so the sequence lands as intended. Customers are businesses, reached
   of 300 campaign emails a day overall, one-click unsubscribe; nothing goes out while email sending is off.
 - **In-app:** at most 1 campaign popup per user per day across campaigns; it shows until clicked or dismissed.
 - **Priority:** when several campaigns match a user, the highest `priority` shows first.
-- **Kill switch:** "Pause all sending" (Hub → Marketing → Marketing settings) stops every campaign push, email and
+- **Kill switch:** "Pause all sending" (Hub → Rental Ninja Settings → Marketing) stops every campaign push, email and
   popup. When the user asks, pause it with `marketing_settings` `pause_all_sending` {reason}. Turning it back on
   restarts sending, so only a person does that, in the Hub.
 
@@ -287,6 +288,10 @@ versions: `get_marketing_context` with `include_history` or `version`, and `upda
 Read tools and `get_marketing_asset_upload_urls` need no grant. Every write tool needs the person's grant in Hub →
 Staff access, group **"Campaigns & media"**, and `marketing_settings` and `marketing_suppressions` need theirs even
 to `get` or `list`: a grant error means asking an admin, not working around it.
+
+The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding
+accounts too) and to reactivate a Smart Inbox trial; Marketing settings to change the contact rules or turn sending
+back on; Marketing suppressions to lift a suppression.
 
 | Tool | Grant |
 |---|---|

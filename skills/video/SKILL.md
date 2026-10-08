@@ -122,7 +122,7 @@ characters, words: [{text, start, end}]}`.
    and find `film.lang`:
    - a `voice_id` → leave `voice.voice` empty (the Hub uses that brand voice) and write its `name` into `voice.name`;
    - `voice_id` null (no brand voice for that language yet) → ask the user for an ElevenLabs voice id, or to have one
-     picked in Hub → Marketing → Voice & audio (`settings_url`), and set `voice.voice` (+ `voice.name`);
+     picked in Hub → Rental Ninja Settings → Voice & audio (`settings_url`), and set `voice.voice` (+ `voice.name`);
    - the user wants another voice for this film → `voice.voice` overrides the brand voice; keep it in `film.yml`.
    Set `voice.from_voice_library` when you know it (true = a public ElevenLabs Voice Library voice, e.g. Cristina
    `1CeqBeXMOqCleeQjfYfO`; false = premade or the company's own); `publish` records the rights from these fields.

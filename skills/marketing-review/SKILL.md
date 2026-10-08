@@ -56,7 +56,7 @@ Parse `$ARGUMENTS`:
 4. **Self-check** (below). A suspected bug → no note for this campaign; put it at the top of the summary.
 5. Read it:
    - **Guardrails** (`guardrails`): email unsubscribe rate, push opt-outs, popup dismiss rate, each `ok` / `amber` /
-     `red` against the thresholds of Marketing → Marketing settings. `red` → the first line of the note recommends pausing the
+     `red` against the thresholds in Hub → Rental Ninja Settings → Marketing. `red` → the first line of the note recommends pausing the
      campaign and says which metric; `amber` → watch it and name a cause to test.
    - **Conversion vs holdout:** exposed and holdout conversion rates and the uplift in percentage points. With
      `small_sample` (a group under 30 teams), or fewer than about 5 conversions in a group, write "too early to
@@ -130,7 +130,7 @@ may need a developer). No note is written on it until a person has looked.
 
 ## Kill switches
 
-- **Sending:** "Pause all sending" (Hub → Marketing → Marketing settings) stops every campaign push, email and popup. The loop
+- **Sending:** "Pause all sending" (Hub → Rental Ninja Settings → Marketing) stops every campaign push, email and popup. The loop
   never touches it: a red guardrail is a recommendation for a person, who can flip it or ask Claude to (the
   `marketing-campaigns` skill). Only a person turns it back off.
 - **The loop:** disable or delete its scheduled task (Claude Desktop → Scheduled; Claude Code `/schedule`). Removing
