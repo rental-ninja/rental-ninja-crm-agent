@@ -62,8 +62,8 @@ Parse `$ARGUMENTS`:
      `small_sample` (a group under 30 teams), or fewer than about 5 conversions in a group, write "too early to
      call" and give the numbers as directional only. Never write "significant" or "winner" on a small sample.
    - **Funnel and steps** (`steps`, per channel): where people drop (audience → reached → clicked → converted);
-     popup CTR and dismiss rate; push sent, failed and open rate; email delivered, clicks (opens are inflated by
-     Apple Mail: judge by clicks), bounces, complaints; skipped deliveries by reason (send window, contact limits,
+     popup CTR and dismiss rate; push sent, failed and open rate; email delivered, clicks (email opens are not
+     measured), bounces, complaints; skipped deliveries by reason (send window, contact limits,
      no device, email sending off).
    - **Against the hypothesis:** is the behaviour it predicted happening? Compare with the last review's numbers.
 6. Write **one** `add_campaign_note`, `kind: note`, markdown, in the language of the campaign's earlier notes
@@ -109,7 +109,7 @@ Parse `$ARGUMENTS`:
 Stop writing for that campaign and tell the person when any of these holds:
 
 - more reached than the audience, more clicked than reached, more converted teams than reached or than the audience;
-- email opens or clicks above sends, push opens above sends, or any negative number;
+- email clicks above sends, push opens above sends, or any negative number;
 - nothing reached after 3 or more days live while sending is on and the steps are not waiting on the send window,
   the contact limits or the email legal gate (check `list_campaign_options` `sending` and the skipped reasons);
 - holdout conversions far above the exposed group's with a large sample (a likely mix-up of the groups);

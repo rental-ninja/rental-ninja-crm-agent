@@ -134,7 +134,7 @@ Each channel is one step with `delay_days` (days after activation) and `send_con
 | Condition | Who still gets the step |
 |---|---|
 | `always` | everyone in the audience |
-| `if_not_engaged` | people who did not click the popup, tap the push or click the email button on an earlier day (email opens do not count) |
+| `if_not_engaged` | people who did not click the popup, tap the push or click the email button on an earlier day |
 | `if_not_converted` | teams that have not converted (converted teams never get any later step anyway) |
 
 Default pattern, to adapt to the goal:
