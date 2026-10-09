@@ -40,7 +40,7 @@ const LAYOUT = (() => {
 const CAPS = (() => { const q = QS.get('caps'), c = FILM.captions || {}; return { on: q !== null ? !/^(0|off|false)$/.test(q) : c.burn ?? !FMT.wide, style: /^(pill|karaoke)$/.test(q) ? q : c.style || 'pill', size: LAYOUT.caps.size }; })();
 Object.assign(SAFE, { stage: LAYOUT.stage, mark: LAYOUT.mark, caps: { x: SAFE.left, w: SAFE.w, h: LAYOUT.caps.size * 3.1, y: LAYOUT.caps.y - LAYOUT.caps.size * (LAYOUT.caps.anchor === 'bottom' ? 3.1 : 1.55) } });
 
-// ---------- timing: the voice and film 3's foley hits ----------
+// ---------- timing: the voice and a fixed mix's foley hits ----------
 const LEAD = FILM.lead, TAIL = FILM.tail, WIPE = FILM.wipe;
 const LN = i => VO.vo[i - 1];
 const DURATION = Math.round((LN(VO.vo.length).end + TAIL) * 2) / 2;

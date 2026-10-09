@@ -35,8 +35,8 @@ python3 "${CLAUDE_SKILL_DIR}/tools/film.py"
 
 Claude Code replaces `${CLAUDE_SKILL_DIR}` with this skill's folder (inside the plugin cache, e.g.
 `~/.claude/plugins/cache/rental-ninja/rental-ninja-crm/<version>/skills/video`). If it ever shows up literally, use the
-"Base directory for this skill" path given above this file instead. `template_flat/`, `template/`, `reference/` and
-`library/` below are relative to that folder. `FILM --help` lists every command.
+"Base directory for this skill" path given above this file instead. `template_flat/`, `reference/` and `library/`
+below are relative to that folder. `FILM --help` lists every command.
 
 - **The skill folder is read-only.** A plugin update replaces it, so nothing is ever written there: `film.py` refuses
   a film folder inside it. To start from a reference, copy it out first.
@@ -52,7 +52,7 @@ Claude Code replaces `${CLAUDE_SKILL_DIR}` with this skill's folder (inside the 
    `xcode-select --install` or `brew install python` in their own Terminal.
 2. `FILM setup` checks everything and prints `ok` / `MISSING` / `optional` with the exact command for each gap.
    It installs nothing by itself.
-3. **Python packages + Chromium** (pyyaml, numpy, playwright, pillow): with the user's OK, run
+3. **Python packages + Chromium** (pyyaml, numpy, playwright): with the user's OK, run
    `FILM setup --install`. It creates the tools venv in `~/.cache/rental-ninja-video/venv` and downloads Playwright's
    Chromium (a few hundred MB, user space only, no password). `film.py` switches to that venv on its own from then on.
 4. **Homebrew and ffmpeg** are system installs: give the user the commands `FILM setup` printed
@@ -83,7 +83,7 @@ Claude Code replaces `${CLAUDE_SKILL_DIR}` with this skill's folder (inside the 
    **Claims.** Every claim on screen or in the narration has its source in `brief.claims`: a tool result from this
    session or a positioning line of the context. No prices, discounts, offers, end dates or customer counts, on screen
    or in the narration: the film outlives the campaign, and teams pay different prices. The claims in
-   `reference/*/film.yml` are examples: re-source any you reuse. Never show a real customer, guest, property or
+   `reference/film5/film.yml` are examples: re-source any you reuse. Never show a real customer, guest, property or
    booking.
 2. **Script.** `FILM new <folder>`, then fill `film.yml`: one narration line ≈ one scene; 8–14 words a line,
    ~150 wpm (`FILM check` estimates the length). Problem → turn → features → proof → CTA for promos; the last line is
@@ -98,10 +98,10 @@ Claude Code replaces `${CLAUDE_SKILL_DIR}` with this skill's folder (inside the 
    Hub jobs, listen, set `pick` per line, then `FILM vo` (cleanup chain → word timings → `words.js` → captions →
    page). It flags takes whose words drift from the script. Tune `gap` per line for breathing room (longer after the
    problem beat and before the turn).
-4. **Scenes.** House style: write `app/js/scenes*.js` (add them to `app.scripts` before `main_flat.js`), starting from
-   `reference/film5/js`. Paper style: `assets*.js` + `scenes*.js` from `reference/film3/js`. Both references are 24
-   complete scenes covering people, houses, phones, calendars, inbox, pricing, money, reports, proof and CTA. Review
-   with `FILM peek <folder> NAME t1 t2 t3 t4 …` at word times and look at every sheet yourself before moving on.
+4. **Scenes.** Write `app/js/scenes*.js` (add them to `app.scripts` before `main_flat.js`), starting from
+   `reference/film5/js`: 24 complete scenes covering people, houses, phones, calendars, inbox, pricing, money,
+   reports, proof and CTA. Review with `FILM peek <folder> NAME t1 t2 t3 t4 …` at word times and look at every
+   sheet yourself before moving on.
 5. **Sound.** Set `music.sections` (and `stops`) to the acts, show the user `FILM score <folder> --dry` (the plan and
    its credits), then `FILM score <folder>` and run its `generate_music` job + `import-music` (see Music). Then
    `FILM audio <folder>` (cues → foley → score → mix → `app/audio/mix.mp3`). The master lands at −14 LUFS / ≤ −1 dBTP.
@@ -206,8 +206,7 @@ sections musical names ("Playful Tension Groove", "Warm Resolution and Final Cho
 
 ## House style
 
-`FILM new <folder>` scaffolds the house style (`film.style: flat`, from `template_flat/`); `FILM new <folder> paper`
-keeps the original paper-craft stop-motion engine (`template/`, kit notes further down, 16x9 only).
+`FILM new <folder>` scaffolds a film in the house style, from `template_flat/`.
 
 - **Look:** flat vector illustration, 25 fps, smooth easing, paper grain, push transitions led by a navy band
   (`drawPush`). Palette "Coral & Navy" in `palette.js` (logo coral `#F5515F`, navy `#0D2B4E`, cream walls,
@@ -230,9 +229,9 @@ keeps the original paper-craft stop-motion engine (`template/`, kit notes furthe
   foreground).
 - **End card:** `endCardScene(lastLine)` (endcard.js): official ninja drops in, name pops on the voice, tagline,
   red CTA pill, URL, from `end_card` in film.yml.
-- **Reference:** `reference/film5/` is the 24-scene Rental Ninja promo in this style (scenes_f1..f4.js). It borrowed
-  film 3's finished mix, so its beats use `hit(type, near)` on `hits.js`; new films time beats with `w()` and emit
-  their own `cue()`s like the paper engine (wipes add whoosh + land automatically).
+- **Reference:** `reference/film5/` is the 24-scene Rental Ninja promo in this style (scenes_f1..f4.js). It was
+  animated onto an earlier film's finished mix, so its beats use `hit(type, near)` on `hits.js`; new films time beats
+  with `w()` and emit their own `cue()`s (Scene code rules).
 
 ## Formats and captions
 
@@ -276,42 +275,28 @@ keeps the original paper-craft stop-motion engine (`template/`, kit notes furthe
 - **Older film folders:** copy `flat.js`, `main_flat.js`, `brand.js`, `endcard.js` from `template_flat/app/js` into
   the film, then `FILM captions <folder>` and `FILM page <folder>`.
 
-## Scene code rules (learned the hard way; people/kit names below are the paper kit, see House style for flat)
+## Scene code rules (learned the hard way)
 
 - Time everything from the voice: `w(line, 'word', n)` (normalised lowercase alnum token, e.g. `'booking'`,
   `'com'`, `'12'`), `LN(i).start/.end`, `B(i)`. Never type absolute seconds. `FILM words <folder> [line]` lists
   tokens.
-- `scene(a, b, {bg, seed, wipe, cam:[z0,z1,cx,cy], camAt(t)?, build(), draw(ctx,t)})` covers lines a..b;
-  scenes must tile every line. Sheets wipe in `timing.lead` before their line; wipes alternate direction.
-- **Pre-populate**: base elements of a scene start at `this.start - 1` so the incoming sheet carries content
-  during the wipe (the wipe draws the scene at its start time). Only the beats animate on words.
-- People: `drawPerson(ctx, x, feetY, {kind, s, eyes, mouth, armL, armR, flip, held, headRot, look})`, kinds
-  `host g1 g2 g3 g4 cleaner owner`. Enter from y ≈ 1750 (below frame) so heads never pop in; keep feet on
-  a visible ground line.
-- Text: `paperText` for headline stickers (dilate backing, no seams), `ink` for printed text inside sprites,
-  `hand` for marker notes. Muted text `P.mute` (#6F6A62) or darker; calendar/UI text ≥ 22 px at 1080p;
-  nothing smaller than what reads on a phone. One idea per scene; max ~3 labels on screen at once.
+- `scene(a, b, {bg, wipe, cam:[z0,z1,cx,cy], camAt(t)?, build(), draw(ctx,t)})` covers lines a..b;
+  scenes must tile every line. Scenes push in `timing.lead` before their line; alternate the `wipe` direction.
+- **Pre-populate**: base elements of a scene start at `this.start - 1` so the incoming scene carries content
+  during the push (it draws the scene at its start time). Only the beats animate on words.
+- People (`person`, House style) enter from below or beside the frame so heads never pop in; keep feet on a
+  visible ground line.
+- Text: `txt` / `wrapText`; muted text `C.mute` or darker; calendar/UI text ≥ 22 px at 1080p; nothing smaller than
+  what reads on a phone. One idea per scene; max ~3 labels on screen at once.
 - Zooms into small UI (keypads, phones) with `camAt(t)` returning `[z, cx, cy]`, not by scaling sprites.
 - Every visible action gets a foley cue: `cue(t, kind, {g, p, pan, d})`. Kinds: slide land tap thud stamp tear
   whoosh swoosh swing pop popup sticker type click tick staple button blink ding sparkle boing fan flip rustle
   confetti scribble. Wipes add whoosh + land automatically.
 - Big dramatic beats (the double-booking stamp) get a hard music stop: `music.stops` (`{line, word, offset}`).
 
-## Paper-style kit (style: paper, template/app/js)
-
-- engine.js: `paper cut spr/Sprite put(ctx,S,x,y,{s,rot,a,elev,boil,id}) paperText ink pencil sheet E.* prog lerp clamp rnd mulberry`.
-- fx.js: `dropIn slideIn popIn flyOut hold reveal strokePath pointAt curve step typed along enter confetti flipK walk sparks pointer`.
-- kit.js: palette `P`, `chip hand tick cross thumb badge glyph` (house calendar chat person team coin tag key chart gear
-  broom lock star doc envelope plane heart bolt globe moon phone percent spark camera pin clock), `drawNinja`
-  (eyes happy|open|closed|wink|wide), `drawPerson`, `appWindow(w,h,crumbs,active)`, `phoneFrame`, `HOMES`,
-  nature/house/site/brand sprites on `A.*`, `drawBrand`.
-- endcard.js: `endCardScene(line, () => ({logo, tag, cta, wink}))` — the series end card from `end_card` in film.yml.
-
 ## Audio notes
 
 - Let the final chord ring after the last word: the outro lift starts there (`mix.outro_lift.from` moves it).
-- `reference/film3/bed_act1.py` is a worked `music.synth` cue (plucks, marimba, clock ticks, chromatic run, hard
-  stop): local numpy, layered over the score, for a sting the model will not place exactly.
 - Mix defaults (film.yml `mix`): VO −18, music −24 pre-duck, foley −31 LUFS, duck 5 dB with 1.7 s hold,
   music ride, intro swell, outro lift, limiter, −14 LUFS master.
 
@@ -386,11 +371,6 @@ before adding a duplicate. Rights, usages and archiving: `manage_marketing_asset
 
 You review the visuals yourself: read every `peek` sheet and the stills of each draft render, at word times, before
 showing the user; then the user watches the draft. There are no automated critics.
-
-## Optional extras
-
-- Images (paper style): `tools/cutout.py` (chroma-key cut-out with a paper border, local). Always write its
-  output into the film folder.
 
 ## Maintainers
 

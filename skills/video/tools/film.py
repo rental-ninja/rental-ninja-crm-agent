@@ -2,9 +2,9 @@
 """Rental Ninja film pipeline. Every command takes the film folder (the one holding film.yml).
 
   setup [--install] [--whisper]   check the prerequisites and print the exact install command for anything missing;
-                          --install creates/updates the tools venv (pyyaml, numpy, playwright + its Chromium, pillow),
+                          --install creates/updates the tools venv (pyyaml, numpy, playwright + its Chromium),
                           --whisper adds faster-whisper (local word timings). Never installs Homebrew packages.
-  new DIR [paper]         scaffold a film folder, e.g. ~/Videos/rn-films/<slug> (house style; 'paper' = paper-craft)
+  new DIR                 scaffold a house-style film folder, e.g. ~/Videos/rn-films/<slug>
   check DIR               validate film.yml and print the line plan
   budget                  how the Hub bills narration and music (engine hub) and a personal ElevenLabs key's credits
   voices [FILTER]         ElevenLabs voices on a personal account (id, name, labels)
@@ -65,7 +65,7 @@ except ModuleNotFoundError as e:
 
 T = os.path.join(SKILL, 'tools')
 PY = sys.executable
-BASE_PKGS = ['pyyaml', 'numpy', 'playwright', 'pillow']
+BASE_PKGS = ['pyyaml', 'numpy', 'playwright']
 WHISPER_PKGS = ['faster-whisper==1.2.1', 'av<19']
 CTA_EMPTY = "end_card.cta is empty, so the end card says 'Book a demo': an in-app film takes the action of the campaign's button"
 
@@ -88,10 +88,10 @@ def dur_of(p):
 
 
 # ---------- scaffold ----------
-def cmd_new(root, style='flat'):
+def cmd_new(root):
     root = spec.film_root(root)
     if os.path.exists(os.path.join(root, 'film.yml')): sys.exit(f'{root}/film.yml exists')
-    tpl = spec.template_dir(style)
+    tpl = spec.TEMPLATE
     for d in ['app/js', 'app/img', 'app/audio', 'vo/lines', 'vo/final', 'music', 'mix', 'out', 'stills', 'final']: os.makedirs(os.path.join(root, d), exist_ok=True)
     for f in glob.glob(os.path.join(tpl, 'app/js/*.js')): shutil.copy(f, os.path.join(root, 'app/js'))
     for f in glob.glob(os.path.join(tpl, 'app/img/*')): shutil.copy(f, os.path.join(root, 'app/img'))
@@ -104,7 +104,6 @@ def cmd_new(root, style='flat'):
 def cmd_check(root):
     s = spec.load(root); L = s['lines']; tk = s['voice']['takes']; ok = True; f = s['film']; cap = s['captions']
     if f['format'] not in spec.FORMATS: print(f"film.format {f['format']!r}: use one of {list(spec.FORMATS)}"); ok = False
-    elif f['format'] != '16x9' and f['style'] != 'flat': print('film.format other than 16x9 needs style: flat'); ok = False
     if cap['style'] not in ('pill', 'karaoke'): print(f"captions.style {cap['style']!r}: pill or karaoke"); ok = False
     if not cta_set(s): print(CTA_EMPTY); ok = False
     import library
@@ -354,10 +353,10 @@ def cmd_captions(root):
 # ---------- page ----------
 def cmd_page(root):
     s = spec.load(root); f = s['film']; tm = s['timing']
-    film = {'slug': f['slug'], 'title': f['title'], 'lead': tm['lead'], 'tail': tm['tail'], 'wipe': tm['wipe'], 'posterOffset': f['poster_offset'], 'builders': s['app'].get('builders', []), 'endCard': s['end_card'],
+    film = {'slug': f['slug'], 'title': f['title'], 'lead': tm['lead'], 'tail': tm['tail'], 'wipe': tm['wipe'], 'posterOffset': f['poster_offset'], 'endCard': s['end_card'],
             'format': f['format'], 'captions': {'burn': s['captions']['burn'], 'style': s['captions']['style']}, 'safe': f.get('safe')}
     open(os.path.join(s['root'], 'app/js/film.js'), 'w').write('const FILM = ' + json.dumps(film, ensure_ascii=False) + ';\n')
-    html = open(os.path.join(spec.template_dir(f['style']), 'app/index.html')).read()
+    html = open(os.path.join(spec.TEMPLATE, 'app/index.html')).read()
     tags = '\n'.join(f'<script charset="utf-8" src="js/{x}"></script>' for x in s['app']['scripts'])
     for k, v in {'TITLE': f['title'], 'HEADLINE': f['headline'], 'SUBHEAD': f.get('subhead', ''), 'ARIA': f['aria'], 'SCRIPTS': tags}.items():
         html = html.replace('{{' + k + '}}', v)
@@ -471,7 +470,7 @@ def cmd_artifact(root):
 def film_info(s):
     """What library.build needs from one film.yml (library.py itself stays standard library only)."""
     f = s['film']
-    return {'root': s['root'], 'slug': f['slug'], 'lang': f['lang'], 'title': f['title'], 'subhead': f.get('subhead', ''), 'style': f['style'],
+    return {'root': s['root'], 'slug': f['slug'], 'lang': f['lang'], 'title': f['title'], 'subhead': f.get('subhead', ''),
             'duration': spec.duration(s), 'sizes': spec.FORMATS, 'burned': {k: spec.burn(s, k) for k in spec.FORMATS},
             'picks': [(n, ln['pick']) for n, ln in enumerate(s['lines'], 1)], 'voice': s['voice'], 'music': s['music'],
             'brief': s.get('brief') or {}, 'rights': s.get('rights') or {}}
@@ -530,7 +529,6 @@ def cmd_setup(install=False, whisper=False):
     ff = shutil.which('ffmpeg') and shutil.which('ffprobe')
     row(bool(ff), 'ffmpeg + ffprobe (audio, video, stills)', ('' if brew else '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"   # Homebrew first\n') + 'brew install ffmpeg')
     row(bool(shutil.which('curl')), 'curl (downloads Hub takes and music)', 'brew install curl')
-    row(has_module('PIL'), 'pillow (paper-style cut-outs, tools/cutout.py)', f'python3 {me} setup --install', False)
     row(has_module('faster_whisper'), 'faster-whisper (local word timings; Hub and ElevenLabs takes do not need it)', f'python3 {me} setup --install --whisper', False)
     import eleven
     row(eleven.has_key(), f'ElevenLabs personal key (engine elevenlabs, narration and music): ELEVEN_KEY or Keychain service {eleven.SERVICE}', f'security add-generic-password -a "$USER" -s {eleven.SERVICE} -w', False)

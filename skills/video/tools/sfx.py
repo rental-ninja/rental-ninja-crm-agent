@@ -1,4 +1,4 @@
-"""Paper-craft foley synthesiser: renders every animation cue (cues.json) into a stereo SFX stem."""
+"""Foley synthesiser: renders every animation cue (cues.json) into a stereo SFX stem."""
 import json, sys, wave
 import numpy as np
 

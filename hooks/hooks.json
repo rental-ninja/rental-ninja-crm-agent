@@ -1,5 +1,5 @@
 {
-  "description": "Auto-approval for the rental-ninja-crm plugin: Hub tools that only read, the low-risk CRM writes (thread assign, state, notes, links, drafts, triage, presence, urgency, company notes) and the Linear lookups run without a prompt. Destructive and grant-gated Hub tools, creating or updating a Linear issue and every other tool always ask. The full list: skills/hub/SKILL.md, Grants and approvals.",
+  "description": "Auto-approval for the rental-ninja-crm plugin: Hub tools that only read, the low-risk CRM writes (thread assign, state, notes, links, drafts, triage, presence, urgency, company notes) and the Linear lookups run without a prompt. Destructive and grant-gated Hub tools, creating or updating a Linear issue and every other tool always ask. The grant each gated tool needs: skills/hub/SKILL.md, Grants and approvals.",
   "hooks": {
     "PreToolUse": [
       {

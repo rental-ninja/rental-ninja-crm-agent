@@ -1,5 +1,5 @@
-# Film 5 — film 3 re-animated in the flat house style, on film 3's finished mix: its beats land on js/hits.js (film 3's
-# foley cue times). Code reference only: the takes and the mix are not shipped, so it does not render as-is.
+# Film 5 — an earlier film re-animated in the house style, on that film's finished mix: its beats land on js/hits.js
+# (that mix's foley cue times). Code reference only: the takes and the mix are not shipped, so it does not render as-is.
 film:
   slug: rental-ninja-promo-flat
   title: Rental Ninja Flat
@@ -9,7 +9,6 @@ film:
   lang: en
   poster_offset: 2.2
   icon: video
-  style: flat
 
 brief:
   audience: vacation rental managers who have not heard of Rental Ninja

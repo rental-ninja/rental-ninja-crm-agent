@@ -1,54 +1,55 @@
 ---
 name: marketing-campaigns
-description: Run Rental Ninja marketing campaigns through the Hub tools - draft and edit in-app popup, push and email sequences in the Hub from the marketing context (hypothesis, audience, channels, copy in Spanish and English without AI tells, other languages machine-translated for review, a test to yourself per channel), and manage audiences, translations, contact rules and the marketing context. The only human-only steps are the ones that start sending - activating a campaign, resuming a paused one, turning "Pause all sending" back off - which a person does in the Hub. Use when the user asks for a campaign, an in-app popup, a push notification, a marketing email, an upgrade, upsell, trial or reactivation nudge, a campaign audience or segment, or wants to change, pause or end a campaign.
+description: Run Rental Ninja marketing campaigns through the Hub tools - draft and edit in-app popup, push and email sequences in the Hub from the marketing context (hypothesis, audience, channels, copy in Spanish and English without AI tells, other languages machine-translated for review, a test to yourself per channel), and manage audiences, translations and the marketing context. Use when the user asks for a campaign, an in-app popup, a push notification, a marketing email, an upgrade, upsell, trial or reactivation nudge, a campaign audience or segment, or wants to change, pause or end a campaign.
 argument-hint: "<goal or idea> | edit <campaign id> | options"
 ---
 
 # Rental Ninja campaigns
 
 You run Rental Ninja's marketing campaigns from here: Claude is the main way to draft, change and manage them, and
-the Hub (Hub → Marketing) shows the same data and is where a person starts the sending. The audience is Rental
-Ninja's own customers: property managers who use the Rental Ninja app. A campaign is a sequence of up to three
-messages (an in-app popup, a push notification, an email), each on its own day and with its own send condition,
-shown to an audience of teams, with a holdout group to measure the uplift.
+the Hub (Hub → Marketing) shows the same data. The audience is Rental Ninja's own customers: property managers who
+use the Rental Ninja app. A campaign is a sequence of up to three messages (an in-app popup, a push notification, an
+email), each on its own day and with its own send condition, shown to an audience of teams.
 
 All calls go through this plugin's `hub` MCP server. No Hub tools at all: ask the user to restart Claude Code or
 check their Hub token. A single tool missing: the person lacks its grant (see Grants).
 
 ## Rules
 
-1. **Never start sending.** Three actions are human-only and done in the Hub: **activating** a campaign, **resuming**
-   a paused one, and turning **"Pause all sending" back off**. MCP does not offer them; never look for a way around
-   that (no impersonation, no clicking through the Hub in a browser, no asking another agent). Everything else in
-   Marketing you can do here.
+1. **Never start sending.** Four actions are human-only and done in the Hub: **activating** a campaign, **resuming**
+   a paused one, turning **"Pause all sending" back off** and **lifting a suppression**. MCP does not offer them;
+   never look for a way around that (no impersonation, no clicking through the Hub in a browser, no asking another
+   agent). Everything else in Marketing you can do here.
 2. **Context before copy.** Read `get_marketing_context` before writing or rewriting any text, for the brand voice,
    customer language, words to use and avoid, pain points, objections, positioning, what never to claim and
    sensitive topics. It holds no prices or figures: facts come from the tools (rule 7).
 3. **Confirm before writing.** Show the plan (hypothesis, audience with its reach, sequence, Spanish and English
-   copy) before creating a draft; confirm every edit (`update_campaign_draft` can drop a channel or replace the
-   hand-picked teams), pause, end, deletion, approval, change to a saved audience, contact-rule change or suppression
-   with the user, naming exactly what it affects.
+   copy) before creating a draft; confirm every edit, pause, end, deletion, approval, change to a saved audience or
+   suppression with the user, naming exactly what it affects. `update_campaign_draft` drops a channel set to `null`
+   and replaces the hand-picked teams with `team_ids` / `company_ids` (`add_teams_to_campaign` appends): send only
+   the fields to change.
 4. **Tests only to yourself.** `send_campaign_test` reaches the user's own app account (the default) or a user of an
    internal Rental Ninja team, never a customer.
 5. **Spanish and English are yours, the rest is the translator's.** Write `es` and `en` yourself. Fill `ca`, `fr`,
    `de`, `it`, `nl`, `pt` only with `translate_campaign_messages`, which marks them machine-translated. Never
    hand-write those languages, and mark translations reviewed (`manage_campaign` `mark_translations_reviewed`) only
    after a person who reads that language checked them and says so.
-6. **A live campaign's own settings change only while paused; its saved audience changes it at once.**
-   `update_campaign_draft` refuses an active campaign: pause it first (`manage_campaign` `pause`, with the user's OK),
-   then a person with Manage campaigns resumes it in the Hub, where the same grant is needed to change a live
-   campaign or add accounts to it. Once activated, a campaign's choice of audience and its holdout are fixed and
-   hand-picked teams can only be added. A saved audience, though, is evaluated live, so `save_marketing_audience`
-   with `id` is refused while an active campaign uses it (pause that campaign first, or a person with Manage
-   campaigns edits the audience in the Hub). A paused campaign using it reaches the new set once resumed. Confirm it
-   first (step 3, "Changing a saved audience").
+6. **A live campaign and its saved audience change only while it is paused.** `update_campaign_draft` refuses an
+   active campaign: pause it first (`manage_campaign` `pause`, with the user's OK). Once activated, a campaign's
+   choice of audience is fixed and hand-picked teams can only be added. A saved audience is evaluated live, so
+   `save_marketing_audience` with `id` is refused while an active campaign uses it (pause that campaign first, or a
+   person with Manage campaigns edits the audience in the Hub), and a paused campaign using it reaches the new set
+   once resumed. Before replacing one: name every campaign `list_marketing_audiences` lists for it, with its status,
+   show the new reach with `preview_marketing_audience`, save only after the user's explicit OK and relay the
+   response's `campaigns` and `warning` word for word. When live campaigns use it and the user only wants a new
+   segment, save a new audience (no `id`) instead.
 7. **Live facts only.** Every fact in the copy comes from a tool in this session, never from memory, the context or
    an earlier campaign:
    - prices → `get_pricing_catalogue` (list prices) or `get_company_pricing` (what one account pays);
    - offers → the text of `list_campaign_options` `offers`, word for word, and only after the user confirms billing
      applies it to every account that converts;
    - features → `search_changelog` + `search_docs`;
-   - limits and sending → `list_campaign_options` / `marketing_settings` `get`;
+   - limits, contact rules and sending → `list_campaign_options` / `marketing_settings` `get`;
    - counts → `preview_marketing_audience`.
 
    If a tool and the context disagree, the tool wins: tell the user. No made-up statistics or testimonials.
@@ -70,11 +71,7 @@ check their Hub token. A single tool missing: the person lacks its grant (see Gr
   `remove_usage`, `delete_file`). Popup and email media come only from the library: upload with
   `get_marketing_asset_upload_urls`, publish with `publish_marketing_asset`, approve, then pass the asset's `asset_id`.
 - **Voice & settings:** `list_marketing_voices`, `get_voiceover_usage`, `generate_voiceover`, `generate_music`,
-  `marketing_settings` (`get`, `set_voice`, `update_contact_rules`, `update_guardrails`, `pause_all_sending`),
-  `marketing_suppressions` (`list`, `add`).
-
-Nothing activates or resumes a campaign, turns sending back on or lifts a suppression: those stay with a person in
-the Hub.
+  `marketing_settings` (`get`, `set_voice`, `pause_all_sending`), `marketing_suppressions` (`list`, `add`).
 
 ## Routing
 
@@ -115,14 +112,13 @@ In parallel:
 One or two sentences, required before anyone can activate the campaign:
 
 > If we show **X** (the message and offer) to **Y** (the audience), **Z** will happen (the behaviour), measured by
-> **…** (the conversion goal from `conversion_goals`, exposed vs holdout).
+> **…** (the conversion goal from `conversion_goals`).
 
 - ES: *Si mostramos a los admins del segmento 2 que les devolvemos sus borradores gratis de Smart Inbox y que un
   borrador solo cuenta cuando lo envían, más equipos reactivarán la prueba y se suscribirán, medido por la
-  suscripción a Smart Inbox frente al grupo de control.*
+  suscripción a Smart Inbox.*
 - EN: *If we show segment 2 admins that their free Smart Inbox drafts are back and that a draft only counts when
-  they send it, more teams will reactivate the trial and subscribe, measured by Smart Inbox subscriptions against
-  the holdout.*
+  they send it, more teams will reactivate the trial and subscribe, measured by Smart Inbox subscriptions.*
 
 ### 3. Audience
 
@@ -131,26 +127,17 @@ Pick one, then check its size before writing copy:
 | Audience | How |
 |---|---|
 | Code-defined segment | `audience: "<key>"` from `list_campaign_options` (`matches_today` = teams and users today) |
-| Saved audience | `audience: "saved_audience_<id>"` from `list_marketing_audiences`; `preview_marketing_audience` shows its count and sample; `save_marketing_audience` saves a new filter when the user asks for one |
+| Saved audience | `audience: "saved_audience_<id>"` from `list_marketing_audiences`; `preview_marketing_audience` shows its count and sample; `save_marketing_audience` saves a new filter when the user asks for one (replacing one: rule 6) |
 | Hand-picked teams | `team_ids` or `company_ids` (Hub companies); `add_teams_to_campaign` appends later |
 
 - `roles`: `admin` (admins and owner), `member`, or both. Admin-only buttons (`upgrade_dialog`,
   `reactivate_smart_inbox_trial` and `open_route` to an admin-only screen) show members "Ask an admin" instead;
   send reactivate campaigns to admins only, since a member's request asks for an upgrade.
-- `holdout_percent`: 10 by default for segments (at least 1), 0 for hand-picked teams. Results compare exposed and
-  holdout teams and flag `small_sample` under 30 teams per group: tell the user when the audience is too small to
-  measure anything, and keep the holdout unless they decide otherwise.
+- Tell the user when the audience is too small for its results to show anything.
 - **One text reaches every team.** Each language has one text for the whole audience. Before the copy states anything
   plan-, country- or size-specific, narrow the audience with saved-audience conditions (`plan`, `country`,
   `channel_manager`, `rentals`) so it is true for every team, or drop it. Spot-check 3–5 teams from
   `preview_marketing_audience` with `get_company_subscription` / `get_company_pricing`.
-- **Changing a saved audience.** `save_marketing_audience` with `id` replaces the conditions of an audience that
-  campaigns may already use. It is refused while an active campaign uses it; a paused one reaches the new set of
-  teams once resumed (its holdout baseline keeps the teams snapshotted at activation). Before saving: find the audience in
-  `list_marketing_audiences` and tell the user every campaign it lists, with its status, and which of them are live;
-  show the new reach with `preview_marketing_audience`; save only after their explicit OK. Then relay the response's
-  `campaigns` and `warning` word for word. When live campaigns use it and the user only wants a new segment, save a
-  new audience (no `id`) instead.
 
 ### 4. Channels and sequence
 
@@ -171,23 +158,15 @@ Default pattern, to adapt to the goal:
 | 5 | `email` | if_not_converted | the full argument for people who still have not acted |
 
 Adapt it: a feature discovery inside the app may need only the popup; people who rarely open the app need the email
-first. Someone who dismisses the popup gets no other channel of that campaign for the dismiss cooldown (14 days by
-default), so a dismissal is a no. If `list_campaign_options` says email sending is off (it stays off until legal
-validates consent), the email step will not go out: say so in the plan.
+first. Someone who dismisses the popup gets no other channel of that campaign for the dismiss cooldown, so a
+dismissal is a no. If `list_campaign_options` says email sending is off (it stays off until legal validates
+consent), the email step will not go out: say so in the plan.
 
 ### 5. Copy
 
 **One message, one job, one call to action.** Each step says one thing and asks for one action; the button says
-what happens when they tap it ("Probar Smart Inbox", "See the offer"), not "Click here" or "Más información".
-
-Lengths that read whole (`copy_warnings` flags the rest; `list_campaign_options` has the hard limits):
-
-| Channel | Field | Reads best |
-|---|---|---|
-| In-app popup | title / body | ≤ 60 / ≤ 280 characters |
-| Push | title / body | ≤ 50 / ≤ 150 characters |
-| Email | subject / preheader | 40–60 / 90–140 characters |
-| Email | body | short markdown: the pain, what changes, one sourced fact, the button; one link at most (the button) |
+what happens when they tap it ("Probar Smart Inbox", "See the offer"), not "Click here" or "Más información". The
+email body is short markdown: the pain, what changes, one sourced fact, the button.
 
 Write from the context, with facts from the tools:
 
@@ -201,26 +180,25 @@ Write from the context, with facts from the tools:
   their own usage rates, yearly billing). Send admins to their own price instead: the popup button `upgrade_dialog`
   (`cta_params` plan `smart-plan`) shows each team its own Smart Inbox prices and leads to Billing; push and email
   open the `subscription` route (Billing). Both are admin-only.
-- No `{placeholders}`: nothing fills them in.
 - Every other fact per rule 7.
 
 **No AI tells** (adapted from the copywriting rules of
-[coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT):
+[coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT). The tools catch lengths,
+links, stock phrases, em dashes in short copy, capitals, exclamation marks, amounts and `{placeholders}`; these they
+can't:
 
 | Tell | English | Spanish | Instead |
 |---|---|---|---|
 | Contrast reveal | "It's not X, it's Y", "Not because X. Because Y." | "No es X, es Y", "No porque X. Porque Y." | state the benefit |
 | Negation list | "No setup, no templates, no waiting" | "Sin instalaciones, sin plantillas, sin esperas" | say what does happen |
 | Self-answered question | "The result? Replies in seconds." | "¿El resultado? Respuestas en segundos." | say it plainly |
-| Stock phrase | unlock the power, take … to the next level, say goodbye to, revolutionize, game changer, look no further, elevate your, in today's fast-paced world | descubre el poder, lleva tu … al siguiente nivel, di adiós a, revoluciona, olvídate de, sin complicaciones, potencia tu, en el mundo actual | what changes for them |
-| Buzzword | seamless, robust, powerful, streamline, effortless | fácil, potente, intuitivo, integral, sin fisuras | a concrete fact |
+| Buzzword | robust, powerful, streamline, effortless | fácil, potente, intuitivo, integral, sin fisuras | a concrete fact |
 | Trailing pile-on | a claim followed by ", saving you time, effort and stress" | "…, ahorrándote tiempo, esfuerzo y estrés" | stop after the claim |
-| Em dash | none in push texts, email subject or preheader; rare elsewhere | lo mismo: coma, dos puntos o punto | comma, colon, full stop |
-| Shouting | ALL CAPS words, more than one "!" | MAYÚSCULAS, más de un "¡!" | one "!" at most (with its "¡" in Spanish) |
 
-Also: at most one list of three or one fragment per message; no emoji unless the brand voice allows them; the swap
-test — if a competitor could send the message unchanged, add the Rental Ninja specific. Before saving, read every
-text for these, then fix every `copy_warnings` entry the tools return (lengths, amounts, `{placeholders}`).
+Also: at most one list of three or one fragment per message; no emoji unless the brand voice allows them; em dashes
+rare even where the tools allow them; the swap test — if a competitor could send the message unchanged, add the
+Rental Ninja specific. Read every text for these before saving, then fix every `copy_warnings` entry the tools
+return.
 
 **Video.** A short video shows the feature working in a way the popup text can't, so whenever the plan has a popup
 (or an email), recommend one in the plan without waiting to be asked:
@@ -234,36 +212,25 @@ text for these, then fix every `copy_warnings` entry the tools return (lengths, 
 
 ### 6. Contact rules
 
-The Hub enforces these (defaults; live values in `list_campaign_options` or `marketing_settings` `get`; changed with
-`marketing_settings` `update_contact_rules` only when the user asks, or in the Hub's Rental Ninja Settings → Marketing). Plan
-around them so the sequence lands as intended. Customers are businesses, reached at work:
-
-- **Send window:** push and email go out on weekdays, 09:00–19:00 in each team's timezone; outside it they wait.
-  A day-5 step on a Friday afternoon lands on Monday.
-- **Push:** at most one marketing push per person every 7 days, across campaigns; only to app versions that can
-  open it.
-- **Email:** at most 2 marketing emails per person in 30 days across campaigns (queued ones count), a warm-up limit
-  of 300 campaign emails a day overall, one-click unsubscribe; nothing goes out while email sending is off.
-- **In-app:** at most 1 campaign popup per user per day across campaigns; it shows until clicked or dismissed.
-- **Priority:** when several campaigns match a user, the highest `priority` shows first.
-- **Kill switch:** "Pause all sending" (Hub → Rental Ninja Settings → Marketing) stops every campaign push, email and
-  popup. When the user asks, pause it with `marketing_settings` `pause_all_sending` {reason}. Turning it back on
-  restarts sending, so only a person does that, in the Hub.
+The Hub enforces fixed contact rules across campaigns: a send window in each team's timezone for push and email,
+caps per person on each channel, an email warm-up limit and the popup dismiss cooldown; when several campaigns match
+a user, the highest `priority` goes first. The live values are in `list_campaign_options` (or `marketing_settings`
+`get`): plan the sequence around them, since a step due outside the send window or over a cap waits.
 
 ### 7. Create the draft
 
 After the user's OK on the plan, `create_campaign_draft` with `name`, `hypothesis`, the audience (`audience`, or
-`team_ids`/`company_ids`), `roles`, `holdout_percent`, optional `starts_at`/`ends_at`/`priority`, and one object
-per channel: `in_app` {`placement`, `title`, `body`, `cta_label`, `cta_type`, `cta_params`, `asset_id`?,
-`delay_days`, `send_condition`}, `push` {`title`, `body`, `route`, `delay_days`, `send_condition`}, `email`
-{`subject`, `preheader`, `body` (markdown), `cta_label`, `route` or `url`, `asset_id`?, `delay_days`,
-`send_condition`}. Texts are objects per language: `{"es": "…", "en": "…"}`.
+`team_ids`/`company_ids`), `roles`, optional `starts_at`/`ends_at`/`priority`, and one object per channel: `in_app`
+{`placement`, `title`, `body`, `cta_label`, `cta_type`, `cta_params`, `asset_id`?, `delay_days`, `send_condition`},
+`push` {`title`, `body`, `route`, `delay_days`, `send_condition`}, `email` {`subject`, `preheader`, `body`
+(markdown), `cta_label`, `route` or `url`, `asset_id`?, `delay_days`, `send_condition`}. Texts are objects per
+language: `{"es": "…", "en": "…"}`.
 
 - `in_app.asset_id` (the popup's video) and `email.asset_id` (a thumbnail of the video) take **approved** media
   library assets only. A draft asset (for example one the `video` skill just published) is approved first: after
   the user has watched it and says so, `manage_marketing_asset` `approve`, or they approve it in Hub → Marketing →
   Media library. Pass its paid-ads verdict on when it says "check first".
-- Fix every `copy_warnings` entry with `update_campaign_draft` (send only the fields to change).
+- Fix the `copy_warnings` it returns with `update_campaign_draft`.
 
 ### 8. Translate, preview, test
 
@@ -283,14 +250,13 @@ per channel: `in_app` {`placement`, `title`, `body`, `cta_label`, `cta_type`, `c
 
 Give the user:
 
-- the hypothesis, the audience with its reach and holdout, the sequence (day, channel, condition, one-line summary);
+- the hypothesis, the audience with its reach, the sequence (day, channel, condition, one-line summary);
 - each fact in the copy with the tool it came from (rule 7);
 - the languages written by you and the machine-translated ones awaiting review;
 - the popup's video: linked, waiting for approval in the media library, or none (and why);
 - copy warnings left on purpose, and anything that will not send (email off, no push devices);
 - the tests sent;
-- the `hub_url`, with: "When you are happy with it, activate it in the Hub: starting the sending is the one step I
-  can't do."
+- the `hub_url`, where a person activates it (rule 1).
 
 ## Managing campaigns
 
@@ -299,14 +265,15 @@ means the person lacks its grant (see Grants); the same action is always in the 
 
 | Ask | Tool | Notes |
 |---|---|---|
-| Pause a campaign | `manage_campaign` `pause` | stops its sends and popups; resuming is human-only (Hub) |
+| Pause a campaign | `manage_campaign` `pause` | stops its sends and popups |
 | End a campaign | `manage_campaign` `end` | final; its results and notes stay; a `marketing-review` postmortem follows |
 | Start from an earlier campaign | `manage_campaign` `duplicate` | the copy is a new draft: re-check hypothesis, audience and copy |
 | Delete a draft | `manage_campaign` `delete_draft` | drafts only, never one that reached people |
 | Add / remove hand-picked teams | `add_teams_to_campaign` / `manage_campaign` `remove_teams` | after activation teams can only be added |
+| Stop all marketing at once | `marketing_settings` `pause_all_sending` {reason} | "Pause all sending" (Hub → Rental Ninja Settings → Marketing): every campaign push, email and popup |
 | A customer asks not to get marketing | `marketing_suppressions` `add` (`list` to check) | also tell the person handling that customer's thread |
 | Brand voice per language | `list_marketing_voices` / `marketing_settings` `set_voice` | the voice the `video` skill uses by default |
-| Change a saved audience | `save_marketing_audience` with `id` | refused while an active campaign uses it; paused ones reach the new set once resumed: name them and get an OK first (step 3) |
+| Change a saved audience | `save_marketing_audience` with `id` | rule 6 |
 | Retire an audience | `manage_marketing_audience` `archive` | campaigns already using it keep working; new ones can't pick it |
 
 ## Notes and learnings

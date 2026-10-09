@@ -3,9 +3,10 @@ import copy, os, re
 import yaml
 
 SKILL = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+TEMPLATE = os.path.join(SKILL, 'template_flat')
 
 DEFAULTS = {
-    'film': {'lang': 'en', 'poster_offset': 2.2, 'icon': 'video', 'style': 'flat', 'format': '16x9'},
+    'film': {'lang': 'en', 'poster_offset': 2.2, 'icon': 'video', 'format': '16x9'},
     'captions': {'burn': None, 'style': 'pill', 'max_chars': 32, 'max_lines': 2},
     'timing': {'first_line_at': 1.6, 'default_gap': 1.35, 'lead': .55, 'tail': 5.2, 'wipe': .34},
     'voice': {
@@ -26,20 +27,11 @@ DEFAULTS = {
     'mix': {'vo_lufs': -18, 'music_lufs': -24, 'sfx_lufs': -31, 'duck_db': 5.0, 'duck_hold': 1.7,
             'ride': {'ratio': .5, 'max_db': 7.0}, 'intro_swell': {'db': 5.0, 'until': 1.7}, 'outro_lift': {'db': 3.0, 'from': None},
             'master_lufs': -14, 'limit': .83, 'room_db': -62, 'fade_out': 1.8},
-    'render': {'fps': 12, 'out_fps': 24, 'draft_crf': 16, 'final_crf': 19, 'small_crf': 23, 'small_width': 1280, 'mp3_kbps': 192},
-    'app': {'scripts': ['words.js', 'film.js', 'engine.js', 'kit.js', 'boot.js', 'fx.js', 'endcard.js', 'scenes.js', 'main.js'], 'builders': ['buildEndCard']},
+    'render': {'fps': 25, 'out_fps': 25, 'draft_crf': 16, 'final_crf': 19, 'small_crf': 23, 'small_width': 1280, 'mp3_kbps': 192},
+    'app': {'scripts': ['words.js', 'film.js', 'flat.js', 'folk.js', 'palette.js', 'world.js', 'hands.js', 'hum_data.js', 'hum_rig.js',
+                        'person.js', 'brand.js', 'endcard.js', 'scenes.js', 'main_flat.js']},
     'end_card': {'tagline': 'Your whole rental business, in one place.', 'cta': 'Book a demo', 'url': 'rental-ninja.com'},
     'rights': {'visuals': None, 'other': None},
-}
-
-
-# The Rental Ninja house style (flat vector, Humaaans cast, red banner + corner watermark) is the default;
-# style: paper keeps the original paper-craft stop-motion engine.
-STYLE = {
-    'flat': {'render': {'fps': 25, 'out_fps': 25},
-             'app': {'scripts': ['words.js', 'film.js', 'flat.js', 'folk.js', 'palette.js', 'world.js', 'hands.js', 'hum_data.js', 'hum_rig.js',
-                                 'person.js', 'brand.js', 'endcard.js', 'scenes.js', 'main_flat.js'], 'builders': []}},
-    'paper': {},
 }
 
 
@@ -70,10 +62,6 @@ def burn(s, fmt=None):
     return (fmt or s['film']['format']) != '16x9' if b is None else bool(b)
 
 
-def template_dir(style):
-    return os.path.join(SKILL, 'template_flat' if style == 'flat' else 'template')
-
-
 def merge(base, over):
     out = copy.deepcopy(base)
     for k, v in (over or {}).items():
@@ -92,8 +80,9 @@ def film_root(root):
 def load(root):
     root = film_root(root)
     raw = yaml.safe_load(open(os.path.join(root, 'film.yml')))
-    style = (raw.get('film') or {}).get('style', DEFAULTS['film']['style'])
-    s = merge(merge(DEFAULTS, STYLE.get(style, {})), raw)
+    style = (raw.get('film') or {}).get('style', 'flat')
+    if style != 'flat': raise SystemExit(f'film.style {style!r}: this skill only makes house-style films (flat)')
+    s = merge(DEFAULTS, raw)
     s['root'] = root
     if s['voice']['engine'] not in VOICE_ENGINES: raise SystemExit(f"voice.engine {s['voice']['engine']!r}: one of {', '.join(VOICE_ENGINES)}")
     mus = raw.get('music') or {}

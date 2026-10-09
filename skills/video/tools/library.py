@@ -24,8 +24,7 @@ MAX_FILES, NAME_MAX, DESCRIPTION_MAX, MUSIC_NOTE_MAX = 40, 160, 2000, 500
 TEMPLATE_IMAGES = {'logo_color.svg', 'logo_neg.png', 'iso.svg'}
 # Voices known to come from the public ElevenLabs Voice Library: their owner's terms decide paid-ads use.
 VOICE_LIBRARY = {'1CeqBeXMOqCleeQjfYfO': 'Cristina'}
-VISUALS = {'flat': 'In-house flat vector animation (canvas code); Humaaans characters by Pablo Stanley (CC0); official Rental Ninja logos.',
-           'paper': 'In-house paper-craft animation (canvas code); official Rental Ninja logos.'}
+VISUALS = 'In-house flat vector animation (canvas code); Humaaans characters by Pablo Stanley (CC0); official Rental Ninja logos.'
 CURL = '/usr/bin/curl' if os.path.exists('/usr/bin/curl') else shutil.which('curl')
 FILM_PY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'film.py')
 
@@ -162,7 +161,7 @@ def rights_of(infos, checks):
     if any(m != musics[0] for m in musics):
         other.append('Music per film: ' + '; '.join(f"{i['lang']} {m['provider']} {m['model'] or ''}".strip() if m else f"{i['lang']} none"
                                                      for i, m in zip(infos, musics)))
-    visuals = ' '.join(dict.fromkeys([VISUALS.get(i['style'], VISUALS['flat']) for i in infos] + [i['rights']['visuals'] for i in infos if i['rights'].get('visuals')]))
+    visuals = ' '.join(dict.fromkeys([VISUALS] + [i['rights']['visuals'] for i in infos if i['rights'].get('visuals')]))
     return {'voice': voice, 'music': musics[0], 'visuals': visuals[:1000], 'other': '; '.join(other)[:1000] or None}
 
 

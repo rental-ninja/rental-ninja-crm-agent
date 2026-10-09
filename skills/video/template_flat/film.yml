@@ -1,6 +1,6 @@
 # film.yml — the single source of truth for one Rental Ninja film (house style: flat vector, Humaaans cast, red banner + watermark).
 # Everything not set here falls back to the series defaults in tools/spec.py.
-# Worked examples in the skill: reference/film5 (house style, 24 scenes) and reference/film3 (paper-craft).
+# Worked example in the skill: reference/film5 (24 scenes).
 
 film:
   slug: my-film                      # file names in final/
@@ -8,7 +8,6 @@ film:
   headline: 'Rental Ninja &middot; <span>one line about the feature</span>'
   subhead: What the viewer will learn
   aria: Animated film about ...
-  style: flat                        # flat = the house style (default); paper = paper-craft stop-motion
   format: 16x9                       # 16x9 1920x1080 (web, YouTube, in-app popup) | 9x16 Reels/Stories | 1x1 | 4x5 feed
   # safe: {'9x16': [.14, .2, .06]}   # override the safe-area insets [top, bottom, sides] per format
   lang: en                           # narration language (also the Hub locale)

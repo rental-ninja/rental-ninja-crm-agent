@@ -46,13 +46,7 @@ These rules exist because CRM actions affect real customers and real team member
 - **`force_booking_com_rate_resync`** — Briefly deactivates every rate plan of the whole Booking.com hotel, not just the rental given. Run it with `dry_run=true` first and confirm the hotel, units and rate plans with the user. On a gateway timeout the server keeps going: check the rate plans with `get_rental_detail` before any retry.
 - **`import_past_bookings`** — Writes a customer's past bookings from their old system's exports. Only when the person asked for it. Hand the files over unchanged (attachment ids, or your own `get_upload_url` uploads): never convert a file, compute money or answer a question yourself. Dry run first, relay the assumptions and the questions one at a time, then execute one rental at a time with the latest `plan_token`, each after the person's explicit yes. After a timeout, run a dry run: stays already written show as duplicates.
 - **`remove_imported_past_bookings`** — Undoes an import with the same files. Report first; pass `execute: true` only after the person confirms the count. Bookings edited since the import are left alone and listed.
-- **`manage_campaign`** — `pause` and `end` stop a live campaign's sending (`end` is final), `delete_draft` deletes a draft for good. Confirm the campaign by name first. There is no activate or resume: a person does that in the Hub.
-- **`update_campaign_draft`** — Overwrites a campaign that is not active: a channel set to `null` is dropped, and `team_ids` / `company_ids` replace the hand-picked teams (`add_teams_to_campaign` appends). Send only the fields to change, after showing the user what changes and getting their OK.
-- **`manage_marketing_asset`** — `approve` only after checking every file and the rights; `delete_file` also removes the file from storage. Confirm before approving, archiving or deleting.
-- **`manage_marketing_audience`** — `delete` is permanent and refused while any campaign that has not ended (draft, active or paused) uses the audience; prefer `archive`.
-- **`save_marketing_audience` with `id`** — Replaces a saved audience. Refused while an active campaign uses it (pause it first, or a person with Manage campaigns edits it in the Hub); a paused campaign using it reaches the new set once resumed. Name those campaigns (`list_marketing_audiences`) and get the user's OK first; pass on the response's `warning`.
-- **`marketing_settings`** — Voices and contact rules apply to every campaign; `pause_all_sending` stops all marketing sends and only a person can turn them back on in the Hub. Confirm the change and its reason.
-- **`generate_voiceover`** / **`generate_music`** — Spend ElevenLabs credits from the company plan; generate only from a final script the user approved, one call at a time (never parallel calls).
+- **Marketing and media writes** (`manage_campaign`, `update_campaign_draft`, `save_marketing_audience` with `id`, `manage_marketing_audience`, `manage_marketing_asset`, `marketing_settings`, `generate_voiceover`, `generate_music`) — follow the `marketing-campaigns` and `video` skills.
 
 ### Team-visible operations (use with care)
 
@@ -100,9 +94,9 @@ The plugin's one reference for grants and auto-approval; the other skills and th
 | `generate_voiceover` | Generate voiceover | Campaigns & media | yes |
 | `generate_music` | Generate music | Campaigns & media | yes |
 
-The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too); Marketing settings to change the contact rules or turn sending back on; Marketing suppressions to lift a suppression.
+The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too); Marketing settings to turn sending back on; Marketing suppressions to lift a suppression.
 
-**Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs these without a prompt: the Hub tools that only read (marketing context, prices, campaigns, previews, results, notes, audiences, media library, voices and `get_voiceover_usage` included), `get_upload_url`, the low-risk CRM writes (assign a thread or its company, snooze/close/reopen, thread and company notes, links, drafts, triage, presence, urgency) and the Linear lookups (`get_issue`, `list_teams`, `list_projects`, `list_issue_labels`). Claude Code asks before every other tool: everything in the table above (the hook never lists a gated or destructive tool), `update_translation` / `retranslate_string` (live app texts) and creating or updating a Linear issue (`save_issue`). A deny or ask rule in the person's own Claude Code settings still applies.
+**Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs the tools it lists without a prompt and never lists a gated or destructive one; Claude Code asks before every other tool. A deny or ask rule in the person's own Claude Code settings still applies.
 
 ## Tone
 
@@ -255,4 +249,4 @@ Present a structured brief:
 
 **Direct capabilities** (no slash command needed): search companies/threads/bookings/rentals/guests, assign/close/snooze threads, add notes with @mentions, look up documentation, debug pricing/min-stay, inspect channel manager S3 logs, transition company state, send replies, open RU tickets (draft + send).
 
-**Confirmation and grants**: see [Grants and approvals](#grants-and-approvals). Reads and the low-risk thread and company writes run without a prompt; Claude Code asks before every gated or destructive tool, live app texts and Linear issue filing.
+**Confirmation and grants**: see [Grants and approvals](#grants-and-approvals).

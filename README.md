@@ -104,21 +104,15 @@ Homebrew and ffmpeg you install yourself in Terminal (they may ask for your Mac 
 
 Claude is the main way to run Rental Ninja's marketing; the Hub (Hub → Marketing) shows the same data and can do the same things.
 
-- **`marketing-campaigns`** drafts a campaign from the marketing context: a hypothesis ("If we show X to Y, Z will happen, measured by …"), the audience and its reach, a sequence of in-app popup, push and email (by default popup on day 0, push on day 2 to people who did not engage, email on day 5 to teams that did not convert), copy in Spanish and English that respects the channel lengths, the brand's word lists and a "no AI tells" list, the other languages machine-translated and marked for review, and a test of each channel sent to your own account. It also manages campaigns, audiences, contact rules, the marketing context and the brand voices.
-- **`marketing-review`** is the marketing loop: every week it reads each active campaign's results (guardrails, conversion against the holdout, with small-sample caution) and writes one note with 1–3 recommendations, and it writes a postmortem for every campaign that ended. It only writes notes and stops when the numbers look like a tracking bug. Schedule it from Claude Desktop (Scheduled tasks) or with `/schedule`; to stop it, disable the task.
+- **`marketing-campaigns`** drafts a campaign from the marketing context: a hypothesis ("If we show X to Y, Z will happen, measured by …"), the audience and its reach, a sequence of in-app popup, push and email (by default popup on day 0, push on day 2 to people who did not engage, email on day 5 to teams that did not convert), copy in Spanish and English that respects the channel lengths, the brand's word lists and a "no AI tells" list, the other languages machine-translated and marked for review, and a test of each channel sent to your own account. It also manages campaigns, audiences, the marketing context and the brand voices.
+- **`marketing-review`** is the marketing loop: every week it reads each active campaign's results (guardrails, conversion, with small-sample caution) and writes one note with 1–3 recommendations, and it writes a postmortem for every campaign that ended. It only writes notes and stops when the numbers look like a tracking bug. Schedule it from Claude Desktop (Scheduled tasks) or with `/schedule`; to stop it, disable the task.
 - **`video`** makes the videos and publishes them to the media library (above).
 
-**Facts come live.** Prices, offers, features, limits and counts in campaign, video and blog copy come from Hub tools in the same session (`get_pricing_catalogue`, `get_company_pricing`, `list_campaign_options`, changelog and docs), never from the marketing context, which holds only voice and positioning; copy that goes to many accounts states no amounts.
-
-**What stays human-only.** Only the actions that start or restart sending: activating a campaign, resuming a paused one, and turning "Pause all sending" back off. You do those in the Hub; Claude never does them. Anything else Claude does after showing you what it will change.
-
-**Grants.** Reading needs no grant. Every marketing write, voice and music generation included, needs its own grant in Hub → Staff access → Campaigns & media: see [Grants and approvals](skills/hub/SKILL.md#grants-and-approvals).
+What Claude does on its own, what stays with a person in the Hub and where the facts in the copy come from: the [rules of `marketing-campaigns`](skills/marketing-campaigns/SKILL.md#rules).
 
 ## Safety
 
-The plugin's `PreToolUse` hook (`hooks/hooks.json`) lets the Hub tools that only read, the low-risk CRM writes (assigning, snoozing, closing, notes, links, drafts, triage) and the Linear lookups run without a prompt. Claude Code asks you before everything else: sending an email or an RU ticket, changing a company's pipeline stage, customer logins, imports, changelog and app translations, every marketing write, voice and music generation, and filing or updating a Linear issue. Activating, resuming or un-pausing campaign sending never happens from Claude: a person does it in the Hub. A deny or ask rule in your own Claude Code settings still applies.
-
-The full list, and the Staff access grant each gated tool needs: [Grants and approvals](skills/hub/SKILL.md#grants-and-approvals).
+Which tools run without a prompt (the plugin's `PreToolUse` hook, `hooks/hooks.json`) and the Staff access grant each gated tool needs: [Grants and approvals](skills/hub/SKILL.md#grants-and-approvals).
 
 ---
 
@@ -175,8 +169,8 @@ rental-ninja-crm-agent/
     ├── video/
     │   ├── SKILL.md              # Animated video maker (in-app + social), Hub narration and music
     │   ├── tools/                # film.py pipeline: setup, narration, captions, music plan, sound, render, publish (library.py)
-    │   ├── template_flat/        # House-style film scaffold (template/ = paper-craft)
-    │   ├── reference/            # Scene code of two complete films
+    │   ├── template_flat/        # House-style film scaffold
+    │   ├── reference/            # Scene code of a complete film (film5)
     │   └── library/              # Humaaans cast, with its licence record
     └── hub/
         ├── SKILL.md              # CRM operator skill (persona, safety, workflows, grants and approvals)

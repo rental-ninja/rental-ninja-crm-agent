@@ -1,25 +1,16 @@
 ---
 name: marketing-review
-description: The Rental Ninja marketing loop, built to run on a schedule - a weekly review of every active campaign (results, guardrails, conversion against the holdout) written as one Hub note per campaign with 1-3 concrete recommendations, and a postmortem note for every campaign that ended without one. It only writes notes - it never activates, pauses, sends or edits a campaign - and stops when the numbers look like a tracking bug. Use when the user says "review the campaigns", "weekly campaign review", "how are the campaigns doing", "campaign postmortem", or wants to schedule the marketing loop.
+description: The Rental Ninja marketing loop, built to run on a schedule - a weekly review of every active campaign (results, guardrails, conversion) written as one Hub note per campaign with 1-3 concrete recommendations, and a postmortem note for every campaign that ended without one. It only writes notes - it never activates, pauses, sends or edits a campaign - and stops when the numbers look like a tracking bug. Use when the user says "review the campaigns", "weekly campaign review", "how are the campaigns doing", "campaign postmortem", or wants to schedule the marketing loop.
 argument-hint: "weekly | postmortem [campaign id] | <campaign id> | schedule"
 ---
 
 # Rental Ninja marketing loop
 
 A loop that watches the running campaigns and keeps their learnings in the Hub, so the next campaign starts from what
-the last one taught. It is meant to run unattended once a week (Claude Desktop scheduled task or `/schedule`), and
-it works the same when someone asks for it.
-
-| Part | What it is |
-|---|---|
-| Purpose | Every active campaign gets a weekly read with recommendations; every ended one gets a postmortem |
-| Cadence | Weekly (Monday morning). Conversions take days and contact caps are weekly: a daily run only adds noise |
-| Body | Weekly review, then Postmortems (below) |
-| Self-check | Tracking-bug test before every note |
-| State | The notes themselves (`list_campaign_notes`): no files, no memory |
-| Output | `add_campaign_note` on each campaign + a short summary for the person who runs it |
-| Stops | See Stop conditions |
-| Kill switches | Sends: "Pause all sending" in the Hub. The loop: disable its scheduled task |
+the last one taught: every active campaign gets a weekly read with recommendations, every ended one a postmortem. It
+is meant to run unattended every Monday morning (Claude Desktop scheduled task or `/schedule`; conversions take days,
+so a daily run only adds noise), and it works the same when someone asks for it. Its only state is the notes
+themselves (`list_campaign_notes`): no files, no memory.
 
 ## Rules
 
@@ -31,7 +22,7 @@ it works the same when someone asks for it.
 2. **One note per campaign per run, at most.** Weekly: skip a campaign that already has a weekly review from the
    last 6 days. Postmortem: skip a campaign that already has any `postmortem` note.
 3. **Numbers with their source.** Every figure comes from `get_campaign_results` in this run; say so in the note.
-   Mark guesses as guesses. Never call a winner on a small sample.
+   Mark guesses as guesses. Never write "significant" or "winner" on a small sample.
 4. **A suspected tracking bug stops the note.** Do not write findings on numbers that cannot be right: report it to
    the person instead (Self-check).
 5. **Nobody by name.** Campaign results include teams and companies: notes speak in counts and segments, never name a
@@ -56,11 +47,10 @@ Parse `$ARGUMENTS`:
 4. **Self-check** (below). A suspected bug → no note for this campaign; put it at the top of the summary.
 5. Read it:
    - **Guardrails** (`guardrails`): email unsubscribe rate, push opt-outs, popup dismiss rate, each `ok` / `amber` /
-     `red` against the thresholds in Hub → Rental Ninja Settings → Marketing. `red` → the first line of the note recommends pausing the
-     campaign and says which metric; `amber` → watch it and name a cause to test.
-   - **Conversion vs holdout:** exposed and holdout conversion rates and the uplift in percentage points. With
-     `small_sample` (a group under 30 teams), or fewer than about 5 conversions in a group, write "too early to
-     call" and give the numbers as directional only. Never write "significant" or "winner" on a small sample.
+     `red`. `red` → the first line of the note recommends pausing the campaign and says which metric; `amber` → watch
+     it and name a cause to test.
+   - **Conversion:** the converted teams and the conversion rate. With `small_sample`, or fewer than about 5
+     conversions, write "too early to call" and give the numbers as directional only (rule 3).
    - **Funnel and steps** (`steps`, per channel): where people drop (audience → reached → clicked → converted);
      popup CTR and dismiss rate; push sent, failed and open rate; email delivered, clicks (email opens are not
      measured), bounces, complaints; skipped deliveries by reason (send window, contact limits,
@@ -75,8 +65,7 @@ Parse `$ARGUMENTS`:
    ```markdown
    **Weekly review · 2026-10-12** · day 9 of the campaign
    **Guardrails:** unsubscribes 0.2 % (ok) · push opt-outs 0.4 % (ok) · popup dismissals 83 % (amber)
-   **Funnel:** 412 teams → 268 reached → 41 clicked → 9 converted. Exposed 2.4 % vs holdout 1.1 % (+1.3 pp),
-   small sample (holdout 44 teams, 2 conversions): directional only.
+   **Funnel:** 412 teams → 268 reached → 41 clicked → 9 converted; small sample: directional only.
    **Read:** the popup is seen but mostly dismissed; the day-2 push brings most clicks (guess: the popup shows at app
    start, before people are in the inbox).
    **Recommendations:**
@@ -98,8 +87,8 @@ Parse `$ARGUMENTS`:
    campaign ended since the last run). At most 5 postmortems per run, newest first; say how many are left.
 3. `get_campaign_results`, the hypothesis and the weekly reviews; Self-check as above.
 4. Write one `add_campaign_note`, `kind: postmortem`:
-   - **Goal vs result:** the hypothesis and the conversion goal; exposed vs holdout with the uplift and the sample
-     caveat; reach per step.
+   - **Goal vs result:** the hypothesis and the conversion goal; the conversions with the sample caveat; reach per
+     step.
    - **What worked:** the steps, copy lines, placement or audience that carried the clicks and conversions.
    - **What did not:** where people dropped, guardrails that went amber or red, steps that never sent (and why).
    - **Reusable:** copy that performed (quote it), the media library asset id, the audience or saved audience,
@@ -115,7 +104,6 @@ Stop writing for that campaign and tell the person when any of these holds:
 - email clicks above sends, push opens above sends, or any negative number;
 - nothing reached after 3 or more days live while sending is on and the steps are not waiting on the send window,
   the contact limits or the email legal gate (check `list_campaign_options` `sending` and the skipped reasons);
-- holdout conversions far above the exposed group's with a large sample (a likely mix-up of the groups);
 - a sudden jump or drop against the last review that no date, step or change explains.
 
 Say which campaign, which numbers and why they cannot be right, and suggest someone check it in the Hub (the tracking
@@ -134,9 +122,9 @@ may need a developer). No note is written on it until a person has looked.
 
 ## Kill switches
 
-- **Sending:** "Pause all sending" (Hub → Rental Ninja Settings → Marketing) stops every campaign push, email and popup. The loop
-  never touches it: a red guardrail is a recommendation for a person, who can flip it or ask Claude to (the
-  `marketing-campaigns` skill). Only a person turns it back off.
+- **Sending:** the one switch is "Pause all sending" (Hub → Rental Ninja Settings → Marketing), which stops every
+  campaign push, email and popup. A red guardrail is a recommendation for a person, who flips it or asks Claude to
+  (the `marketing-campaigns` skill).
 - **The loop:** disable or delete its scheduled task (Claude Desktop → Scheduled; Claude Code `/schedule`). Removing
   "Add campaign notes" from the person's Staff access also stops it from writing.
 
