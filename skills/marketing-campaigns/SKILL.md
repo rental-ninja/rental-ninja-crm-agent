@@ -25,16 +25,16 @@ check their Hub token. A single tool missing: the person lacks its grant (see Gr
    sensitive topics. It holds no prices or figures: facts come from the tools (rule 7).
 3. **Confirm before writing.** Show the plan (hypothesis, audience with its reach, sequence, Spanish and English
    copy) before creating a draft; confirm every edit, pause, end, deletion, approval, change to a saved audience or
-   suppression with the user, naming exactly what it affects. `update_campaign_draft` drops a channel set to `null`
-   and replaces the hand-picked teams with `team_ids` / `company_ids` (`add_teams_to_campaign` appends): send only
-   the fields to change.
+   suppression with the user, naming exactly what it affects. `save_campaign_draft` with a `campaign_id` drops a
+   channel set to `null` and replaces the hand-picked teams with `team_ids` / `company_ids` (`manage_campaign`
+   `add_teams` appends): send only the fields to change.
 4. **Tests only to yourself.** `send_campaign_test` reaches the user's own app account (the default) or a user of an
    internal Rental Ninja team, never a customer.
 5. **Spanish and English are yours, the rest is the translator's.** Write `es` and `en` yourself. Fill `ca`, `fr`,
    `de`, `it`, `nl`, `pt` only with `translate_campaign_messages`, which marks them machine-translated. Never
    hand-write those languages, and mark translations reviewed (`manage_campaign` `mark_translations_reviewed`) only
    after a person who reads that language checked them and says so.
-6. **A live campaign and its saved audience change only while it is paused.** `update_campaign_draft` refuses an
+6. **A live campaign and its saved audience change only while it is paused.** `save_campaign_draft` refuses an
    active campaign: pause it first (`manage_campaign` `pause`, with the user's OK). Once activated, a campaign's
    choice of audience is fixed and hand-picked teams can only be added. A saved audience is evaluated live, so
    `save_marketing_audience` with `id` is refused while an active campaign uses it (pause that campaign first, or a
@@ -45,7 +45,8 @@ check their Hub token. A single tool missing: the person lacks its grant (see Gr
    segment, save a new audience (no `id`) instead.
 7. **Live facts only.** Every fact in the copy comes from a tool in this session, never from memory, the context or
    an earlier campaign:
-   - prices → `get_pricing_catalogue` (list prices) or `get_company_pricing` (what one account pays);
+   - prices → `get_pricing_catalogue` (list prices) or `get_company_subscription` with `include_prices` (what one
+     account pays);
    - offers → the text of `list_campaign_options` `offers`, word for word, and only after the user confirms billing
      applies it to every account that converts;
    - features → `search_changelog` + `search_docs`;
@@ -58,19 +59,19 @@ check their Hub token. A single tool missing: the person lacks its grant (see Gr
 
 - **Context:** `get_marketing_context` (`version`, `include_history`), `update_marketing_context` (new version, or
   `restore_version`).
-- **Facts (read-only):** `get_pricing_catalogue`, `get_company_pricing` {`company_id`}, `get_company_subscription`,
+- **Facts (read-only):** `get_pricing_catalogue`, `get_company_subscription` {`company_id`, `include_prices`},
   `search_changelog`, `search_docs`.
-- **Campaigns:** `list_campaign_options`, `list_campaigns`, `create_campaign_draft`, `update_campaign_draft`,
-  `translate_campaign_messages`, `add_teams_to_campaign`, `preview_campaign`, `send_campaign_test`,
-  `get_campaign_results`, `list_campaign_notes`, `add_campaign_note`, and `manage_campaign` with an `action`: `pause`,
-  `end`, `duplicate`, `delete_draft`, `remove_teams`, `mark_translations_reviewed`.
+- **Campaigns:** `list_campaign_options`, `list_campaigns`, `save_campaign_draft` (no `campaign_id` creates a draft),
+  `translate_campaign_messages`, `preview_campaign`, `send_campaign_test`, `get_campaign_results`,
+  `list_campaign_notes`, `add_campaign_note`, and `manage_campaign` with an `action`: `pause`, `end`, `duplicate`,
+  `delete_draft`, `add_teams`, `remove_teams`, `mark_translations_reviewed`.
 - **Audiences:** `list_marketing_audiences`, `preview_marketing_audience`, `save_marketing_audience`,
   `manage_marketing_audience` (`archive`, `restore`, `delete`).
-- **Media library:** `list_marketing_assets`, `get_marketing_asset`, `get_marketing_asset_upload_urls`,
-  `publish_marketing_asset`, `manage_marketing_asset` (`update`, `approve`, `back_to_draft`, `archive`, `add_usage`,
-  `remove_usage`, `delete_file`). Popup and email media come only from the library: upload with
+- **Media library:** `list_marketing_assets` (with `id`: one asset and its files), `get_marketing_asset_upload_urls`,
+  `publish_marketing_asset`, `manage_marketing_asset` (`update`, `approve`, `back_to_draft`, `archive`,
+  `delete_file`). Popup and email media come only from the library: upload with
   `get_marketing_asset_upload_urls`, publish with `publish_marketing_asset`, approve, then pass the asset's `asset_id`.
-- **Voice & settings:** `list_marketing_voices`, `get_voiceover_usage`, `generate_voiceover`, `generate_music`,
+- **Voice & settings:** `list_marketing_voices` (voices and the ElevenLabs balance), `generate_voiceover`, `generate_music`,
   `marketing_settings` (`get`, `set_voice`, `pause_all_sending`), `marketing_suppressions` (`list`, `add`).
 
 ## Routing
@@ -79,7 +80,7 @@ Parse `$ARGUMENTS`:
 
 - **a goal or idea** ("get admins of segment 2 to try Smart Inbox") → the Workflow below.
 - **`edit <id>`** → `list_campaigns`, `preview_campaign` and `list_campaign_notes` for it, ask what to change, then
-  steps 5–9 with `update_campaign_draft` (an active campaign is paused first: rule 6).
+  steps 5–9 with `save_campaign_draft` and its `campaign_id` (an active campaign is paused first: rule 6).
 - **pause, end, duplicate, delete, remove teams, suppress a contact** → Managing campaigns below.
 - **`options`** → summarise `list_campaign_options`: audiences with today's matches, placements, buttons, offers,
   contact rules and whether email sending is on.
@@ -128,7 +129,7 @@ Pick one, then check its size before writing copy:
 |---|---|
 | Code-defined segment | `audience: "<key>"` from `list_campaign_options` (`matches_today` = teams and users today) |
 | Saved audience | `audience: "saved_audience_<id>"` from `list_marketing_audiences`; `preview_marketing_audience` shows its count and sample; `save_marketing_audience` saves a new filter when the user asks for one (replacing one: rule 6) |
-| Hand-picked teams | `team_ids` or `company_ids` (Hub companies); `add_teams_to_campaign` appends later |
+| Hand-picked teams | `team_ids` or `company_ids` (Hub companies); `manage_campaign` `add_teams` appends later |
 
 - `roles`: `admin` (admins and owner), `member`, or both. Admin-only buttons (`upgrade_dialog`,
   `reactivate_smart_inbox_trial` and `open_route` to an admin-only screen) show members "Ask an admin" instead;
@@ -137,7 +138,7 @@ Pick one, then check its size before writing copy:
 - **One text reaches every team.** Each language has one text for the whole audience. Before the copy states anything
   plan-, country- or size-specific, narrow the audience with saved-audience conditions (`plan`, `country`,
   `channel_manager`, `rentals`) so it is true for every team, or drop it. Spot-check 3–5 teams from
-  `preview_marketing_audience` with `get_company_subscription` / `get_company_pricing`.
+  `preview_marketing_audience` with `get_company_subscription` (`include_prices` for their prices).
 
 ### 4. Channels and sequence
 
@@ -206,20 +207,20 @@ return.
 - If an approved library asset fits the message, propose it by name.
 - Otherwise offer to make one now with the `video` skill, briefed from this campaign: the audience, the pain in
   their words, what changes, the button, the languages, 16:9 for the popup, 20–30 seconds. Say that the voice and
-  the music spend ElevenLabs credits (`get_voiceover_usage` shows what is left), and start it only on the user's yes.
-- Don't hold the draft for it: create the draft without `asset_id`, and add the video with `update_campaign_draft`
+  the music spend ElevenLabs credits (`list_marketing_voices` shows what is left), and start it only on the user's yes.
+- Don't hold the draft for it: create the draft without `asset_id`, and add the video with `save_campaign_draft`
   once the user has watched it and it is approved (step 7).
 
 ### 6. Contact rules
 
 The Hub enforces fixed contact rules across campaigns: a send window in each team's timezone for push and email,
-caps per person on each channel, an email warm-up limit and the popup dismiss cooldown; when several campaigns match
+caps per person on each channel and the popup dismiss cooldown; when several campaigns match
 a user, the highest `priority` goes first. The live values are in `list_campaign_options` (or `marketing_settings`
 `get`): plan the sequence around them, since a step due outside the send window or over a cap waits.
 
 ### 7. Create the draft
 
-After the user's OK on the plan, `create_campaign_draft` with `name`, `hypothesis`, the audience (`audience`, or
+After the user's OK on the plan, `save_campaign_draft` (no `campaign_id`) with `name`, `hypothesis`, the audience (`audience`, or
 `team_ids`/`company_ids`), `roles`, optional `starts_at`/`ends_at`/`priority`, and one object per channel: `in_app`
 {`placement`, `title`, `body`, `cta_label`, `cta_type`, `cta_params`, `asset_id`?, `delay_days`, `send_condition`},
 `push` {`title`, `body`, `route`, `delay_days`, `send_condition`}, `email` {`subject`, `preheader`, `body`
@@ -229,8 +230,8 @@ language: `{"es": "…", "en": "…"}`.
 - `in_app.asset_id` (the popup's video) and `email.asset_id` (a thumbnail of the video) take **approved** media
   library assets only. A draft asset (for example one the `video` skill just published) is approved first: after
   the user has watched it and says so, `manage_marketing_asset` `approve`, or they approve it in Hub → Marketing →
-  Media library. Pass its paid-ads verdict on when it says "check first".
-- Fix the `copy_warnings` it returns with `update_campaign_draft`.
+  Media library. Pass its rights note on when it limits use.
+- Fix the `copy_warnings` it returns with `save_campaign_draft` and the draft's `campaign_id`.
 
 ### 8. Translate, preview, test
 
@@ -269,7 +270,7 @@ means the person lacks its grant (see Grants); the same action is always in the 
 | End a campaign | `manage_campaign` `end` | final; its results and notes stay; a `marketing-review` postmortem follows |
 | Start from an earlier campaign | `manage_campaign` `duplicate` | the copy is a new draft: re-check hypothesis, audience and copy |
 | Delete a draft | `manage_campaign` `delete_draft` | drafts only, never one that reached people |
-| Add / remove hand-picked teams | `add_teams_to_campaign` / `manage_campaign` `remove_teams` | after activation teams can only be added |
+| Add / remove hand-picked teams | `manage_campaign` `add_teams` / `remove_teams` | never on an active campaign; after activation teams can only be added |
 | Stop all marketing at once | `marketing_settings` `pause_all_sending` {reason} | "Pause all sending" (Hub → Rental Ninja Settings → Marketing): every campaign push, email and popup |
 | A customer asks not to get marketing | `marketing_suppressions` `add` (`list` to check) | also tell the person handling that customer's thread |
 | Brand voice per language | `list_marketing_voices` / `marketing_settings` `set_voice` | the voice the `video` skill uses by default |
@@ -298,7 +299,8 @@ any there, don't use them: tell the user and propose removing them in a new vers
 
 ## Grants
 
-Reading needs no grant; `get_marketing_asset_upload_urls` needs "Publish to the media library", like `publish_marketing_asset`. Every other tool needs its own grant in Hub → Staff
-access → Campaigns & media (`marketing_settings` and `marketing_suppressions` even to `get` or `list`); one missing
-from your tools means the person lacks that grant. The grant labels, what to tell the person and which tools run
+Reading needs no grant. Writing needs one of five grants in Hub → Staff access → Campaigns & media: Campaign drafts
+(drafts, translations, notes, saved audiences, tests), Manage campaigns, Media library & context (uploads, assets, the
+marketing context), Voiceovers & music, Marketing settings (`marketing_settings` and `marketing_suppressions`, even to
+`get` or `list`). A tool missing from your tools means the person lacks its grant. The grant labels, what to tell the person and which tools run
 without a prompt: **Grants and approvals** in the `hub` skill (`${CLAUDE_SKILL_DIR}/../hub/SKILL.md`).

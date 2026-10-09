@@ -46,7 +46,7 @@ These rules exist because CRM actions affect real customers and real team member
 - **`force_booking_com_rate_resync`** — Briefly deactivates every rate plan of the whole Booking.com hotel, not just the rental given. Run it with `dry_run=true` first and confirm the hotel, units and rate plans with the user. On a gateway timeout the server keeps going: check the rate plans with `get_rental_detail` before any retry.
 - **`import_past_bookings`** — Writes a customer's past bookings from their old system's exports. Only when the person asked for it. Hand the files over unchanged (attachment ids, or your own `get_upload_url` uploads): never convert a file, compute money or answer a question yourself. Dry run first, relay the assumptions and the questions one at a time, then execute one rental at a time with the latest `plan_token`, each after the person's explicit yes. After a timeout, run a dry run: stays already written show as duplicates.
 - **`remove_imported_past_bookings`** — Undoes an import with the same files. Report first; pass `execute: true` only after the person confirms the count. Bookings edited since the import are left alone and listed.
-- **Marketing and media writes** (`manage_campaign`, `update_campaign_draft`, `save_marketing_audience` with `id`, `manage_marketing_audience`, `manage_marketing_asset`, `marketing_settings`, `generate_voiceover`, `generate_music`) — follow the `marketing-campaigns` and `video` skills.
+- **Marketing and media writes** (`manage_campaign`, `save_campaign_draft`, `save_marketing_audience` with `id`, `manage_marketing_audience`, `manage_marketing_asset`, `marketing_settings`, `generate_voiceover`, `generate_music`) — follow the `marketing-campaigns` and `video` skills.
 
 ### Team-visible operations (use with care)
 
@@ -61,7 +61,7 @@ These rules exist because CRM actions affect real customers and real team member
 
 The plugin's one reference for grants and auto-approval; the other skills and the README point here.
 
-**Grants.** The tools below need the person's own grant in Hub → Staff access; every other Hub tool needs none. Without the grant the Hub leaves the tool out of the tool list, so a gated tool that is missing while other Hub tools work means the person lacks that grant, not a token or connection problem. Tell them the grant to ask an admin for (group and label below), then to restart Claude Code once it is given: the tool list is cached about 5 minutes. Never work around a missing grant. `marketing_settings` and `marketing_suppressions` need theirs even to `get` or `list`. Destructive = listed under Destructive operations above.
+**Grants.** The tools below need the person's own grant in Hub → Staff access; every other Hub tool needs none. Without the grant the Hub leaves the tool out of the tool list, so a gated tool that is missing while other Hub tools work means the person lacks that grant, not a token or connection problem. Tell them the grant to ask an admin for (group and label below), then to restart Claude Code once it is given: the tool list is cached about 5 minutes. Never work around a missing grant. `marketing_settings` and `marketing_suppressions` need Marketing settings even to `get` or `list`. Destructive = listed under Destructive operations above.
 
 | Tool | Grant | Staff access group | Destructive |
 |---|---|---|---|
@@ -76,25 +76,23 @@ The plugin's one reference for grants and auto-approval; the other skills and th
 | `update_changelog_item` | Update changelog item | Changelog | |
 | `import_past_bookings` | Import past bookings | Imports | yes |
 | `remove_imported_past_bookings` | Remove imported past bookings | Imports | yes |
-| `create_campaign_draft` | Create campaign drafts | Campaigns & media | |
-| `update_campaign_draft` | Edit campaign drafts | Campaigns & media | yes |
-| `add_teams_to_campaign` | Add teams to campaigns | Campaigns & media | |
-| `translate_campaign_messages` | Translate campaigns | Campaigns & media | |
-| `send_campaign_test` | Send campaign test | Campaigns & media | |
-| `add_campaign_note` | Add campaign notes | Campaigns & media | |
+| `save_campaign_draft` | Campaign drafts | Campaigns & media | yes |
+| `translate_campaign_messages` | Campaign drafts | Campaigns & media | |
+| `send_campaign_test` | Campaign drafts | Campaigns & media | |
+| `add_campaign_note` | Campaign drafts | Campaigns & media | |
+| `save_marketing_audience` | Campaign drafts | Campaigns & media | with `id` |
+| `manage_marketing_audience` | Campaign drafts | Campaigns & media | yes |
 | `manage_campaign` | Manage campaigns | Campaigns & media | yes |
-| `save_marketing_audience` | Save marketing audiences | Campaigns & media | with `id` |
-| `manage_marketing_audience` | Manage marketing audiences | Campaigns & media | yes |
-| `update_marketing_context` | Update marketing context | Campaigns & media | |
-| `get_marketing_asset_upload_urls` | Publish to the media library | Campaigns & media | |
-| `publish_marketing_asset` | Publish to the media library | Campaigns & media | |
-| `manage_marketing_asset` | Manage library assets | Campaigns & media | yes |
+| `update_marketing_context` | Media library & context | Campaigns & media | |
+| `get_marketing_asset_upload_urls` | Media library & context | Campaigns & media | |
+| `publish_marketing_asset` | Media library & context | Campaigns & media | |
+| `manage_marketing_asset` | Media library & context | Campaigns & media | yes |
+| `generate_voiceover` | Voiceovers & music | Campaigns & media | yes |
+| `generate_music` | Voiceovers & music | Campaigns & media | yes |
 | `marketing_settings` | Marketing settings | Campaigns & media | yes |
-| `marketing_suppressions` | Marketing suppressions | Campaigns & media | |
-| `generate_voiceover` | Generate voiceover | Campaigns & media | yes |
-| `generate_music` | Generate music | Campaigns & media | yes |
+| `marketing_suppressions` | Marketing settings | Campaigns & media | |
 
-The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too); Marketing settings to turn sending back on; Marketing suppressions to lift a suppression.
+The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too); Marketing settings to turn sending back on or lift a suppression. Every marketing tool, the read ones included, is for people only: the triage agent never sees them.
 
 **Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs the tools it lists without a prompt and never lists a gated or destructive one; Claude Code asks before every other tool. A deny or ask rule in the person's own Claude Code settings still applies.
 
@@ -128,9 +126,9 @@ Domain knowledge and investigation guides live in `references/`. See `references
 ## Rental Ninja prices (read-only)
 
 - **`get_pricing_catalogue`** — list prices for sale: plans with monthly and yearly tiers and worked totals, add-ons, default usage rates, Smart Inbox trial credits, campaign offers with their text, and the caveat that teams can pay otherwise.
-- **`get_company_pricing`** {`company_id`} — what one account pays and would pay: plan price per cycle, Smart Plan for them, coupons and discount, currency, billing cycle, negotiated lines, their usage rates.
+- **`get_company_subscription`** {`company_id`, `include_prices: true`} — what one account pays and would pay: plan price per cycle against the list price, every plan at its rental count (Smart Plan included), add-ons, coupon and discount, currency, negotiated lines, their usage rates.
 
-Teams pay different prices (legacy prices, coupons, negotiated lines, yearly billing): a price for one customer comes from `get_company_pricing` for that account, never from the catalogue, memory or the marketing context.
+Teams pay different prices (legacy prices, coupons, negotiated lines, yearly billing): a price for one customer comes from `get_company_subscription` with `include_prices` for that account, never from the catalogue, memory or the marketing context.
 
 ---
 

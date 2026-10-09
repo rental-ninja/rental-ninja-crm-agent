@@ -63,8 +63,8 @@ below are relative to that folder. `FILM --help` lists every command.
 6. **Hub:** narration, music and publishing go through this plugin's Hub MCP server (Hub token: the plugin README).
    No Hub tools at all: ask the user to restart Claude Code or check the token. `generate_voiceover`,
    `generate_music`, `publish_marketing_asset` and `manage_marketing_asset` are grant-gated: one missing from your
-   tools means the person lacks its grant ("Generate voiceover", "Generate music", "Publish to the media library",
-   "Manage library assets"). They ask an admin for it in Hub → Staff access → Campaigns & media, then restart Claude
+   tools means the person lacks its grant ("Voiceovers & music" for the first two, "Media library & context" for the
+   others). They ask an admin for it in Hub → Staff access → Campaigns & media, then restart Claude
    Code (the tool list is cached about 5 minutes); never work around it. Which tools ask before running: **Grants and
    approvals** in the `hub` skill (`${CLAUDE_SKILL_DIR}/../hub/SKILL.md`).
 7. Run `FILM setup` again until it prints `Ready.`
@@ -305,10 +305,9 @@ sections musical names ("Playful Tension Groove", "Warm Resolution and Final Cho
 Everything audible is paid in ElevenLabs credits: narration 1 credit per character (`FILM takes` prints the
 characters), music ~15 credits per second (`FILM score --dry` prints the estimate: a 15 s Reel ≈ 225, a 30 s cut
 ≈ 450, a 3 min promo ≈ 2,700). With engine `hub` they come from the company's ElevenLabs account, with no per-person
-cap. Before showing an estimate, call `get_voiceover_usage` (free, no prompt): `account.remaining` is the company's
-credits left (`account` is null when the Hub cannot read the balance: say so) and `team_credits_used` this calendar
-month's Hub spend (`credits_used` and `by_kind` are yours). Show the user the estimate next to what is left and this
-month's spend, and say plainly when the estimate does not fit. Claude Code asks before every `generate_voiceover` and
+cap. Before showing an estimate, call `list_marketing_voices` (free, no prompt): `account.remaining` is the
+company's credits left this billing period (`account` is null when the Hub cannot read the balance: say so). Show the
+user the estimate next to what is left, and say plainly when the estimate does not fit. Claude Code asks before every `generate_voiceover` and
 `generate_music` call: the plugin never auto-approves spending. `FILM budget` explains this and shows a personal
 key's credits when there is one.
 
@@ -330,13 +329,13 @@ key's credits when there is one.
   an ElevenLabs Enterprise licence. Music you bring yourself (`engine: library`) needs its own licence.
 - **Cast:** Humaaans are CC0 (record in `library/humaaans/LICENSE.md`).
 - **Claims:** sourced in `brief.claims` (phase 1, Claims); no real customer data on screen.
-- **Record:** `FILM publish` writes these rights into the media library asset, and the Hub turns them into a paid-ads
-  verdict (yes, or check first with the reasons). A Voice Library voice always gives "check first".
+- **Record:** `FILM publish` writes these rights as the asset's rights note in the media library (voice, music,
+  visuals, other). Check a Voice Library voice's sharing terms yourself before any paid use.
 
 ## Media library (`publish`)
 
 The Hub media library (Hub → Marketing → Media library) holds the videos campaigns use: an in-app popup plays the 16x9
-video, poster and WebVTT subtitles of the user's language (`update_campaign_draft` `in_app.asset_id`), an email shows
+video, poster and WebVTT subtitles of the user's language (`save_campaign_draft` `in_app.asset_id`), an email shows
 the 16x9 poster as a thumbnail (`email.asset_id`). Python cannot call the Hub, so `FILM publish` prepares everything
 and you make the tool calls, in this order:
 
@@ -358,14 +357,14 @@ and you make the tool calls, in this order:
    again. It needs only the system `python3` and `curl`.
 4. Call `publish_marketing_asset` with `library/publish_request.json` exactly as written and write its result to
    `library/published.json` (`publish` then refuses a second asset from the same folder unless `--force`). Give the
-   user the `hub_url` and pass the `paid_ads` verdict on word for word. Tool missing: Setup step 6.
+   user the `hub_url`. Tool missing: Setup step 6.
 
 The asset always lands as a **draft**, and only approved assets can be linked to campaigns. Approve it once the user
 has watched the delivered film and says so: `manage_marketing_asset` `approve`, or
 the user approves it in Hub → Marketing → Media library. Publish only films the user approved.
-`list_marketing_assets` / `get_marketing_asset` show what is already in the library: check for an earlier version
-before adding a duplicate. Rights, usages and archiving: `manage_marketing_asset` (`update`, `add_usage`,
-`archive`), or the video's page in the Hub.
+`list_marketing_assets` (with `id` for one asset and its files) shows what is already in the library: check for an
+earlier version before adding a duplicate. Rights note and archiving: `manage_marketing_asset` (`update`, `archive`),
+or the video's page in the Hub.
 
 ## Review
 

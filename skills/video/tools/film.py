@@ -543,7 +543,7 @@ def cmd_budget():
           "the company's ElevenLabs account, with no per-person cap. The Hub runs one job per person at a time (call the tools\n"
           'sequentially, never in parallel), refuses a job when the credits left are fewer than it needs (it returns a notice)\n'
           'and adds a `warning` to results when less than 10 % is left: show either to the user verbatim.\n'
-          'The Hub MCP tool get_voiceover_usage shows the credits left and this month\'s spend: call it before an estimate.')
+          'The Hub MCP tool list_marketing_voices shows the credits left: call it before an estimate.')
     import eleven
     if not eleven.has_key(): return print('ElevenLabs (engine elevenlabs): no personal key')
     used, limit, reset = eleven.quota(); left = limit - used

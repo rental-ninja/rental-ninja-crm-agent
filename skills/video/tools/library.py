@@ -20,7 +20,7 @@ LOCALES = ('es', 'en', 'ca', 'fr', 'de', 'it', 'nl', 'pt')
 CONTENT_TYPES = {'.mp4': 'video/mp4', '.webm': 'video/webm', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
                  '.webp': 'image/webp', '.vtt': 'text/vtt', '.srt': 'application/x-subrip'}
 MAX_BYTES = {'video': 500 * 1024 * 1024, 'poster': 10 * 1024 * 1024, 'subtitles': 1024 * 1024}
-MAX_FILES, NAME_MAX, DESCRIPTION_MAX, MUSIC_NOTE_MAX = 40, 160, 2000, 500
+MAX_FILES, NAME_MAX, DESCRIPTION_MAX, MUSIC_NOTE_MAX, RIGHTS_NOTE_MAX = 40, 160, 2000, 500, 2000
 TEMPLATE_IMAGES = {'logo_color.svg', 'logo_neg.png', 'iso.svg'}
 # Voices known to come from the public ElevenLabs Voice Library: their owner's terms decide paid-ads use.
 VOICE_LIBRARY = {'1CeqBeXMOqCleeQjfYfO': 'Cristina'}
@@ -165,6 +165,16 @@ def rights_of(infos, checks):
     return {'voice': voice, 'music': musics[0], 'visuals': visuals[:1000], 'other': '; '.join(other)[:1000] or None}
 
 
+def rights_note(rights):
+    """The media library keeps rights as one free-text note: voice, music, visuals and anything else, one per line."""
+    v, m = rights['voice'], rights['music']
+    lines = [f"Voice: {v['provider']} {v['voice_name'] or '?'} ({v['voice_id'] or '?'}){', public Voice Library' if v['from_voice_library'] else ''}",
+             f"Music: {m['provider']} {m.get('model') or ''}{'; ' + m['note'] if m.get('note') else ''}".rstrip() if m else 'Music: none',
+             f"Visuals: {rights['visuals']}"]
+    if rights['other']: lines.append(f"Other: {rights['other']}")
+    return '\n'.join(lines)[:RIGHTS_NOTE_MAX]
+
+
 def strip_html(s):
     return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>|&[a-z]+;', ' ', s or '')).strip()
 
@@ -213,11 +223,7 @@ def build(infos, lib, name=None, description=None, force=False):
         dims = f"{f['width']}x{f['height']}" if f.get('width') else ''
         print(f"  {f['role']:<9} {f['format']:<4} {f['locale']}  {f['filename']:<44} {human(f['size_bytes']):>9}  {dims:<9} "
               f"{str(f['duration_s']) + ' s' if 'duration_s' in f else '':<8} <- {os.path.relpath(f['path'], os.path.dirname(os.path.dirname(os.path.dirname(f['path']))))}")
-    v, m = rights['voice'], rights['music']
-    music = f"music {m['provider']} {m.get('model') or ''}{'; ' + m['note'] if m.get('note') else ''}" if m else 'music none'
-    print(f"rights: voice {v['provider']} {v['voice_name'] or '?'} ({v['voice_id'] or '?'}){', public Voice Library' if v['from_voice_library'] else ''}; "
-          f"{music}\n        visuals: {rights['visuals']}"
-          + (f"\n        other: {rights['other']}" if rights['other'] else ''))
+    print('rights:\n  ' + rights_note(rights).replace('\n', '\n  '))
     print(f'description: {man["description"]}')
     for c in checks: print(f'CHECK  {c}')
     q = shlex.quote
@@ -228,7 +234,7 @@ def build(infos, lib, name=None, description=None, force=False):
           f'  3. Run: python3 {q(FILM_PY)} upload {q(os.path.dirname(lib))}\n'
           f'     (one curl POST per file, storage answers 204; then it writes library/publish_request.json)\n'
           f'  4. Call publish_marketing_asset with the JSON in library/publish_request.json, exactly as written, and save its result\n'
-          f'     to library/published.json. The asset is a DRAFT: give the user its hub_url and paid_ads verdict; once they say so,\n'
+          f'     to library/published.json. The asset is a DRAFT: give the user its hub_url; once they say so,\n'
           f'     approve it (manage_marketing_asset action approve, or Hub -> Marketing -> Media library).')
 
 
@@ -283,11 +289,11 @@ def upload(lib, dry=False):
         prog[t['key']] = t['filename']; write_json(prog_p, prog)
     if dry: return print('dry run: nothing was sent')
     keys = {t['filename']: t['key'] for t in tickets}
-    req = {'name': man['name'], 'description': man['description'], 'rights': man['rights'],
+    req = {'name': man['name'], 'description': man['description'], 'rights_note': rights_note(man['rights']),
            'files': [{'key': keys[f['filename']], **{k: f[k] for k in ('locale', 'format', 'role', 'duration_s', 'width', 'height') if f.get(k) is not None}} for f in man['files']]}
     out = os.path.join(lib, 'publish_request.json'); write_json(out, req)
     print(f'{len(tickets)} files on storage. Now call publish_marketing_asset with the JSON in {out}, exactly as written,\n'
-          'save its result to library/published.json and give the user the hub_url and the paid_ads verdict: the asset is a draft\n'
+          'save its result to library/published.json and give the user the hub_url: the asset is a draft\n'
           'until it is approved (manage_marketing_asset action approve, or Hub -> Marketing -> Media library), once the user says so.')
 
 

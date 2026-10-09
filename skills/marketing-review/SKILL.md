@@ -113,7 +113,7 @@ may need a developer). No note is written on it until a person has looked.
 
 - **No Hub tools at all:** stop and say so (restart Claude Code or check the Hub token).
 - **`add_campaign_note` missing from the tools:** the person lacks its grant. Stop and tell them to ask an admin for
-  "Add campaign notes" in Hub → Staff access → Campaigns & media, then restart Claude Code (the tool list is cached
+  "Campaign drafts" in Hub → Staff access → Campaigns & media, then restart Claude Code (the tool list is cached
   about 5 minutes).
 - **Suspected tracking bug:** that campaign is skipped and reported (above); the others go on.
 - **Global pause:** when `list_campaign_options` says sending is paused, mention it once at the top of the summary;

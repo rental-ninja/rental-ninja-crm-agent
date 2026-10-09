@@ -137,7 +137,7 @@ Team members get the update on their next session.
 
 ### Changelog
 
-- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. The hook runs the read-only tools, the low-risk CRM writes and the Linear lookups without a prompt; destructive and grant-gated tools and creating or updating a Linear issue always ask ([Grants and approvals](skills/hub/SKILL.md#grants-and-approvals)). RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library. Campaign, video and blog copy take prices, offers and features from live tools (new read-only `get_pricing_catalogue` and `get_company_pricing`, auto-approved), never from the marketing context.
+- **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. The hook runs the read-only tools, the low-risk CRM writes and the Linear lookups without a prompt; destructive and grant-gated tools and creating or updating a Linear issue always ask ([Grants and approvals](skills/hub/SKILL.md#grants-and-approvals)). RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library. Campaign, video and blog copy take prices, offers and features from live tools (the new read-only `get_pricing_catalogue` and `get_company_subscription` with `include_prices`, auto-approved), never from the marketing context.
 
 ### Adding a new team member
 
@@ -184,7 +184,7 @@ rental-ninja-crm-agent/
 2. Try closing and reopening Claude Code
 3. If it still doesn't work, ask Pol to check your token is valid
 
-**One Hub tool missing while the others work** (e.g. `generate_voiceover`, `create_campaign_draft`)
+**One Hub tool missing while the others work** (e.g. `generate_voiceover`, `save_campaign_draft`)
 - You lack its grant: ask an admin to give it to you in Hub → Staff access ([which grant](skills/hub/SKILL.md#grants-and-approvals)), then restart Claude Code. The tool list is cached about 5 minutes.
 
 **"Permission denied" or "Unauthorized"**
