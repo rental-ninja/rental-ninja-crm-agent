@@ -18,14 +18,15 @@ behaviour — gather the facts first:
 
 | Need | Tool |
 |---|---|
-| What actually shipped | `mcp__hub__search_changelog`, `list_changelog_items`, `get_changelog_draft` |
-| How a feature really works | `mcp__hub__search_docs` (repos: `ninja-docs` for help-center, `ninja` for backend, `ninja_app` for the manager app, `ninja_app_client` for the guest app, `rentals-united-docs` for channel/OTA) |
-| Real customer pain points, in their own words | `mcp__hub__search_threads`, `search_closure_summaries`, `get_thread_detail` |
-| Channel/OTA specifics | `mcp__hub__search_docs` with `repo: rentals-united-docs` |
+| What actually shipped | `search_changelog`, `list_changelog_items`, `get_changelog_draft` |
+| How a feature really works | `search_docs` (repos: `ninja-docs` for help-center, `ninja` for backend, `ninja_app` for the manager app, `ninja_app_client` for the guest app, `rentals-united-docs` for channel/OTA) |
+| Real customer pain points, in their own words | `search_threads`, `search_closure_summaries`, `get_thread_detail` |
+| Channel/OTA specifics | `search_docs` with `repo: rentals-united-docs` |
+| Voice, words to avoid, what never to claim | `get_marketing_context` |
 
-`reference/product-knowledge.md` is a snapshot of the main features and their
-real names — read it to know *what to search for*, then verify with the live
-tools. When the snapshot and the tools disagree, the tools win.
+`reference/product-knowledge.md` lists the main features by their real names,
+with no figures — read it to know *what to search for*; every behaviour and
+limit you write comes from the live tools.
 
 **Grounding rules — non-negotiable.** The in-app generator this skill replaces
 shipped confident, invented specifics; that is the failure mode to avoid:
@@ -33,6 +34,10 @@ shipped confident, invented specifics; that is the failure mode to avoid:
 - Every product claim traces to a `search_docs` or changelog result. Use the
   real feature names and real behaviour — never guess a feature name, a
   workflow, a limit or a price.
+- **No Rental Ninja prices or fees in the article** (plans, add-ons,
+  commissions, SMS): link the pricing page instead (its URL from the user,
+  never guessed). Teams pay different prices, and the article outlives any
+  price.
 - **Never invent statistics, percentages, survey results, named customer
   stories, awards or certifications.** If a number would strengthen a point and
   you don't have a real one, drop it or go qualitative ("many managers find…",
@@ -53,8 +58,8 @@ given):
 - the problem it solves
 - objectives: SEO / training / product diffusion
 - **additional context**: any real facts specific to this post — figures, a
-  particular workflow, pricing — that the Hub won't give you. Treat what they
-  give as fact and never contradict it.
+  particular workflow — that the Hub won't give you. Treat what they give as
+  fact and never contradict it, except prices: those stay out (section 1).
 - target locales. Default: `es` (original), `en`, `fr`, `it`, `pt`, `de`.
 
 ## 3. Write it
