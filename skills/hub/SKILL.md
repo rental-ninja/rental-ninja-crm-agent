@@ -94,7 +94,7 @@ The plugin's one reference for grants and auto-approval; the other skills and th
 
 The same grants gate people in the Hub: Manage campaigns to activate, resume or change an active campaign (adding accounts too); Marketing settings to turn sending back on or lift a suppression. Every marketing tool, the read ones included, is for people only: the triage agent never sees them.
 
-**Approvals.** The plugin's `PreToolUse` hook (`hooks/hooks.json`) runs the tools it lists without a prompt and never lists a gated or destructive one; Claude Code asks before every other tool. A deny or ask rule in the person's own Claude Code settings still applies.
+**Approvals.** Which tools run without a prompt: the `description` of the plugin's `PreToolUse` hook (`hooks/hooks.json`). Claude Code asks before every other tool; the person's own deny or ask rules still apply.
 
 ## Tone
 

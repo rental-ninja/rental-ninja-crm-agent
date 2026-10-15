@@ -22,8 +22,6 @@ CONTENT_TYPES = {'.mp4': 'video/mp4', '.webm': 'video/webm', '.jpg': 'image/jpeg
 MAX_BYTES = {'video': 500 * 1024 * 1024, 'poster': 10 * 1024 * 1024, 'subtitles': 1024 * 1024}
 MAX_FILES, NAME_MAX, DESCRIPTION_MAX, MUSIC_NOTE_MAX, RIGHTS_NOTE_MAX = 40, 160, 2000, 500, 2000
 TEMPLATE_IMAGES = {'logo_color.svg', 'logo_neg.png', 'iso.svg'}
-# Voices known to come from the public ElevenLabs Voice Library: their owner's terms decide paid-ads use.
-VOICE_LIBRARY = {'1CeqBeXMOqCleeQjfYfO': 'Cristina'}
 VISUALS = 'In-house flat vector animation (canvas code); Humaaans characters by Pablo Stanley (CC0); official Rental Ninja logos.'
 CURL = '/usr/bin/curl' if os.path.exists('/usr/bin/curl') else shutil.which('curl')
 FILM_PY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'film.py')
@@ -104,7 +102,7 @@ def collect(info, problems, checks):
 
 
 def voice_of(info, checks):
-    """(voice_id, voice_name, from_voice_library) of one film: the voice of the picked Hub takes, else film.yml voice.voice."""
+    """(voice_id, voice_name) of one film: the voice of the picked Hub takes, else film.yml voice.voice."""
     V = info['voice']; ids = []
     for n, pick in info['picks']:
         p = os.path.join(info['root'], f'vo/lines/l{n}_{pick}.hub.json')
@@ -113,16 +111,10 @@ def voice_of(info, checks):
             if vid and vid not in ids: ids.append(vid)
     if V.get('voice') and V['voice'] not in ids: ids.append(V['voice'])
     if len(ids) > 1: checks.append(f"{info['slug']}: the picked takes use {len(ids)} voices ({', '.join(ids)}): the rights record the first")
-    vid = ids[0] if ids else None; name = V.get('name') or VOICE_LIBRARY.get(vid or '')
+    vid = ids[0] if ids else None; name = V.get('name')
     if not vid: checks.append(f"{info['slug']}: voice id unknown (no Hub take results): set voice.voice in film.yml")
     if not name: checks.append(f"{info['slug']}: voice name unknown: set voice.name in film.yml from list_marketing_voices")
-    lib = V.get('from_voice_library')
-    if lib is None:
-        lib = True
-        if vid not in VOICE_LIBRARY:
-            checks.append(f"{info['slug']}: is voice {name or vid} from the public ElevenLabs Voice Library? Recorded as yes (paid ads: check first) "
-                          'until film.yml says voice.from_voice_library: false (a premade or company voice)')
-    return vid, name, bool(lib)
+    return vid, name
 
 
 def music_of(info, checks):
@@ -154,10 +146,9 @@ def rights_of(infos, checks):
         if v[1] and v[1] not in ids: ids.append(v[1])
     joined = ', '.join(ids)
     voice = {'provider': 'elevenlabs', 'voice_id': joined if len(joined) <= 64 else first[1],
-             'voice_name': ', '.join(f'{v[2] or v[1]} ({v[0]})' for v in voices)[:120] if len(voices) > 1 else first[2],
-             'from_voice_library': any(v[3] for v in voices)}
+             'voice_name': ', '.join(f'{v[2] or v[1]} ({v[0]})' for v in voices)[:120] if len(voices) > 1 else first[2]}
     other = [x for x in (i['rights'].get('other') for i in infos) if x]
-    if len(voices) > 1: other.insert(0, 'Voices per language: ' + '; '.join(f"{v[0]} {v[2] or '?'} {v[1] or '?'}{' (Voice Library)' if v[3] else ''}" for v in voices))
+    if len(voices) > 1: other.insert(0, 'Voices per language: ' + '; '.join(f"{v[0]} {v[2] or '?'} {v[1] or '?'}" for v in voices))
     if any(m != musics[0] for m in musics):
         other.append('Music per film: ' + '; '.join(f"{i['lang']} {m['provider']} {m['model'] or ''}".strip() if m else f"{i['lang']} none"
                                                      for i, m in zip(infos, musics)))
@@ -168,7 +159,7 @@ def rights_of(infos, checks):
 def rights_note(rights):
     """The media library keeps rights as one free-text note: voice, music, visuals and anything else, one per line."""
     v, m = rights['voice'], rights['music']
-    lines = [f"Voice: {v['provider']} {v['voice_name'] or '?'} ({v['voice_id'] or '?'}){', public Voice Library' if v['from_voice_library'] else ''}",
+    lines = [f"Voice: {v['provider']} {v['voice_name'] or '?'} ({v['voice_id'] or '?'})",
              f"Music: {m['provider']} {m.get('model') or ''}{'; ' + m['note'] if m.get('note') else ''}".rstrip() if m else 'Music: none',
              f"Visuals: {rights['visuals']}"]
     if rights['other']: lines.append(f"Other: {rights['other']}")

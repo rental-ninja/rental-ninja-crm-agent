@@ -131,8 +131,6 @@ characters, words: [{text, start, end}]}`.
    - `voice_id` null (no brand voice for that language yet) → ask the user for an ElevenLabs voice id, or to have one
      picked in Hub → Rental Ninja Settings → Voice & audio (`settings_url`), and set `voice.voice` (+ `voice.name`);
    - the user wants another voice for this film → `voice.voice` overrides the brand voice; keep it in `film.yml`.
-   Set `voice.from_voice_library` when you know it (true = a public ElevenLabs Voice Library voice, e.g. Cristina
-   `1CeqBeXMOqCleeQjfYfO`; false = premade or the company's own); `publish` records the rights from these fields.
    `FILM takes <folder>` calls nothing: it writes `vo/hub_jobs.json`, one job per line × take: `input` (text =
    `say:` or `text`, locale, model, settings, label `<slug> line N take T`), `save_result_as`, `import`. It prints
    the characters the takes will use (1 credit each); fewer takes (`--takes a,b`, `--lines 3,4`) spend less.
@@ -321,16 +319,13 @@ key's credits when there is one.
 
 ## Rights before publishing
 
-- **Voice:** Hub takes come from the company's ElevenLabs account; ElevenLabs output is cleared for commercial use on
-  paid plans. Voice Library voices (e.g. "Cristina", `1CeqBeXMOqCleeQjfYfO`) carry their owner's sharing terms: check them before a paid
-  campaign. With a personal key, the rights follow that account's plan.
-- **Music:** ElevenLabs Music output is cleared for commercial use, social posts and paid ads included, on paid plans
-  (the company account through the Hub; a personal key follows its own plan). Film/TV, broadcast and large games need
-  an ElevenLabs Enterprise licence. Music you bring yourself (`engine: library`) needs its own licence.
+- **Voice and music:** the Hub's brand voices and ElevenLabs Music are cleared for every use, paid campaigns and ads
+  included: never ask the user about voice or music licences. With a personal key, the rights follow that account's
+  plan. Music you bring yourself (`engine: library`) needs its own licence.
 - **Cast:** Humaaans are CC0 (record in `library/humaaans/LICENSE.md`).
 - **Claims:** sourced in `brief.claims` (phase 1, Claims); no real customer data on screen.
 - **Record:** `FILM publish` writes these rights as the asset's rights note in the media library (voice, music,
-  visuals, other). Check a Voice Library voice's sharing terms yourself before any paid use.
+  visuals, other).
 
 ## Media library (`publish`)
 
@@ -343,7 +338,7 @@ and you make the tool calls, in this order:
    folders (one per language; `library/` goes in the first). Per format it takes the 1080p MP4 (`final/<slug>.mp4`,
    `<slug>-<fmt>.mp4`; the 720p copies stay out), its poster and, for formats without burned-in captions (16x9 by
    default), the WebVTT subtitles (made from the `.srt` when missing), measured with ffprobe. Rights come from the
-   film: voice = the `voice_id` of the picked Hub takes + `voice.name` + `voice.from_voice_library`; music =
+   film: voice = the `voice_id` of the picked Hub takes + `voice.name`; music =
    `elevenlabs` + the composed model only when `music/composed.wav` exists (otherwise the clips or in-house cues, or
    no music; `music.licence` for engine library; the note is cut at 500 characters); visuals = the house style +
    `rights.visuals`; `rights.other`. It prints the files with sizes, the rights and `CHECK` lines, and writes

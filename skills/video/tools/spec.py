@@ -10,7 +10,7 @@ DEFAULTS = {
     'captions': {'burn': None, 'style': 'pill', 'max_chars': 32, 'max_lines': 2},
     'timing': {'first_line_at': 1.6, 'default_gap': 1.35, 'lead': .55, 'tail': 5.2, 'wipe': .34},
     'voice': {
-        'engine': 'hub', 'voice': None, 'name': None, 'from_voice_library': None, 'model': 'eleven_v4', 'takes': ['a', 'b', 'c'],
+        'engine': 'hub', 'voice': None, 'name': None, 'model': 'eleven_v4', 'takes': ['a', 'b', 'c'],
         'settings': {'stability': .5, 'similarity_boost': .8, 'use_speaker_boost': True},
         'chain': ('silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.02,areverse,'
                   'silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.08,areverse,'
@@ -38,7 +38,7 @@ DEFAULTS = {
 # Voice engines: hub (the default) = ElevenLabs voices through the Hub MCP tool generate_voiceover, no local key
 # (voice None = the brand voice for film.lang, from the Hub tool list_marketing_voices); elevenlabs = the same API with a
 # personal key. `settings` are the API voice_settings (plus optional `language`, a two-letter code for the flash/turbo
-# v2.5 models). `name` and `from_voice_library` only feed the media library rights (`film.py publish`).
+# v2.5 models). `name` only feeds the media library rights (`film.py publish`).
 VOICE_ENGINES = ('hub', 'elevenlabs')
 
 

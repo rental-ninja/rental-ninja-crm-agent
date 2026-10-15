@@ -39,8 +39,6 @@ voice:
                                      # company account); elevenlabs = your own key (Keychain or ELEVEN_KEY)
   voice: ''                          # empty = the brand voice for film.lang (Hub tool list_marketing_voices); or an ElevenLabs voice id
   name: ''                           # the voice's name from list_marketing_voices (recorded in the media library rights)
-  # from_voice_library: false        # true = a public ElevenLabs Voice Library voice (its owner's terms decide paid ads);
-                                     # unset = publish records true ("check first") unless the voice is known
   model: eleven_v4                  # emotive: audio tags in say:, e.g. '[tired] Son las doce... [sighs] [relieved] Con Rental Ninja...'
   # settings: {stability: .5, similarity_boost: .8, use_speaker_boost: true}   # series defaults
   takes: [a, b, c]

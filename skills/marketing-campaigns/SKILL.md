@@ -28,8 +28,8 @@ check their Hub token. A single tool missing: the person lacks its grant (see Gr
    suppression with the user, naming exactly what it affects. `save_campaign_draft` with a `campaign_id` drops a
    channel set to `null` and replaces the hand-picked teams with `team_ids` / `company_ids` (`manage_campaign`
    `add_teams` appends): send only the fields to change.
-4. **Tests only to yourself.** `send_campaign_test` reaches the user's own app account (the default) or a user of an
-   internal Rental Ninja team, never a customer.
+4. **Tests only to yourself.** `send_campaign_test` reaches the user's own app account (the default) or Rental Ninja
+   staff (an app user with a Hub account), never a customer.
 5. **Spanish and English are yours, the rest is the translator's.** Write `es` and `en` yourself. Fill `ca`, `fr`,
    `de`, `it`, `nl`, `pt` only with `translate_campaign_messages`, which marks them machine-translated. Never
    hand-write those languages, and mark translations reviewed (`manage_campaign` `mark_translations_reviewed`) only
@@ -100,7 +100,7 @@ In parallel:
   today and its exact path and label in the app.
 - `get_pricing_catalogue` when the campaign sells a plan, an add-on or a trial: what is for sale and the caveat that
   teams can pay otherwise.
-- `list_campaign_options`: audiences with `matches_today`, placements, app screens (`routes`, `email_routes`),
+- `list_campaign_options`: audiences with `matches_today`, placements, app screens (`routes`, `email.routes`),
   button types (`cta_types` and which are admin-only), `offers`, `plans`, text limits, the push and email rules,
   `sending` (whether sending is paused) and `conversion_goals`.
 - `list_campaigns`, then `list_campaign_notes` of the related or recent ones: their postmortems and hypotheses say
@@ -230,7 +230,7 @@ language: `{"es": "…", "en": "…"}`.
 - `in_app.asset_id` (the popup's video) and `email.asset_id` (a thumbnail of the video) take **approved** media
   library assets only. A draft asset (for example one the `video` skill just published) is approved first: after
   the user has watched it and says so, `manage_marketing_asset` `approve`, or they approve it in Hub → Marketing →
-  Media library. Pass its rights note on when it limits use.
+  Media library.
 - Fix the `copy_warnings` it returns with `save_campaign_draft` and the draft's `campaign_id`.
 
 ### 8. Translate, preview, test
@@ -241,8 +241,7 @@ language: `{"es": "…", "en": "…"}`.
    them for the user. When a person who reads the language has checked one and says so, mark it reviewed
    (`manage_campaign` `mark_translations_reviewed`, or in the Hub editor).
 2. `preview_campaign` in `es` and `en` (and `role: member` when the button is admin-only): check the `sequence`,
-   `push_reach`, `email_reach`, `content_locale` (a language missing a text falls back as a whole) and
-   `copy_warnings`.
+   `push_reach`, `email_reach`, `content_locale` and `copy_warnings`.
 3. `send_campaign_test` once per channel the campaign uses (`channel`: `in_app`, `push`, `email`), to the user's own
    account. The popup appears the next time they reach its placement; the push needs a phone with the app; the email
    arrives with the real template. Ask the user to look at each one.
