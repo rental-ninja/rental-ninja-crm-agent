@@ -44,6 +44,8 @@ When a payout looks wrong, the root cause is almost always one of these:
 
 - **Recurring item scope** — A recurring item scoped to specific rentals may not apply to the rental in question. Check whether the item's rental list matches.
 
+- **Rectification counted twice** — A rectification invoice offsets only the one invoice it was created from. A second rectification, or « Recréer », leaves the earlier invoice counted and over-bills. Don't advise the customer to click « Rectifier » or « Recréer » again; this needs a dev fix ([RN-4645](https://linear.app/rental-ninja/issue/RN-4645)).
+
 ## Investigation Approach
 
 Start broad, narrow down. Get the big picture first (settlement list, payout summary), then drill into the specific payout and payee strategy.
@@ -56,6 +58,7 @@ Recommended sequence:
 4. Run `recalculate_payout_preview` to compare stored vs. recalculated amounts — this is the fastest way to spot whether something changed.
 5. If mismatches found, verify input booking data with `get_settlement_bookings`.
 6. For a specific payout, use `get_payout_detail` for the line-item breakdown.
+7. When invoice totals don't match the payout, read each invoice with `get_payee_invoice_text`. A rectification's correction line names the one invoice it cancels, and no other tool shows it.
 
 ## Communication
 
@@ -66,6 +69,7 @@ Property managers are not accountants. When explaining findings:
 - Name the root cause plainly: "The percentage was changed from 90% to 80% on March 5th"
 - If recommending action, be specific: "Re-generate the payout to apply the current strategy" or "The booking price needs to be corrected from X to Y"
 - For thread notes and drafts, follow hub skill conventions (AI footer tag, match customer language for replies, English for notes)
+- Never ask the customer to send invoices or statements Rental Ninja issued: read them with `get_payee_invoice_text`. When an invoice is wrong, tell the customer which one to hold and which ones are fine to send.
 
 ## Safety
 
@@ -81,6 +85,7 @@ Property managers are not accountants. When explaining findings:
 - `list_settlements(company_id, date_from, date_to, rental_id)` — browse settlement periods
 - `get_settlement_detail(company_id, settlement_id)` — full settlement with payouts, invoices, attachments
 - `get_payout_detail(company_id, payout_id)` — single payout with line items and payment history
+- `get_payee_invoice_text(company_id, id)` — the text of one invoice PDF, including rectification correction lines; `id` is the invoice's numeric id from `get_payout_detail`
 - `query_payout_summary(company_id, ...)` — aggregate payout amounts, group by settlement/rental/payee
 - `recalculate_payout_preview(company_id, settlement_id, payout_id)` — compare stored vs. fresh calculation
 - `get_settlement_bookings(company_id, settlement_id)` — bookings feeding into a settlement
