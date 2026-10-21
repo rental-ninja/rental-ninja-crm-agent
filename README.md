@@ -137,6 +137,7 @@ Team members get the update on their next session.
 
 ### Changelog
 
+- **5.6.1** — New read-only Hub tool `get_company_websites` (a company's direct-booking websites: why a site is down or not taking bookings, domain and DNS, rentals, payment gateway, coupons), auto-approved; sub-agents take website lookups.
 - **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. What it runs without a prompt: its `description` in [`hooks/hooks.json`](hooks/hooks.json). RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library. Campaign, video and blog copy take prices, offers and features from live tools (the new read-only `get_pricing_catalogue` and `get_company_subscription` with `include_prices`, auto-approved), never from the marketing context.
 
 ### Adding a new team member
