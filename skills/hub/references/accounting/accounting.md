@@ -44,7 +44,7 @@ When a payout looks wrong, the root cause is almost always one of these:
 
 - **Recurring item scope** — A recurring item scoped to specific rentals may not apply to the rental in question. Check whether the item's rental list matches.
 
-- **Rectification counted twice** — A rectification invoice offsets only the one invoice it was created from. A second rectification, or « Recréer », leaves the earlier invoice counted and over-bills. Don't advise the customer to click « Rectifier » or « Recréer » again; this needs a dev fix ([RN-4645](https://linear.app/rental-ninja/issue/RN-4645)).
+- **Rectification counted twice** — A rectification invoice offsets only the one invoice it was created from. A second rectification, or « Recréer », leaves the earlier invoice counted and over-bills. Don't advise the customer to click « Rectifier » or « Recréer » again; this needs a dev fix (Q326-129).
 
 ## Investigation Approach
 

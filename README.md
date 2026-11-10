@@ -61,7 +61,7 @@ If something isn't working, check the [Troubleshooting](#troubleshooting) sectio
 | `/rental-ninja-crm:hub research 1234` | Deep investigation on a thread, company, or topic |
 | `/rental-ninja-crm:hub help` | Quick reference card |
 | `/rental-ninja-crm:hub <payout question>` | Investigate payouts, settlements, payee strategies, and discrepancies |
-| `/rental-ninja-crm:file-bug <thread id>` | Files a Linear bug from a thread or a description, after you confirm it |
+| `/rental-ninja-crm:file-bug <thread id>` | Files a Kaneo bug task from a thread or a description, after you confirm it |
 | `/rental-ninja-crm:blog-post <topic>` | Writes a multilingual blog article grounded in the Hub (changelog, docs, real threads) and saves an `.html` file to upload at `/admin/blog/import` in the CMS |
 | `/rental-ninja-crm:video <topic>` | Makes an animated Rental Ninja video (in-app campaign 16:9, Instagram/Facebook 9:16, 1:1, 4:5) narrated and scored through the Hub and rendered to MP4 on your Mac, then publishes it to the Hub media library — see [Videos](#videos-mac) |
 | `/rental-ninja-crm:marketing-campaigns <goal>` | Drafts a campaign (in-app popup, push, email) from the marketing context and manages it — see [Marketing](#marketing) |
@@ -137,6 +137,7 @@ Team members get the update on their next session.
 
 ### Changelog
 
+- **5.7.0** — Bugs go to Kaneo (https://kaneo.rental-ninja.com): `file-bug` creates a task in the quarter's General Development project (or the project the bug belongs to) with the `Bug` label, then links it from the Hub thread. The `kaneo` MCP server replaces the previous tracker's server; each person signs in every 30 days ([Troubleshooting](#troubleshooting)). Kaneo lookups are auto-approved; creating or changing a task or label asks.
 - **5.6.1** — New read-only Hub tool `get_company_websites` (a company's direct-booking websites: why a site is down or not taking bookings, domain and DNS, rentals, payment gateway, coupons), auto-approved; sub-agents take website lookups.
 - **5.6.0** — Marketing: new `marketing-campaigns` and `marketing-review` skills; the `video` skill reads the marketing context before the script, takes each language's brand voice from the Hub and publishes delivered films to the media library (`film.py publish` + `upload`, WebVTT subtitles). Auto-approval moves to a `PreToolUse` hook (`hooks/hooks.json`): Claude Code ignores `permissions` in a plugin's `settings.json`, so until now nothing was auto-approved. What it runs without a prompt: its `description` in [`hooks/hooks.json`](hooks/hooks.json). RU tickets are `save_draft` (`thread_type: "ru_ticket"`) + `send_reply`; popup and email media come only from the media library. Campaign, video and blog copy take prices, offers and features from live tools (the new read-only `get_pricing_catalogue` and `get_company_subscription` with `include_prices`, auto-approved), never from the marketing context.
 
@@ -152,7 +153,7 @@ Team members get the update on their next session.
 rental-ninja-crm-agent/
 ├── .claude-plugin/
 │   └── plugin.json               # Plugin manifest (name, version)
-├── .mcp.json                     # Hub and Linear MCP server connections
+├── .mcp.json                     # Hub and Kaneo MCP server connections
 ├── hooks/
 │   └── hooks.json                # Auto-approval: the PreToolUse hook and its list of tools that run without a prompt
 └── skills/
@@ -160,7 +161,7 @@ rental-ninja-crm-agent/
     │   ├── SKILL.md              # Hub-grounded multilingual blog writer
     │   └── reference/            # CMS import template + product feature names (no figures)
     ├── file-bug/
-    │   └── SKILL.md              # Linear bug filing from a thread or a description
+    │   └── SKILL.md              # Kaneo bug filing from a thread or a description
     ├── marketing-campaigns/
     │   └── SKILL.md              # Campaign drafting and management through the Hub tools
     ├── marketing-review/
@@ -190,6 +191,9 @@ rental-ninja-crm-agent/
 
 **"Permission denied" or "Unauthorized"**
 - Your token may have expired — ask Pol for a new one
+
+**`file-bug` can't reach Kaneo**
+- The `kaneo` server needs a one-time sign-in: type `/mcp`, choose **kaneo**, then **Authenticate**. Or run `claude mcp login plugin:rental-ninja-crm:kaneo` in Terminal. The sign-in lasts 30 days.
 
 **Commands not showing up**
 - Make sure the plugin is installed: type `/plugin` and check the list

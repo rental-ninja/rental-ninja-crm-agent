@@ -1,5 +1,5 @@
 {
-  "description": "Auto-approval for the rental-ninja-crm plugin: Hub tools that only read, the low-risk CRM writes (thread assign, state, notes, links, drafts, triage, presence, urgency, company notes) and the Linear lookups run without a prompt. Destructive and grant-gated Hub tools, creating or updating a Linear issue and every other tool always ask. The grant each gated tool needs: skills/hub/SKILL.md, Grants and approvals.",
+  "description": "Auto-approval for the rental-ninja-crm plugin: Hub tools that only read, the low-risk CRM writes (thread assign, state, notes, links, drafts, triage, presence, urgency, company notes) and the Kaneo lookups run without a prompt. Destructive and grant-gated Hub tools, creating or changing a Kaneo task or label, and every other tool always ask. The grant each gated tool needs: skills/hub/SKILL.md, Grants and approvals.",
   "hooks": {
     "PreToolUse": [
       {
@@ -12,11 +12,11 @@
         ]
       },
       {
-        "matcher": "^mcp__plugin_rental-ninja-crm_linear__(get_issue|list_issue_labels|list_projects|list_teams)$",
+        "matcher": "^mcp__plugin_rental-ninja-crm_kaneo__(get_task|get_task_by_ticket_id|list_project_columns|list_projects|list_workspace_labels|list_workspaces|search)$",
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"Auto-approved by the rental-ninja-crm plugin: a Linear lookup\"}}'"
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"Auto-approved by the rental-ninja-crm plugin: a Kaneo lookup\"}}'"
           }
         ]
       }

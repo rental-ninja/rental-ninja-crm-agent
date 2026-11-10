@@ -3,8 +3,8 @@
     "type": "http",
     "url": "https://rental-ninja.com/hub/mcp"
   },
-  "linear": {
+  "kaneo": {
     "type": "http",
-    "url": "https://mcp.linear.app/mcp"
+    "url": "https://kaneo.rental-ninja.com/api/mcp"
   }
 }
