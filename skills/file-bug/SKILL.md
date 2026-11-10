@@ -29,7 +29,7 @@ Run these in parallel:
    - `list_project_columns`: the status is the `slug` of the lowest-`position` column with `isFinal: false` (`todo`).
    - `list_workspace_labels` with the project's `workspaceId`: the `Bug` label.
 
-**Bug label**: `list_workspace_labels` returns the workspace's labels plus one row for every label on every task. Use only the row named exactly `Bug` with `taskId: null`. Attaching a row that has a `taskId` moves that label off the other task. In "Rental Ninja" the result is too large to return, so Claude Code saves it to a file: search that file for the `Bug` entry whose `taskId` is `null`. If there is none, the label is created in step 4.
+**Bug label**: `list_workspace_labels` returns the workspace's labels plus one row for every label on every task. Use only the row named exactly `Bug` with `taskId: null`. Attaching a row that has a `taskId` moves that label off the other task. In "Rental Ninja" the result is too large to return, so Claude Code saves it to a file: search that file for the `Bug` entry whose `taskId` is `null`. If there is none, the label is created after confirmation (section 4).
 
 If freeform description with no thread ID: skip the thread fetch, use what the user provided directly.
 
